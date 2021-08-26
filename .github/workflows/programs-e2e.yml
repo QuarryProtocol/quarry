@@ -37,7 +37,6 @@ jobs:
         with:
           always-auth: true
           node-version: "16"
-          registry-url: "https://npm.pkg.github.com"
       - name: Cache Node modules
         uses: actions/cache@v2
         id: cache-node-modules
@@ -108,7 +107,6 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "16"
-          registry-url: "https://npm.pkg.github.com"
       - run: yarn install
       - name: Generate IDL types
         run: nix shell .#ci --command yarn idl:generate:nolint

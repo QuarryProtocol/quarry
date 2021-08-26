@@ -34,7 +34,6 @@ jobs:
         with:
           always-auth: true
           node-version: 14.x
-          registry-url: "https://npm.pkg.github.com"
       - name: Cache Node modules
         uses: actions/cache@v2
         id: cache-node-modules
