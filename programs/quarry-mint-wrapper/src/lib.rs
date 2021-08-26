@@ -8,7 +8,6 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::declare_id;
 use anchor_lang::Key;
 use anchor_spl::token::{self, Mint, TokenAccount};
-use vipers::unwrap_or_err;
 use vipers::validate::Validate;
 
 mod account_validators;
@@ -17,6 +16,8 @@ declare_id!("QMWVettd5nC2Y9nSkXa4pznj2dMfBg5oqvwc4kV8Sa6");
 
 #[program]
 pub mod quarry_mint_wrapper {
+    use vipers::unwrap_int;
+
     use super::*;
 
     /// Creates a new [MintWrapper].
@@ -77,13 +78,10 @@ pub mod quarry_mint_wrapper {
         let minter = &mut ctx.accounts.minter;
         require!(minter.allowance >= amount, MinterAllowanceExceeded);
 
-        let new_supply = unwrap_or_err!(
-            ctx.accounts.token_mint.supply.checked_add(amount),
-            U64Overflow
-        );
+        let new_supply = unwrap_int!(ctx.accounts.token_mint.supply.checked_add(amount));
         require!(new_supply <= mint_wrapper.hard_cap, HardcapExceeded);
 
-        minter.allowance = unwrap_or_err!(minter.allowance.checked_sub(amount), U64Overflow);
+        minter.allowance = unwrap_int!(minter.allowance.checked_sub(amount));
 
         let seeds = gen_wrapper_signer_seeds!(mint_wrapper);
         let proxy_signer = &[&seeds[..]];
@@ -308,6 +306,4 @@ pub enum ErrorCode {
     HardcapExceeded,
     #[msg("Minter allowance exceeded.")]
     MinterAllowanceExceeded,
-    #[msg("U64 overflow.")]
-    U64Overflow,
 }

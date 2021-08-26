@@ -13,12 +13,12 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::declare_id;
 use anchor_lang::Key;
 use anchor_spl::token::{self, Mint, TokenAccount, Transfer};
+use num_traits::ToPrimitive;
 use payroll::Payroll;
 use std::cmp;
-use std::convert::TryFrom;
 use vipers::assert_keys;
+use vipers::program_err;
 use vipers::validate::Validate;
-use vipers::{program_err, try_or_err};
 
 mod account_validators;
 mod payroll;
@@ -29,6 +29,8 @@ declare_id!("QMNFUvncKBh11ZgEwYtoup3aXvuVxt6fzrcsjk2cjpM");
 
 #[program]
 pub mod quarry_mine {
+
+    use vipers::unwrap_int;
 
     use crate::quarry::StakeAction;
 
@@ -146,10 +148,9 @@ pub mod quarry_mine {
         );
 
         quarry.last_update_ts = cmp::min(ctx.accounts.clock.unix_timestamp, quarry.famine_ts);
-        quarry.daily_rewards_rate = try_or_err!(
-            u64::try_from(rewarder.compute_quarry_daily_rewards_rate(new_share)),
-            U64ConversionFailure
-        );
+        quarry.daily_rewards_rate = unwrap_int!(rewarder
+            .compute_quarry_daily_rewards_rate(new_share)
+            .to_u64());
         quarry.rewards_share = new_share;
 
         emit!(QuarryRewardsUpdateEvent {
@@ -836,21 +837,16 @@ pub enum ErrorCode {
     Unauthorized,
     #[msg("Insufficient staked balance for withdraw request.")]
     InsufficientBalance,
-    #[msg("Error: Conversion to or from u64 failed.")]
-    U64ConversionFailure,
     #[msg("Pending authority not set")]
     PendingAuthorityNotSet,
     #[msg("Invalid quarry rewards share")]
     InvalidRewardsShare,
     #[msg("Insufficient allowance.")]
     InsufficientAllowance,
-
     #[msg("New vault not empty.")]
     NewVaultNotEmpty,
-    #[msg("Math overflow.")]
-    MathOverflow,
     #[msg("Not enough tokens.")]
     NotEnoughTokens,
-    #[msg("Temporal rift.")]
-    TemporalRift,
+    #[msg("Invalid timestamp.")]
+    InvalidTimestamp,
 }

@@ -78,7 +78,7 @@ impl Payroll {
 
     /// Calculates the amount of rewards to pay for each staked token, performing safety checks.
     pub fn calculate_reward_per_token(&self, current_ts: i64) -> Result<u128, ProgramError> {
-        require!(current_ts >= self.last_checkpoint_ts, TemporalRift);
+        require!(current_ts >= self.last_checkpoint_ts, InvalidTimestamp);
         Ok(unwrap_int!(
             self.calculate_reward_per_token_unsafe(current_ts)
         ))
@@ -115,7 +115,7 @@ impl Payroll {
             tokens_deposited <= self.total_tokens_deposited,
             NotEnoughTokens
         );
-        require!(current_ts >= self.last_checkpoint_ts, TemporalRift);
+        require!(current_ts >= self.last_checkpoint_ts, InvalidTimestamp);
         let result = unwrap_int!(self.calculate_rewards_earned_unsafe(
             current_ts,
             tokens_deposited,

@@ -1,10 +1,10 @@
 //! Quarry-related math and helpers.
 
 use anchor_lang::prelude::*;
-use std::convert::TryFrom;
-use vipers::{try_or_err, unwrap_int};
+use vipers::unwrap_int;
 
 use crate::{payroll::Payroll, Miner, Quarry, Rewarder};
+use num_traits::cast::ToPrimitive;
 
 pub enum StakeAction {
     Stake,
@@ -19,16 +19,13 @@ impl Quarry {
         rewarder: &Rewarder,
         payroll: &Payroll,
     ) -> ProgramResult {
-        let updated_rewards_per_token_stored = try_or_err!(
-            u64::try_from(payroll.calculate_reward_per_token(current_ts)?),
-            U64ConversionFailure
-        );
+        let updated_rewards_per_token_stored =
+            unwrap_int!(payroll.calculate_reward_per_token(current_ts)?.to_u64());
         // Update quarry struct
         self.rewards_per_token_stored = updated_rewards_per_token_stored;
-        self.daily_rewards_rate = try_or_err!(
-            u64::try_from(rewarder.compute_quarry_daily_rewards_rate(self.rewards_share)),
-            U64ConversionFailure
-        );
+        self.daily_rewards_rate = unwrap_int!(rewarder
+            .compute_quarry_daily_rewards_rate(self.rewards_share)
+            .to_u64());
         self.last_update_ts = payroll.last_time_reward_applicable(current_ts);
 
         Ok(())
@@ -45,15 +42,14 @@ impl Quarry {
         let payroll: Payroll = (*self).into();
         self.update_rewards_internal(current_ts, rewarder, &payroll)?;
 
-        let updated_rewards_earned = try_or_err!(
-            u64::try_from(payroll.calculate_rewards_earned(
+        let updated_rewards_earned = unwrap_int!(payroll
+            .calculate_rewards_earned(
                 current_ts,
                 miner.balance.into(),
                 miner.rewards_per_token_paid.into(),
                 miner.rewards_earned.into(),
-            )?),
-            U64ConversionFailure
-        );
+            )?
+            .to_u64());
         // Update miner struct
         miner.rewards_earned = updated_rewards_earned;
         miner.rewards_per_token_paid = self.rewards_per_token_stored;

@@ -860,6 +860,7 @@ version = "0.1.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
+ "num-traits",
  "proptest",
  "quarry-mint-wrapper",
  "rand 0.8.4",
