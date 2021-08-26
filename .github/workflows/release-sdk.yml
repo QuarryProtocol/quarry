@@ -9,6 +9,7 @@ env:
   CARGO_TERM_COLOR: always
   SOLANA_VERSION: "1.7.10"
   RUST_TOOLCHAIN: nightly-2021-08-14
+  NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
 
 jobs:
   release:
@@ -47,5 +48,3 @@ jobs:
       - run: yarn build
       - name: Publish
         run: yarn publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
