@@ -1,9 +1,9 @@
 # ⛏ Quarry
 
 [![NPM](https://img.shields.io/npm/v/@quarryprotocol/quarry-sdk)](https://www.npmjs.com/package/@quarryprotocol/quarry-sdk)
-[![License](https://img.shields.io/badge/license-AGPL%203.0-blue?style=flat-square)](https://github.com/QuarryProtocol/quarry/blob/master/LICENSE)
-[![Build Status](https://img.shields.io/github/workflow/status/QuarryProtocol/quarry/E2E/master?style=flat-square)](https://github.com/QuarryProtocol/quarry/actions/workflows/programs-e2e.yml?query=branch%3Amaster)
-[![Contributors](https://img.shields.io/github/contributors/QuarryProtocol/quarry?style=flat-square)](https://github.com/QuarryProtocol/quarry/graphs/contributors)
+[![License](https://img.shields.io/badge/license-AGPL%203.0-blue)](https://github.com/QuarryProtocol/quarry/blob/master/LICENSE)
+[![Build Status](https://img.shields.io/github/workflow/status/QuarryProtocol/quarry/E2E/master)](https://github.com/QuarryProtocol/quarry/actions/workflows/programs-e2e.yml?query=branch%3Amaster)
+[![Contributors](https://img.shields.io/github/contributors/QuarryProtocol/quarry)](https://github.com/QuarryProtocol/quarry/graphs/contributors)
 
 <p align="center">
     <img src="/images/banner.png" />
