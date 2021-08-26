@@ -1,0 +1,14 @@
+[scripts]
+test = "yarn ts-mocha -t 30000"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[[test.genesis]]
+address = "QMNFUvncKBh11ZgEwYtoup3aXvuVxt6fzrcsjk2cjpM"
+program = "./target/deploy/quarry_mine.so"
+
+[[test.genesis]]
+address = "QMWVettd5nC2Y9nSkXa4pznj2dMfBg5oqvwc4kV8Sa6"
+program = "./target/deploy/quarry_mint_wrapper.so"

@@ -1,0 +1,3 @@
+# mine
+
+Rewards distribution program.

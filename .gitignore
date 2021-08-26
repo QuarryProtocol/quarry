@@ -1,0 +1,29 @@
+# Ignore Mac OS noise
+.DS_Store
+
+# Ignore the build directory for Rust/Anchor
+target
+
+# Ignore backup files creates by cargo fmt.
+**/*.rs.bk
+
+# Ignore logs
+.anchor
+yarn-error.log
+lerna-debug.log
+
+# Ignore node modules
+node_modules
+.eslintcache
+
+# Ignore submodule dependencies
+deps
+
+# VM
+.vagrant/
+test-ledger/
+
+# Generated IDL types
+artifacts/
+dist/
+src/idls/

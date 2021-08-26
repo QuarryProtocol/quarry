@@ -1,0 +1,51 @@
+{
+  "name": "@quarryprotocol/quarry-sdk",
+  "version": "0.0.0",
+  "description": "Quarry Protocol SDK",
+  "main": "dist/index.js",
+  "repository": "git@github.com:QuarryProtocol/quarry.git",
+  "author": "Larry Jarry <larry@quarry.so>",
+  "license": "AGPL-3.0",
+  "scripts": {
+    "build": "tsc -P tsconfig.build.json",
+    "clean": "rm -fr dist/",
+    "idl:generate": "./scripts/parse-idls.sh && ./scripts/generate-idl-types.sh",
+    "idl:generate:nolint": "./scripts/parse-idls.sh && RUN_ESLINT=none ./scripts/generate-idl-types.sh",
+    "typecheck": "tsc",
+    "lint": "eslint .",
+    "test:e2e": "anchor test --skip-build 'tests/**/*.ts'",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@project-serum/common": "^0.0.1-beta.3",
+    "@saberhq/chai-solana": "^0.14.2",
+    "@saberhq/eslint-config": "^0.14.1",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^16.7.1",
+    "eslint": "^7.32.0",
+    "husky": "^7.0.2",
+    "lint-staged": "^11.1.2",
+    "mocha": "^9.1.0",
+    "ts-mocha": "^8.0.0",
+    "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "@project-serum/anchor": "^0.13.2",
+    "@saberhq/anchor-contrib": "^0.14.0",
+    "@saberhq/solana-contrib": "^0.14.2",
+    "@saberhq/token-utils": "^0.14.2",
+    "@solana/web3.js": "^1.24.1",
+    "bn.js": "^5.2.0"
+  },
+  "resolutions": {
+    "bn.js": "^5.2.0",
+    "@types/bn.js": "^5.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist/",
+    "src/"
+  ]
+}

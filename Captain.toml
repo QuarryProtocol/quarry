@@ -1,0 +1,23 @@
+[paths]
+artifacts = "../program-artifacts"
+program_keypairs = "~/deployments/quarry/programs"
+
+[networks.devnet]
+deployer = "~/deployments/quarry/deployers/devnet.json"
+upgrade_authority = "Hqedjjj4JGpAvhLXRsfLHatBgikGarfwHFDFjLsmth2y"
+url = "https://api.devnet.solana.com"
+
+[networks.testnet]
+deployer = "~/deployments/quarry/deployers/testnet.json"
+upgrade_authority = "Hqedjjj4JGpAvhLXRsfLHatBgikGarfwHFDFjLsmth2y"
+url = "https://api.testnet.solana.com"
+
+[networks.mainnet]
+deployer = "~/deployments/quarry/deployers/mainnet.json"
+upgrade_authority = "Hqedjjj4JGpAvhLXRsfLHatBgikGarfwHFDFjLsmth2y"
+url = "https://api.mainnet-beta.solana.com"
+
+[networks.localnet]
+deployer = "~/deployments/quarry/deployers/localnet.json"
+upgrade_authority = "Hqedjjj4JGpAvhLXRsfLHatBgikGarfwHFDFjLsmth2y"
+url = "http://localhost:8899"
