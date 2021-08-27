@@ -24,7 +24,7 @@ impl Quarry {
         // Update quarry struct
         self.rewards_per_token_stored = updated_rewards_per_token_stored;
         self.daily_rewards_rate = unwrap_int!(rewarder
-            .compute_quarry_daily_rewards_rate(self.rewards_share)
+            .compute_quarry_daily_rewards_rate(self.rewards_share)?
             .to_u64());
         self.last_update_ts = payroll.last_time_reward_applicable(current_ts);
 

@@ -149,13 +149,13 @@ pub mod quarry_mine {
             rewarder.total_rewards_shares - quarry.rewards_share + new_share;
 
         require!(
-            rewarder.validate_quarry_rewards_share(new_share),
+            rewarder.validate_quarry_rewards_share(new_share)?,
             InvalidRewardsShare
         );
 
         quarry.last_update_ts = cmp::min(ctx.accounts.clock.unix_timestamp, quarry.famine_ts);
         quarry.daily_rewards_rate = unwrap_int!(rewarder
-            .compute_quarry_daily_rewards_rate(new_share)
+            .compute_quarry_daily_rewards_rate(new_share)?
             .to_u64());
         quarry.rewards_share = new_share;
 
