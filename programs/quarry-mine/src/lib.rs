@@ -147,8 +147,8 @@ pub mod quarry_mine {
         let quarry = &mut ctx.accounts.quarry;
         rewarder.total_rewards_shares = unwrap_int!(rewarder
             .total_rewards_shares
-            .checked_sub(quarry.rewards_share)
-            .and_then(|v| v.checked_add(new_share)));
+            .checked_add(new_share)
+            .and_then(|v| v.checked_sub(quarry.rewards_share)));
 
         rewarder.validate_quarry_rewards_share(new_share)?;
 
