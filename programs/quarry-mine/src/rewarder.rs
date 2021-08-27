@@ -40,6 +40,10 @@ impl Rewarder {
         &self,
         quarry_rewards_share: u64,
     ) -> Result<bool, ProgramError> {
+        require!(
+            quarry_rewards_share <= self.total_rewards_shares,
+            InvalidRewardsShare
+        );
         if self.daily_rewards_rate == 0
             || self.total_rewards_shares == 0
             || quarry_rewards_share == 0
@@ -77,7 +81,10 @@ mod tests {
             daily_rewards_rate: DEFAULT_DAILY_REWARDS_RATE,
             ..Default::default()
         };
-        assert!(rewarder.validate_quarry_rewards_share(DEFAULT_DAILY_REWARDS_RATE)?);
+        assert_eq!(
+            rewarder.validate_quarry_rewards_share(DEFAULT_DAILY_REWARDS_RATE),
+            program_err!(InvalidRewardsShare)
+        );
         rewarder.total_rewards_shares = 1_000_000_000_000;
         assert!(rewarder.validate_quarry_rewards_share(0)?);
 
