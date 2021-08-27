@@ -183,6 +183,7 @@ export class MinerWrapper {
         rewardsTokenMint: this.quarry.rewarderData.rewardsTokenMint,
         rewardsTokenAccount,
         stake: this.userStakeAccounts,
+        claimFeeTokenAccount: this.quarry.rewarderData.claimFeeTokenAccount,
       },
     });
     instructions.push(ix);
