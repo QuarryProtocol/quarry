@@ -3,6 +3,10 @@ name = "quarry-mint-wrapper"
 version = "0.1.1"
 description = "Created with Anchor"
 edition = "2018"
+homepage = "https://quarry.so"
+repository = "https://github.com/QuarryProtocol/quarry"
+authors = ["Larry Jarry <larry@quarry.so"]
+license = "AGPL-3.0"
 
 [lib]
 crate-type = ["cdylib", "lib"]
