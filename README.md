@@ -23,11 +23,11 @@ Quarry was built with the intention of helping more Solana projects launch on-ch
 
 ## Packages
 
-| Package                      | Description                                           | Version                                                                                                                                    | Docs                                                                                             |
-| :--------------------------- | :---------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
-| `quarry-mint-wrapper`        | Mints tokens to authorized accounts                   | [![Crates.io](https://img.shields.io/crates/v/quarry-mint-wrapper?color=blue)](https://crates.io/crates/quarry-mint-wrapper)               | [![Docs.rs](https://docs.rs/quarry-mint-wrapper/badge.svg)](https://docs.rs/quarry-mint-wrapper) |
-| `quarry-mine`                | Distributes liquidity mining rewards to token stakers | ![crates](https://img.shields.io/crates/v/quarry-mine?color=blue)                                                                          | [![Docs.rs](https://docs.rs/quarry-mine/badge.svg)](https://docs.rs/quarry-mine)                 |
-| `@quarryprotocol/quarry-sdk` | TypeScript SDK for Quarry                             | [![npm](https://img.shields.io/npm/v/@quarryprotocol/quarry-sdk.svg?color=blue)](https://www.npmjs.com/package/@quarryprotocol/quarry-sdk) | [![Docs](https://img.shields.io/badge/docs-typedoc-blue)](https://docs.quarry.so/ts/)            |
+| Package                      | Description                                           | Version                                                                                                                         | Docs                                                                                             |
+| :--------------------------- | :---------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------- |
+| `quarry-mint-wrapper`        | Mints tokens to authorized accounts                   | [![Crates.io](https://img.shields.io/crates/v/quarry-mint-wrapper)](https://crates.io/crates/quarry-mint-wrapper)               | [![Docs.rs](https://docs.rs/quarry-mint-wrapper/badge.svg)](https://docs.rs/quarry-mint-wrapper) |
+| `quarry-mine`                | Distributes liquidity mining rewards to token stakers | [![crates](https://img.shields.io/crates/v/quarry-mine)](https://crates.io/crates/quarry-mine)                                  | [![Docs.rs](https://docs.rs/quarry-mine/badge.svg)](https://docs.rs/quarry-mine)                 |
+| `@quarryprotocol/quarry-sdk` | TypeScript SDK for Quarry                             | [![npm](https://img.shields.io/npm/v/@quarryprotocol/quarry-sdk.svg)](https://www.npmjs.com/package/@quarryprotocol/quarry-sdk) | [![Docs](https://img.shields.io/badge/docs-typedoc-blue)](https://docs.quarry.so/ts/)            |
 
 ## Documentation
 
