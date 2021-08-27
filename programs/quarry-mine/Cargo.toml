@@ -1,7 +1,7 @@
 [package]
 name = "quarry-mine"
 version = "0.2.0"
-description = "Created with Anchor"
+description = "Distributes liquidity mining rewards to token stakers"
 edition = "2018"
 homepage = "https://quarry.so"
 repository = "https://github.com/QuarryProtocol/quarry"

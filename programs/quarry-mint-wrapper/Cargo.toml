@@ -1,7 +1,7 @@
 [package]
 name = "quarry-mint-wrapper"
 version = "0.2.0"
-description = "Created with Anchor"
+description = "Mints tokens to authorized accounts"
 edition = "2018"
 homepage = "https://quarry.so"
 repository = "https://github.com/QuarryProtocol/quarry"
