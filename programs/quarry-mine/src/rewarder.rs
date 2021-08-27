@@ -36,10 +36,7 @@ impl Rewarder {
     }
 
     /// Validate the quarry rewards share.
-    pub fn validate_quarry_rewards_share(
-        &self,
-        quarry_rewards_share: u64,
-    ) -> Result<bool, ProgramError> {
+    pub fn validate_quarry_rewards_share(&self, quarry_rewards_share: u64) -> ProgramResult {
         require!(
             quarry_rewards_share <= self.total_rewards_shares,
             InvalidRewardsShare
@@ -48,10 +45,13 @@ impl Rewarder {
             || self.total_rewards_shares == 0
             || quarry_rewards_share == 0
         {
-            Ok(true)
+            Ok(())
         } else {
             let daily_rate: u128 = self.compute_quarry_daily_rewards_rate(quarry_rewards_share)?;
-            Ok(unwrap_int!(daily_rate.checked_div(SECONDS_PER_DAY)) > 0)
+            // must be non-zero
+            let rate_per_second = unwrap_int!(daily_rate.checked_div(SECONDS_PER_DAY));
+            require!(rate_per_second > 0, InvalidRewardsShare);
+            Ok(())
         }
     }
 }
@@ -76,26 +76,26 @@ mod tests {
     }
 
     #[test]
-    fn test_validate_quarry_rewards_share() -> ProgramResult {
+    fn test_validate_quarry_rewards_share() {
         let mut rewarder = Rewarder {
             daily_rewards_rate: DEFAULT_DAILY_REWARDS_RATE,
             ..Default::default()
         };
+        let invalid: ProgramResult = program_err!(InvalidRewardsShare);
+
         assert_eq!(
             rewarder.validate_quarry_rewards_share(DEFAULT_DAILY_REWARDS_RATE),
-            program_err!(InvalidRewardsShare)
+            invalid
         );
         rewarder.total_rewards_shares = 1_000_000_000_000;
-        assert!(rewarder.validate_quarry_rewards_share(0)?);
+        assert_eq!(rewarder.validate_quarry_rewards_share(0), Ok(()));
 
-        assert!(!rewarder.validate_quarry_rewards_share(1)?);
-        assert!(!rewarder.validate_quarry_rewards_share(10)?);
-        assert!(!rewarder.validate_quarry_rewards_share(100)?);
-        assert!(!rewarder.validate_quarry_rewards_share(1000)?);
-        assert!(rewarder.validate_quarry_rewards_share(10000)?);
-        assert!(rewarder.validate_quarry_rewards_share(100000)?);
-
-        Ok(())
+        assert_eq!(rewarder.validate_quarry_rewards_share(1), invalid);
+        assert_eq!(rewarder.validate_quarry_rewards_share(10), invalid);
+        assert_eq!(rewarder.validate_quarry_rewards_share(100), invalid);
+        assert_eq!(rewarder.validate_quarry_rewards_share(1000), invalid);
+        assert_eq!(rewarder.validate_quarry_rewards_share(10000), Ok(()));
+        assert_eq!(rewarder.validate_quarry_rewards_share(100000), Ok(()));
     }
 
     #[test]
