@@ -1,6 +1,6 @@
 [package]
 name = "quarry-mint-wrapper"
-version = "0.1.1"
+version = "0.2.0"
 description = "Created with Anchor"
 edition = "2018"
 homepage = "https://quarry.so"
