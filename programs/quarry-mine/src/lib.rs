@@ -310,7 +310,8 @@ pub mod quarry_mine {
             staked_token: ctx.accounts.stake.token_account.mint,
             timestamp: clock.unix_timestamp,
             rewards_token: ctx.accounts.rewards_token_mint.key(),
-            amount: amount_claimable,
+            amount: amount_claimable_minus_fees,
+            fees: max_claim_fee,
         });
 
         Ok(())
@@ -812,6 +813,8 @@ pub struct ClaimEvent {
     pub rewards_token: Pubkey,
     /// Amount of rewards token received.
     pub amount: u64,
+    /// Fees paid.
+    pub fees: u64,
     /// When the event occurred.
     pub timestamp: i64,
 }
