@@ -1,3 +1,5 @@
 # mine
 
-Rewards distribution program.
+Distributes liquidity mining rewards to token stakers.
+
+More in-depth documentation pending.
