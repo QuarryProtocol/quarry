@@ -14,6 +14,7 @@
     "typecheck": "tsc",
     "lint": "eslint .",
     "test:e2e": "anchor test --skip-build 'tests/**/*.ts'",
+    "docs:generate": "typedoc --excludePrivate --includeVersion --out site/ts/ src/index.ts",
     "prepare": "husky install"
   },
   "devDependencies": {
@@ -27,6 +28,7 @@
     "lint-staged": "^11.1.2",
     "mocha": "^9.1.0",
     "ts-mocha": "^8.0.0",
+    "typedoc": "^0.21.7",
     "typescript": "^4.3.5"
   },
   "dependencies": {

@@ -1,6 +1,5 @@
 # ⛏ Quarry
 
-[![NPM](https://img.shields.io/npm/v/@quarryprotocol/quarry-sdk)](https://www.npmjs.com/package/@quarryprotocol/quarry-sdk)
 [![License](https://img.shields.io/badge/license-AGPL%203.0-blue)](https://github.com/QuarryProtocol/quarry/blob/master/LICENSE)
 [![Build Status](https://img.shields.io/github/workflow/status/QuarryProtocol/quarry/E2E/master)](https://github.com/QuarryProtocol/quarry/actions/workflows/programs-e2e.yml?query=branch%3Amaster)
 [![Contributors](https://img.shields.io/github/contributors/QuarryProtocol/quarry)](https://github.com/QuarryProtocol/quarry/graphs/contributors)
@@ -21,6 +20,14 @@ Quarry was built with the intention of helping more Solana projects launch on-ch
 
 - **Quarry is in active development, so all APIs are subject to change.**
 - **This code is unaudited. Use at your own risk.**
+
+## Packages
+
+| Package                      | Description                                    | Version                                                                                                                                    | Docs                                                                                             |
+| :--------------------------- | :--------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
+| `quarry-mint-wrapper`        | Rust primitives for writing programs on Solana | [![Crates.io](https://img.shields.io/crates/v/quarry-mint-wrapper?color=blue)](https://crates.io/crates/quarry-mint-wrapper)               | [![Docs.rs](https://docs.rs/quarry-mint-wrapper/badge.svg)](https://docs.rs/quarry-mint-wrapper) |
+| `quarry-mine`                | CPI clients for SPL programs on Solana         | ![crates](https://img.shields.io/crates/v/quarry-mine?color=blue)                                                                          | [![Docs.rs](https://docs.rs/quarry-mine/badge.svg)](https://docs.rs/quarry-mine)                 |
+| `@quarryprotocol/quarry-sdk` | TypeScript SDK for Quarry                      | [![npm](https://img.shields.io/npm/v/@quarryprotocol/quarry-sdk.svg?color=blue)](https://www.npmjs.com/package/@quarryprotocol/quarry-sdk) | [![Docs](https://img.shields.io/badge/docs-typedoc-blue)](https://docs.quarry.so/ts/)            |
 
 ## Documentation
 

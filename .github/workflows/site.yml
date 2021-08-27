@@ -1,0 +1,42 @@
+name: Documentation Site
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: cachix/install-nix-action@v13
+        with:
+          install_url: https://nixos-nix-install-tests.cachix.org/serve/i6laym9jw3wg9mw6ncyrk6gjx4l34vvx/install
+          install_options: "--tarball-url-prefix https://nixos-nix-install-tests.cachix.org/serve"
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v10
+        with:
+          name: quarry
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Cache Node modules
+        uses: actions/cache@v2
+        id: cache-node-modules
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+      - name: Install Yarn dependencies
+        run: yarn install
+      - name: Parse IDLs
+        run: nix shell .#ci --command yarn idl:generate
+      - run: yarn docs:generate
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: gh-pages
+          folder: site

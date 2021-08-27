@@ -27,3 +27,5 @@ test-ledger/
 artifacts/
 dist/
 src/idls/
+
+site/
