@@ -27,6 +27,9 @@ mod rewarder;
 
 declare_id!("QMNFUvncKBh11ZgEwYtoup3aXvuVxt6fzrcsjk2cjpM");
 
+/// The fees of new rewarders-- 1,000 KBPS = 1 BP or 0.01%.
+const DEFAULT_CLAIM_FEE_KBPS: u64 = 1_000;
+
 #[program]
 pub mod quarry_mine {
 
@@ -58,6 +61,9 @@ pub mod quarry_mine {
         rewarder.mint_wrapper = ctx.accounts.mint_wrapper.key();
 
         rewarder.rewards_token_mint = ctx.accounts.rewards_token_mint.key();
+
+        rewarder.claim_fee_token_account = ctx.accounts.claim_fee_token_account.key();
+        rewarder.max_claim_fee_kbps = DEFAULT_CLAIM_FEE_KBPS;
 
         emit!(NewRewarderEvent {
             authority: rewarder.authority,
@@ -242,28 +248,61 @@ pub mod quarry_mine {
             InsufficientAllowance
         );
 
-        // Mint the tokens.
-        let cpi_accounts = quarry_mint_wrapper::PerformMint {
-            mint_wrapper: ctx.accounts.mint_wrapper.clone().into(),
-            minter_authority: ctx.accounts.stake.rewarder.to_account_info(),
-            token_mint: ctx.accounts.rewards_token_mint.clone(),
-            destination: ctx.accounts.rewards_token_account.clone(),
-            minter: ProgramAccount::<quarry_mint_wrapper::Minter>::try_from(
-                &ctx.accounts.minter.to_account_info(),
-            )?,
-            token_program: ctx.accounts.stake.token_program.clone(),
-        };
+        // Calculate rewards
+        let max_claim_fee_kbps = ctx.accounts.stake.rewarder.max_claim_fee_kbps;
+        require!(max_claim_fee_kbps < 10_000 * 1_000, InvalidMaxClaimFee);
+        let max_claim_fee = unwrap_int!(unwrap_int!((amount_claimable as u128)
+            .checked_mul(max_claim_fee_kbps.into())
+            .and_then(|f| f.checked_div((10_000 * 1_000) as u128)))
+        .to_u64());
+
+        let amount_claimable_minus_fees = unwrap_int!(amount_claimable.checked_sub(max_claim_fee));
+
+        // Create the signer seeds.
         let seeds = &[
             b"Rewarder".as_ref(),
             ctx.accounts.stake.rewarder.base.as_ref(),
             &[ctx.accounts.stake.rewarder.bump],
         ];
         let signer_seeds = &[&seeds[..]];
-        let cpi_program = ctx.accounts.mint_wrapper_program.clone();
-        let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
 
-        // Mint rewards
-        quarry_mint_wrapper::cpi::perform_mint(cpi_ctx, amount_claimable)?;
+        // Mint the claimed tokens.
+        quarry_mint_wrapper::cpi::perform_mint(
+            CpiContext::new_with_signer(
+                ctx.accounts.mint_wrapper_program.clone(),
+                quarry_mint_wrapper::PerformMint {
+                    mint_wrapper: ctx.accounts.mint_wrapper.clone().into(),
+                    minter_authority: ctx.accounts.stake.rewarder.to_account_info(),
+                    token_mint: ctx.accounts.rewards_token_mint.clone(),
+                    destination: ctx.accounts.rewards_token_account.clone(),
+                    minter: ProgramAccount::<quarry_mint_wrapper::Minter>::try_from(
+                        &ctx.accounts.minter.to_account_info(),
+                    )?,
+                    token_program: ctx.accounts.stake.token_program.clone(),
+                },
+                signer_seeds,
+            ),
+            amount_claimable_minus_fees,
+        )?;
+
+        // Mint the fees.
+        quarry_mint_wrapper::cpi::perform_mint(
+            CpiContext::new_with_signer(
+                ctx.accounts.mint_wrapper_program.clone(),
+                quarry_mint_wrapper::PerformMint {
+                    mint_wrapper: ctx.accounts.mint_wrapper.clone().into(),
+                    minter_authority: ctx.accounts.stake.rewarder.to_account_info(),
+                    token_mint: ctx.accounts.rewards_token_mint.clone(),
+                    destination: ctx.accounts.claim_fee_token_account.clone(),
+                    minter: ProgramAccount::<quarry_mint_wrapper::Minter>::try_from(
+                        &ctx.accounts.minter.to_account_info(),
+                    )?,
+                    token_program: ctx.accounts.stake.token_program.clone(),
+                },
+                signer_seeds,
+            ),
+            max_claim_fee,
+        )?;
         miner.rewards_earned = 0;
 
         emit!(ClaimEvent {
@@ -271,7 +310,8 @@ pub mod quarry_mine {
             staked_token: ctx.accounts.stake.token_account.mint,
             timestamp: clock.unix_timestamp,
             rewards_token: ctx.accounts.rewards_token_mint.key(),
-            amount: amount_claimable,
+            amount: amount_claimable_minus_fees,
+            fees: max_claim_fee,
         });
 
         Ok(())
@@ -400,6 +440,14 @@ pub struct Rewarder {
     pub mint_wrapper: Pubkey,
     /// Mint of the rewards token for this [Rewarder].
     pub rewards_token_mint: Pubkey,
+
+    /// Claim fees are placed in this account.
+    pub claim_fee_token_account: Pubkey,
+    /// Maximum amount of tokens to send to the Quarry DAO on each claim,
+    /// in terms of thousands of BPS.
+    /// This is stored on the [Rewarder] to ensure that the fee will
+    /// not exceed this in the future.
+    pub max_claim_fee_kbps: u64,
 }
 
 /// A pool which distributes tokens to its [Miner]s.
@@ -509,6 +557,9 @@ pub struct NewRewarder<'info> {
 
     /// Rewards token mint.
     pub rewards_token_mint: CpiAccount<'info, Mint>,
+
+    /// Token account in which the rewards token fees are collected.
+    pub claim_fee_token_account: CpiAccount<'info, TokenAccount>,
 }
 
 #[derive(Accounts)]
@@ -689,6 +740,10 @@ pub struct ClaimRewards<'info> {
     #[account(mut)]
     pub rewards_token_account: CpiAccount<'info, TokenAccount>,
 
+    /// Account to send claim fees to.
+    #[account(mut)]
+    pub claim_fee_token_account: CpiAccount<'info, TokenAccount>,
+
     /// User's stake.
     pub stake: UserStake<'info>,
 }
@@ -722,7 +777,6 @@ pub struct UserStake<'info> {
     pub token_account: CpiAccount<'info, TokenAccount>,
 
     /// Token program
-    #[account(constraint = token_program.key() == token::ID)]
     pub token_program: AccountInfo<'info>,
 
     /// Rewarder
@@ -759,6 +813,8 @@ pub struct ClaimEvent {
     pub rewards_token: Pubkey,
     /// Amount of rewards token received.
     pub amount: u64,
+    /// Fees paid.
+    pub fees: u64,
     /// When the event occurred.
     pub timestamp: i64,
 }
@@ -849,4 +905,6 @@ pub enum ErrorCode {
     NotEnoughTokens,
     #[msg("Invalid timestamp.")]
     InvalidTimestamp,
+    #[msg("Invalid max claim fee.")]
+    InvalidMaxClaimFee,
 }

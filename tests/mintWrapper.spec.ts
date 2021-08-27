@@ -357,8 +357,13 @@ describe("MintWrapper", () => {
         wagesPerTokenPaid,
         ZERO
       );
+
+      const fees = expectedWagesEarned.mul(new BN(1)).div(new BN(10_000));
+      const rewardsAfterFees = expectedWagesEarned.sub(fees);
+
       expect(event.data.amount.isZero()).to.be.false;
-      expect(event.data.amount).to.bignumber.eq(expectedWagesEarned);
+      expect(event.data.amount).to.bignumber.eq(rewardsAfterFees);
+      expect(event.data.fees).to.bignumber.eq(fees);
       expect(miner.rewardsEarned.toString()).to.equal(ZERO.toString());
       const rewardsTokenAccount = await getATAAddress({
         mint: rewardsMint,

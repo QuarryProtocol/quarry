@@ -45,7 +45,6 @@ mod tests {
     use crate::payroll::SECONDS_PER_DAY;
 
     use super::*;
-    use anchor_lang::prelude::*;
     use proptest::prelude::*;
     use rand::thread_rng;
     use std::convert::TryFrom;
@@ -124,16 +123,10 @@ mod tests {
             quarry_rewards_share in 0..u64::MAX,
         ) {
             let rewarder = Rewarder {
-                base: Pubkey::default(),
                 bump: 254,
-                authority: Pubkey::default(),
                 num_quarries,
                 daily_rewards_rate,
-                total_rewards_shares: 0,
-                pending_authority: Pubkey::default(),
-                mint_wrapper_program: Pubkey::default(),
-                rewards_token_mint: Pubkey::default(),
-                mint_wrapper: Pubkey::default(),
+                ..Default::default()
             };
             assert_eq!(rewarder.compute_quarry_daily_rewards_rate(quarry_rewards_share), 0);
         }

@@ -1,4 +1,5 @@
 import type { Provider, TransactionEnvelope } from "@saberhq/solana-contrib";
+import { getOrCreateATA } from "@saberhq/token-utils";
 import type { PublicKey } from "@solana/web3.js";
 import { Keypair, SystemProgram, SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
 
@@ -38,10 +39,19 @@ export class MineWrapper {
       await this.sdk.programs.MintWrapper.account.mintWrapper.fetch(
         mintWrapper
       );
+
+    const { address: claimFeeTokenAccount, instruction: createATAInstruction } =
+      await getOrCreateATA({
+        provider: this.provider,
+        mint: mintWrapperData.tokenMint,
+        owner: rewarderKey,
+      });
+
     return {
       key: rewarderKey,
       tx: this.sdk.newTx(
         [
+          ...(createATAInstruction ? [createATAInstruction] : []),
           this.program.instruction.newRewarder(bump, {
             accounts: {
               base: baseKP.publicKey,
@@ -53,6 +63,7 @@ export class MineWrapper {
               mintWrapper,
               mintWrapperProgram: this.sdk.programs.MintWrapper.programId,
               rewardsTokenMint: mintWrapperData.tokenMint,
+              claimFeeTokenAccount,
             },
           }),
         ],

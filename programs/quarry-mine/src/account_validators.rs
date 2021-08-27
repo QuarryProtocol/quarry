@@ -24,6 +24,15 @@ impl<'info> Validate<'info> for NewRewarder<'info> {
     fn validate(&self) -> ProgramResult {
         require!(self.base.is_signer, Unauthorized);
 
+        // ensure the claim fee token account is owned by the rewarder
+        // in a future program upgrade, rewarder token accounts will be able
+        // to be flushed to a DAO
+        assert_ata!(
+            self.claim_fee_token_account,
+            self.rewarder,
+            self.rewards_token_mint
+        );
+
         assert_program!(self.system_program, SYSTEM_PROGRAM_ID);
         assert_keys!(
             self.mint_wrapper_program,
@@ -38,6 +47,11 @@ impl<'info> Validate<'info> for NewRewarder<'info> {
 
         assert_owner!(self.mint_wrapper, quarry_mint_wrapper::ID, "mint_wrapper");
         assert_owner!(self.rewards_token_mint, token::ID, "rewards_token_mint");
+        assert_owner!(
+            self.claim_fee_token_account,
+            token::ID,
+            "claim_fee_token_account"
+        );
 
         Ok(())
     }
@@ -124,6 +138,13 @@ impl<'info> Validate<'info> for ClaimRewards<'info> {
             self.rewards_token_mint.mint_authority.unwrap(),
             self.mint_wrapper,
             "mint wrapper",
+        );
+
+        // claim_fee_token_account validate
+        assert_keys!(
+            self.claim_fee_token_account,
+            self.stake.rewarder.claim_fee_token_account,
+            "claim_fee_token_account"
         );
 
         assert_owner!(self.mint_wrapper, quarry_mint_wrapper::ID, "mint_wrapper");
