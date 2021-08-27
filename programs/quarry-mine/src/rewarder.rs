@@ -20,13 +20,13 @@ impl Rewarder {
         &self,
         quarry_rewards_share: u64,
     ) -> Result<u128, ProgramError> {
-        require!(
-            quarry_rewards_share < self.total_rewards_shares,
-            InvalidRewardsShare
-        );
         if self.total_rewards_shares == 0 {
             Ok(0)
         } else {
+            require!(
+                quarry_rewards_share <= self.total_rewards_shares,
+                InvalidRewardsShare
+            );
             Ok(unwrap_int!((self.daily_rewards_rate as u128)
                 .checked_mul(quarry_rewards_share as u128)
                 .and_then(
