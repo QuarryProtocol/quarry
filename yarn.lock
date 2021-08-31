@@ -173,14 +173,14 @@
     "@solana/web3.js" "^1.23.0"
     eventemitter3 "^4.0.7"
 
-"@saberhq/chai-solana@^0.14.2":
-  version "0.14.2"
-  resolved "https://registry.yarnpkg.com/@saberhq/chai-solana/-/chai-solana-0.14.2.tgz#5ac336816c343601f0250ad0d761577b9eb2db7b"
-  integrity sha512-lp8HD7MMaciISy00Kf3gy2eeS7Vw/3lnlWHw/hmetszS1VTRKjm6IevnpOVHqDp/0WfRO5DkVe6/n7gGEjeN/Q==
+"@saberhq/chai-solana@^0.16.0":
+  version "0.16.0"
+  resolved "https://registry.yarnpkg.com/@saberhq/chai-solana/-/chai-solana-0.16.0.tgz#fdc3e336c4348a315175e7c8b1da4e19909ad159"
+  integrity sha512-1d1oHnWg6UoHF4eUPvgUuBEe4jk8LJoY7zkQcDdm1Ox9imdqOQdgmGPdpk0lCpT2t3ckU/OG+nuTrL4RPCn1oA==
   dependencies:
     "@project-serum/anchor" "^0.13.0"
-    "@saberhq/solana-contrib" "^0.14.2"
-    "@saberhq/token-utils" "^0.14.2"
+    "@saberhq/solana-contrib" "^0.16.0"
+    "@saberhq/token-utils" "^0.16.0"
     "@solana/web3.js" "^1.23.0"
     "@types/chai" "^4.2.21"
     "@types/chai-as-promised" "^7.1.4"
@@ -216,6 +216,18 @@
     tiny-invariant "^1.1.0"
     tslib "^2.3.0"
 
+"@saberhq/solana-contrib@^0.16.0":
+  version "0.16.0"
+  resolved "https://registry.yarnpkg.com/@saberhq/solana-contrib/-/solana-contrib-0.16.0.tgz#0e66e92db17b4f5c74a4a1f2565cbbd6ab878846"
+  integrity sha512-PHN5ObKJVD/nj1L2YLuB1gAYCDoyRzVBoT3xS8osy4Pfor5+AG0fHsHHErK+czkLzf0ddIToRuyQQjc6kttoYA==
+  dependencies:
+    "@solana/web3.js" "^1.23.0"
+    "@types/promise-retry" "^1.1.3"
+    "@types/retry" "^0.12.1"
+    promise-retry "^2.0.1"
+    tiny-invariant "^1.1.0"
+    tslib "^2.3.0"
+
 "@saberhq/token-utils@^0.14.2":
   version "0.14.2"
   resolved "https://registry.yarnpkg.com/@saberhq/token-utils/-/token-utils-0.14.2.tgz#c096af908897ffc1516c2ec1ea2e9eff690667d6"
@@ -224,6 +236,20 @@
     "@saberhq/solana-contrib" "^0.14.2"
     "@solana/spl-token" "^0.1.5"
     "@solana/spl-token-registry" "^0.2.210"
+    "@solana/web3.js" "^1.23.0"
+    "@ubeswap/token-math" "^4.1.0"
+    buffer-layout "^1.2.2"
+    tiny-invariant "^1.1.0"
+    tslib "^2.3.0"
+
+"@saberhq/token-utils@^0.16.0":
+  version "0.16.0"
+  resolved "https://registry.yarnpkg.com/@saberhq/token-utils/-/token-utils-0.16.0.tgz#d6557505a6b6ebf9954bb90d316a5c9ba01e4e9e"
+  integrity sha512-nUMlJ+1Dds69O7fRtkTyvlw2+lsn8En16II3oSCjgybyQDGzHD/rDHuezb1F8ss+3J4cpqvbwZHaHoDfRd6arA==
+  dependencies:
+    "@saberhq/solana-contrib" "^0.16.0"
+    "@solana/spl-token" "^0.1.5"
+    "@solana/spl-token-registry" "^0.2.226"
     "@solana/web3.js" "^1.23.0"
     "@ubeswap/token-math" "^4.1.0"
     buffer-layout "^1.2.2"
@@ -241,6 +267,13 @@
   version "0.2.219"
   resolved "https://registry.yarnpkg.com/@solana/spl-token-registry/-/spl-token-registry-0.2.219.tgz#2687486a55be685cafdde75a23ffbcc9e3ac7f84"
   integrity sha512-c3Ne/xYaCI5VlaAJ3tp403yXhiEK/rtCDy8kZAJNvVgU8ic8jT3ZhEBHT+Oe0INnscndoz5fljnl9Ywq0stOAg==
+  dependencies:
+    cross-fetch "3.0.6"
+
+"@solana/spl-token-registry@^0.2.226":
+  version "0.2.226"
+  resolved "https://registry.yarnpkg.com/@solana/spl-token-registry/-/spl-token-registry-0.2.226.tgz#e080801c7644c92d6e37653bc31ba33ca25dae85"
+  integrity sha512-QPLYfw7Dob4WKC9tGmdgi/zihlRgiH4S2LUzSrIDJXhx2KfNVmkOIqgCutKAJPsqEdDUZ4sQ0YQ4RbBWkWmwUw==
   dependencies:
     cross-fetch "3.0.6"
 
