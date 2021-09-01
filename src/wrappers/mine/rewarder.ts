@@ -103,14 +103,14 @@ export class RewarderWrapper {
    * Updates to daily rewards rate on the quarry, and update rewards on quarries assocated with each mint provided.
    * @param param0
    */
-  public async setDailyRewards(
-    newDailyRate: u64,
+  public async setAnnualRewards(
+    newAnnualRate: u64,
     mints: PublicKey[]
   ): Promise<TransactionEnvelope> {
     const authority = this.program.provider.wallet.publicKey;
     const tx = await this.syncQuarryRewards(mints);
     tx.instructions.unshift(
-      this.program.instruction.setDailyRewards(newDailyRate, {
+      this.program.instruction.setAnnualRewards(newAnnualRate, {
         accounts: {
           auth: {
             rewarder: this.rewarderKey,

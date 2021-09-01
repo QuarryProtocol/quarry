@@ -13,7 +13,7 @@ use crate::CreateQuarry;
 use crate::MutableRewarderWithAuthority;
 use crate::NewRewarder;
 use crate::ReadOnlyRewarderWithAuthority;
-use crate::SetDailyRewards;
+use crate::SetAnnualRewards;
 use crate::SetFamine;
 use crate::SetRewardsShare;
 use crate::TransferAuthority;
@@ -178,7 +178,7 @@ impl<'info> Validate<'info> for AcceptAuthority<'info> {
     }
 }
 
-impl<'info> Validate<'info> for SetDailyRewards<'info> {
+impl<'info> Validate<'info> for SetAnnualRewards<'info> {
     /// Validates the [Rewarder] is correct.
     fn validate(&self) -> ProgramResult {
         self.auth.validate()

@@ -39,7 +39,8 @@ describe("Mine", () => {
 
   const { web3, BN } = anchor;
 
-  const DAILY_REWARDS_RATE = new BN(1000 * web3.LAMPORTS_PER_SOL);
+  const DAILY_REWARDS_RATE = new BN(1_000 * web3.LAMPORTS_PER_SOL);
+  const ANNUAL_REWARDS_RATE = DAILY_REWARDS_RATE.mul(new BN(365));
 
   let stakedMintAuthority: anchor.web3.Keypair;
   let stakeTokenMint: anchor.web3.PublicKey;
@@ -123,7 +124,7 @@ describe("Mine", () => {
     it("Is initialized!", async () => {
       const rewarder = await mine.program.account.rewarder.fetch(rewarderKey);
       expect(rewarder.authority).to.eqAddress(provider.wallet.publicKey);
-      expect(rewarder.dailyRewardsRate.toString()).to.eql(ZERO.toString());
+      expect(rewarder.annualRewardsRate.toString()).to.eql(ZERO.toString());
       expect(rewarder.numQuarries).to.eq(ZERO.toNumber());
       expect(rewarder.totalRewardsShares.toString()).to.bignumber.eq(
         ZERO.toString()
@@ -132,7 +133,7 @@ describe("Mine", () => {
 
     it("Set daily rewards rate", async () => {
       await assert.doesNotReject(async () => {
-        await mine.program.rpc.setDailyRewards(DAILY_REWARDS_RATE, {
+        await mine.program.rpc.setAnnualRewards(ANNUAL_REWARDS_RATE, {
           accounts: {
             auth: {
               authority: provider.wallet.publicKey,
@@ -144,9 +145,7 @@ describe("Mine", () => {
       });
 
       const rewarder = await mine.program.account.rewarder.fetch(rewarderKey);
-      expect(rewarder.dailyRewardsRate.toString()).to.eql(
-        DAILY_REWARDS_RATE.toString()
-      );
+      expect(rewarder.annualRewardsRate).bignumber.to.eq(ANNUAL_REWARDS_RATE);
     });
 
     it("Transfer authority and accept authority", async () => {
@@ -207,7 +206,7 @@ describe("Mine", () => {
   });
 
   describe("Quarry", () => {
-    const quarryRewardsShare = DAILY_REWARDS_RATE.div(new BN(10));
+    const quarryRewardsShare = ANNUAL_REWARDS_RATE.div(new BN(10));
     let quarryData: QuarryData;
     let quarryKey: anchor.web3.PublicKey;
     let rewarderKey: anchor.web3.PublicKey;
@@ -222,7 +221,7 @@ describe("Mine", () => {
       rewarderKey = theRewarderKey;
       rewarder = await mine.loadRewarderWrapper(rewarderKey);
       await expectTX(
-        await rewarder.setDailyRewards(DAILY_REWARDS_RATE, []),
+        await rewarder.setAnnualRewards(ANNUAL_REWARDS_RATE, []),
         "set daily rewards"
       );
     });
@@ -257,7 +256,7 @@ describe("Mine", () => {
           stakeTokenMint.toBase58()
         );
         assert.strictEqual(
-          quarryData.dailyRewardsRate.toString(),
+          quarryData.annualRewardsRate.toString(),
           ZERO.toString()
         );
         assert.strictEqual(quarryData.rewardsShare.toString(), ZERO.toString());
@@ -296,8 +295,8 @@ describe("Mine", () => {
             .abs()
             .lte(new BN(1))
         ).to.be.true;
-        const expectedRewardsRate = quarry.computeDailyRewardsRate();
-        expect(quarry.quarryData.dailyRewardsRate.toString()).to.equal(
+        const expectedRewardsRate = quarry.computeAnnualRewardsRate();
+        expect(quarry.quarryData.annualRewardsRate.toString()).to.equal(
           expectedRewardsRate.toString()
         );
         expect(quarry.quarryData.rewardsShare.toString()).to.eq(
@@ -443,37 +442,37 @@ describe("Mine", () => {
         await expectTX(tx, "sync quarries").to.be.fulfilled;
       });
 
-      it("Set daily rewards and make sure quarries update", async () => {
+      it("Set annual rewards and make sure quarries update", async () => {
         const multiplier = new BN(10);
         let rewarderData = await mine.program.account.rewarder.fetch(
           rewarderKey
         );
-        const nextDailyRewardsRate = DAILY_REWARDS_RATE.mul(multiplier);
+        const nextAnnualRewardsRate = ANNUAL_REWARDS_RATE.mul(multiplier);
         const prevRates = await Promise.all(
           tokens.map(async (t) => {
             const quarry = await rewarder.getQuarry(t);
-            return { token: t, rate: quarry.quarryData.dailyRewardsRate };
+            return { token: t, rate: quarry.quarryData.annualRewardsRate };
           })
         );
 
-        const tx = await rewarder.setDailyRewards(
-          nextDailyRewardsRate,
+        const tx = await rewarder.setAnnualRewards(
+          nextAnnualRewardsRate,
           tokens.map((t) => t.mintAccount)
         );
         console.log(await tx.simulate());
-        await expectTX(tx, "set daily rewards and update quarry rewards").to.be
+        await expectTX(tx, "set annual rewards and update quarry rewards").to.be
           .fulfilled;
 
         rewarderData = await mine.program.account.rewarder.fetch(rewarderKey);
-        expect(rewarderData.dailyRewardsRate).to.bignumber.eq(
-          nextDailyRewardsRate
+        expect(rewarderData.annualRewardsRate).to.bignumber.eq(
+          nextAnnualRewardsRate
         );
 
-        let sumRewardsPerDay = new BN(0);
+        let sumRewardsPerAnnum = new BN(0);
         for (const token of tokens) {
           const nextRate = (await rewarder.getQuarry(token)).quarryData
-            .dailyRewardsRate;
-          sumRewardsPerDay = sumRewardsPerDay.add(nextRate);
+            .annualRewardsRate;
+          sumRewardsPerAnnum = sumRewardsPerAnnum.add(nextRate);
           const prevRate = prevRates.find((r) => r.token.equals(token))?.rate;
           invariant(
             prevRate,
@@ -490,16 +489,16 @@ describe("Mine", () => {
         }
         // Check on day multiple
         expect(
-          sumRewardsPerDay,
+          sumRewardsPerAnnum,
           "rewards rate within one day multiple"
         ).bignumber.closeTo(
-          nextDailyRewardsRate,
+          nextAnnualRewardsRate,
           new BN(2) // precision lost
         );
 
-        // Rdaily rewards rate
-        const txRestore = await rewarder.setDailyRewards(
-          DAILY_REWARDS_RATE,
+        // Restore daily rewards rate
+        const txRestore = await rewarder.setAnnualRewards(
+          ANNUAL_REWARDS_RATE,
           tokens.map((t) => t.mintAccount)
         );
         await expectTX(txRestore, "revert daily rewards to previous amount").to
@@ -508,16 +507,15 @@ describe("Mine", () => {
         for (const token of tokens) {
           const lastRate = (
             await rewarder.getQuarry(token)
-          ).computeDailyRewardsRate();
+          ).computeAnnualRewardsRate();
           const prevRate = prevRates.find((r) => r.token.equals(token))?.rate;
           invariant(
             prevRate,
             `prev rate not found for token ${token.toString()}`
           );
-          expect(
-            lastRate.toString(),
-            `revert rate ${token.toString()}`
-          ).bignumber.to.eq(prevRate);
+          expect(lastRate, `revert rate ${token.toString()}`).bignumber.to.eq(
+            prevRate
+          );
         }
       });
     });
@@ -536,8 +534,8 @@ describe("Mine", () => {
       await expectTX(tx, "Create new rewarder").to.be.fulfilled;
       rewarderKey = theRewarderKey;
       rewarder = await mine.loadRewarderWrapper(rewarderKey);
-      await expectTX(await rewarder.setDailyRewards(DAILY_REWARDS_RATE, [])).to
-        .be.fulfilled;
+      await expectTX(await rewarder.setAnnualRewards(ANNUAL_REWARDS_RATE, []))
+        .to.be.fulfilled;
 
       const { tx: quarryTx } = await rewarder.createQuarry({
         token: stakeToken,

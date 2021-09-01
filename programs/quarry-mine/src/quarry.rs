@@ -6,6 +6,7 @@ use vipers::unwrap_int;
 use crate::{payroll::Payroll, Miner, Quarry, Rewarder};
 use num_traits::cast::ToPrimitive;
 
+/// An action for a user to take on the staking pool.
 pub enum StakeAction {
     Stake,
     Withdraw,
@@ -19,12 +20,11 @@ impl Quarry {
         rewarder: &Rewarder,
         payroll: &Payroll,
     ) -> ProgramResult {
-        let updated_rewards_per_token_stored =
-            unwrap_int!(payroll.calculate_reward_per_token(current_ts)?.to_u64());
+        let updated_rewards_per_token_stored = payroll.calculate_reward_per_token(current_ts)?;
         // Update quarry struct
         self.rewards_per_token_stored = updated_rewards_per_token_stored;
-        self.daily_rewards_rate = unwrap_int!(rewarder
-            .compute_quarry_daily_rewards_rate(self.rewards_share)
+        self.annual_rewards_rate = unwrap_int!(rewarder
+            .compute_quarry_annual_rewards_rate(self.rewards_share)
             .to_u64());
         self.last_update_ts = payroll.last_time_reward_applicable(current_ts);
 
@@ -46,7 +46,7 @@ impl Quarry {
             .calculate_rewards_earned(
                 current_ts,
                 miner.balance.into(),
-                miner.rewards_per_token_paid.into(),
+                miner.rewards_per_token_paid,
                 miner.rewards_earned.into(),
             )?
             .to_u64());
@@ -87,7 +87,10 @@ impl Quarry {
 #[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
-    use crate::{payroll::SECONDS_PER_DAY, quarry::StakeAction};
+    use crate::{
+        payroll::{PRECISION_MULTIPLIER, SECONDS_PER_DAY},
+        quarry::StakeAction,
+    };
 
     const DEFAULT_TOKEN_DECIMALS: u8 = 6;
 
@@ -145,8 +148,8 @@ mod tests {
         vault.balance -= amount;
     }
 
-    fn to_unit(amount: u64) -> u64 {
-        amount * u64::pow(10, DEFAULT_TOKEN_DECIMALS.into())
+    fn to_unit(amt: u64) -> u64 {
+        amt * 1_000_000
     }
 
     #[test]
@@ -157,9 +160,11 @@ mod tests {
         quarry.token_mint_decimals = DEFAULT_TOKEN_DECIMALS;
         let miner_vault = &mut MinerVault { balance: 0 };
 
+        let daily_rewards_rate = to_unit(5_000);
+        let annual_rewards_rate = daily_rewards_rate * 365;
         let rewarder = Rewarder {
             bump: 254,
-            daily_rewards_rate: to_unit(5000),
+            annual_rewards_rate,
             num_quarries: 1,
             total_rewards_shares: quarry.rewards_share,
             ..Default::default()
@@ -179,12 +184,12 @@ mod tests {
             miner,
             total_to_stake,
         );
-        assert!(quarry.daily_rewards_rate > 0);
+        assert!(quarry.annual_rewards_rate > 0);
         assert_eq!(miner_vault.balance, total_to_stake);
 
         // Fastforward time by 6 days
         current_ts += SECONDS_PER_DAY as i64 * 6;
-        let expected_rewards_earned = 29999808000; // About 500 * 10 ^ 6 * 6
+        let expected_rewards_earned = daily_rewards_rate * 6;
 
         // Withdraw half
         let withdraw_amount = to_unit(250);
@@ -199,7 +204,9 @@ mod tests {
         assert!(quarry.rewards_per_token_stored > 0);
         assert_eq!(
             miner.rewards_earned,
-            miner.rewards_per_token_paid * total_to_stake / to_unit(1)
+            (miner.rewards_per_token_paid * (total_to_stake as u128) / PRECISION_MULTIPLIER)
+                .to_u64()
+                .unwrap()
         );
         assert_eq!(miner.rewards_earned, expected_rewards_earned);
         assert_eq!(miner_vault.balance, total_to_stake - withdraw_amount);
@@ -254,9 +261,12 @@ mod tests {
         quarry.token_mint_decimals = DEFAULT_TOKEN_DECIMALS;
         let miner_vault_one = &mut MinerVault { balance: 0 };
         let miner_vault_two = &mut MinerVault { balance: 0 };
+
+        let daily_rewards_rate = to_unit(5_000);
+        let annual_rewards_rate = daily_rewards_rate * 365;
         let rewarder = Rewarder {
             bump: 254,
-            daily_rewards_rate: to_unit(5000),
+            annual_rewards_rate,
             num_quarries: 1,
             total_rewards_shares: quarry.rewards_share,
             ..Default::default()
@@ -288,7 +298,7 @@ mod tests {
         );
         assert_eq!(miner_vault_two.balance, total_to_stake);
         assert_eq!(miner_two.balance, miner_vault_two.balance);
-        assert!(quarry.daily_rewards_rate > 0);
+        assert!(quarry.annual_rewards_rate > 0);
 
         // Fastforward time by 3 days
         current_ts += SECONDS_PER_DAY as i64 * 3;
@@ -305,7 +315,9 @@ mod tests {
         assert!(quarry.rewards_per_token_stored > 0);
         assert_eq!(
             miner_two.rewards_earned,
-            miner_two.rewards_per_token_paid * total_to_stake / to_unit(1)
+            (miner_two.rewards_per_token_paid * (total_to_stake as u128) / PRECISION_MULTIPLIER)
+                .to_u64()
+                .unwrap()
         );
         assert_eq!(miner_vault_two.balance, 0);
         assert_eq!(miner_two.balance, miner_vault_two.balance);
@@ -314,8 +326,9 @@ mod tests {
         current_ts += SECONDS_PER_DAY as i64 * 3;
 
         // Claim rewards
-        let expected_miner_one_rewards_earned = 22499856000; // About 3000 * 10 ^ 6 * (3/4)
-        let expected_miner_two_rewards_earned = 7499952000; // About 3000 * 10 ^ 6 * (1/4)
+        let total_distributed = daily_rewards_rate * 6; // 6 days of rewards
+        let expected_miner_one_rewards_earned = total_distributed * 3 / 4;
+        let expected_miner_two_rewards_earned = total_distributed / 4;
         assert_eq!(
             sim_claim(current_ts, &rewarder, quarry, miner_vault_one, miner_one),
             expected_miner_one_rewards_earned
@@ -329,7 +342,7 @@ mod tests {
         current_ts += SECONDS_PER_DAY as i64 * 6;
 
         // Claim rewards
-        let expected_miner_one_rewards_earned = 29999808000;
+        let expected_miner_one_rewards_earned = daily_rewards_rate * 6;
         let expected_miner_two_rewards_earned = 0;
         assert_eq!(
             sim_claim(current_ts, &rewarder, quarry, miner_vault_one, miner_one),

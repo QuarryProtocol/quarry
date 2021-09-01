@@ -1,3 +1,4 @@
+import { MAX_U64 } from "@saberhq/token-utils";
 import BN from "bn.js";
 
 export const ZERO = new BN(0);
@@ -7,9 +8,8 @@ export class Payroll {
   constructor(
     public readonly famineTs: BN,
     public readonly lastCheckpointTs: BN,
-    public readonly rewardsRatePerSecond: BN,
+    public readonly annualRewardsRate: BN,
     public readonly rewardsPerTokenStored: BN,
-    public readonly tokenDecimals: BN,
     public readonly totalTokensDeposited: BN
   ) {}
 
@@ -28,12 +28,12 @@ export class Payroll {
       ZERO,
       lastTimeRewardsApplicable.sub(this.lastCheckpointTs)
     );
-    const reward = timeWorked.mul(this.rewardsRatePerSecond);
-    const preciseReward = reward
-      .mul(this.decimalPrecision())
+    const reward = timeWorked
+      .mul(new BN(MAX_U64.toString()))
+      .mul(this.annualRewardsRate)
+      .div(new BN(365 * 86_400))
       .div(this.totalTokensDeposited);
-
-    return this.rewardsPerTokenStored.add(preciseReward);
+    return this.rewardsPerTokenStored.add(reward);
   }
 
   /**
@@ -54,11 +54,7 @@ export class Payroll {
       this.calculateRewardPerToken(currentTs).sub(rewardsPerTokenPaid);
     const earnedRewards = tokensDeposited
       .mul(netNewRewards)
-      .div(this.decimalPrecision());
+      .div(new BN(MAX_U64.toString()));
     return earnedRewards.add(rewardsEarned);
-  }
-
-  private decimalPrecision(): BN {
-    return BASE_TEN.pow(this.tokenDecimals);
   }
 }

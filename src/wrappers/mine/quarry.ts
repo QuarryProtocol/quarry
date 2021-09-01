@@ -5,7 +5,6 @@ import { getATAAddress, getOrCreateATA } from "@saberhq/token-utils";
 import { u64 } from "@solana/spl-token";
 import type { PublicKey } from "@solana/web3.js";
 import { SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
-import BN = require("bn.js");
 
 import type {
   MineProgram,
@@ -82,19 +81,20 @@ export class QuarryWrapper {
   }
 
   /**
-   * Get the computed rewards rate of the quarry
+   * Get the computed rewards rate of the quarry.
    *
-   * You probably don't want this. You want quarryData.dailyRewardsRate.
+   * This is used for tests, so you probably don't want this.
+   * You want quarryData.annualRewardsRate.
    *
-   * @returns dailyRewardsRate
+   * @returns annualRewardsRate
    */
-  public computeDailyRewardsRate(): u64 {
+  public computeAnnualRewardsRate(): u64 {
     const rewarder = this.rewarderData;
     const totalRewardsShares = rewarder.totalRewardsShares;
     if (totalRewardsShares.isZero()) {
       return new u64(0);
     }
-    const numerator = rewarder.dailyRewardsRate.mul(
+    const numerator = rewarder.annualRewardsRate.mul(
       this.quarryData.rewardsShare
     );
     return numerator.div(totalRewardsShares);
@@ -240,9 +240,8 @@ export class QuarryWrapper {
     return new Payroll(
       data.famineTs,
       data.lastUpdateTs,
-      data.dailyRewardsRate,
+      data.annualRewardsRate,
       data.rewardsPerTokenStored,
-      new BN(data.tokenMintDecimals),
       data.totalTokensDeposited
     );
   }

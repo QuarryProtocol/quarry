@@ -53,7 +53,7 @@ pub mod quarry_mine {
 
         rewarder.authority = ctx.accounts.authority.key();
         rewarder.pending_authority = Pubkey::default();
-        rewarder.daily_rewards_rate = 0;
+        rewarder.annual_rewards_rate = 0;
         rewarder.num_quarries = 0;
         rewarder.total_rewards_shares = 0;
 
@@ -97,12 +97,12 @@ pub mod quarry_mine {
 
     /// Sets the amount of reward tokens distributed to all [Quarry]s per day.
     #[access_control(ctx.accounts.validate())]
-    pub fn set_daily_rewards(ctx: Context<SetDailyRewards>, new_rate: u64) -> ProgramResult {
+    pub fn set_annual_rewards(ctx: Context<SetAnnualRewards>, new_rate: u64) -> ProgramResult {
         let rewarder = &mut ctx.accounts.auth.rewarder;
-        let previous_rate = rewarder.daily_rewards_rate;
-        rewarder.daily_rewards_rate = new_rate;
+        let previous_rate = rewarder.annual_rewards_rate;
+        rewarder.annual_rewards_rate = new_rate;
 
-        emit!(RewarderDailyRewardsUpdateEvent {
+        emit!(RewarderAnnualRewardsUpdateEvent {
             previous_rate,
             new_rate,
             timestamp: ctx.accounts.clock.unix_timestamp as u64,
@@ -127,7 +127,7 @@ pub mod quarry_mine {
         // Set quarry params
         quarry.famine_ts = i64::MAX;
         quarry.rewarder_key = *rewarder.to_account_info().key;
-        quarry.daily_rewards_rate = 0;
+        quarry.annual_rewards_rate = 0;
         quarry.rewards_share = 0;
         quarry.token_mint_decimals = ctx.accounts.token_mint.decimals;
         quarry.token_mint_key = *ctx.accounts.token_mint.to_account_info().key;
@@ -156,14 +156,14 @@ pub mod quarry_mine {
         );
 
         quarry.last_update_ts = cmp::min(ctx.accounts.clock.unix_timestamp, quarry.famine_ts);
-        quarry.daily_rewards_rate = unwrap_int!(rewarder
-            .compute_quarry_daily_rewards_rate(new_share)
+        quarry.annual_rewards_rate = unwrap_int!(rewarder
+            .compute_quarry_annual_rewards_rate(new_share)
             .to_u64());
         quarry.rewards_share = new_share;
 
         emit!(QuarryRewardsUpdateEvent {
             token_mint: quarry.token_mint_key,
-            daily_rewards_rate: quarry.daily_rewards_rate,
+            annual_rewards_rate: quarry.annual_rewards_rate,
             rewards_share: quarry.rewards_share,
             timestamp: ctx.accounts.clock.unix_timestamp as u64,
         });
@@ -192,7 +192,7 @@ pub mod quarry_mine {
 
         emit!(QuarryRewardsUpdateEvent {
             token_mint: quarry.token_mint_key,
-            daily_rewards_rate: quarry.daily_rewards_rate,
+            annual_rewards_rate: quarry.annual_rewards_rate,
             rewards_share: quarry.rewards_share,
             timestamp: current_ts as u64,
         });
@@ -433,7 +433,7 @@ pub struct Rewarder {
     /// Number of quarries the rewarder manages
     pub num_quarries: u16,
     /// Amount of reward tokens distributed per day
-    pub daily_rewards_rate: u64,
+    pub annual_rewards_rate: u64,
     /// Total amount of rewards shares allocated to quarries
     pub total_rewards_shares: u64,
     /// Mint wrapper program that the rewarder will pull from.
@@ -470,9 +470,9 @@ pub struct Quarry {
     /// Timestamp of last checkpoint
     pub last_update_ts: i64,
     /// Rewards per token stored in the quarry
-    pub rewards_per_token_stored: u64,
-    /// Rewards rate for this quarry
-    pub daily_rewards_rate: u64,
+    pub rewards_per_token_stored: u128,
+    /// Amount of rewards distributed to the quarry per year.
+    pub annual_rewards_rate: u64,
     /// Rewards shared allocated to this quarry
     pub rewards_share: u64,
 
@@ -500,15 +500,15 @@ pub struct Miner {
     /// Whenever the [Miner] claims tokens, this is reset to 0.
     pub rewards_earned: u64,
 
-    /// A checkpoint of the quarry's reward tokens paid per staked token.
+    /// A checkpoint of the [Quarry]'s reward tokens paid per staked token.
     ///
     /// When the [Miner] is initialized, this number starts at 0.
-    /// On the first [farm::stake_tokens], the [Quarry::update_rewards_and_miner]
+    /// On the first [quarry_mine::stake_tokens], the [Quarry]#update_rewards_and_miner
     /// method is called, which updates this checkpoint to the current quarry value.
     ///
-    /// On a [farm::claim_rewards], the difference in checkpoints is used to calculate
+    /// On a [quarry_mine::claim_rewards], the difference in checkpoints is used to calculate
     /// the amount of tokens owed.
-    pub rewards_per_token_paid: u64,
+    pub rewards_per_token_paid: u128,
 
     /// Number of tokens the [Miner] holds.
     pub balance: u64,
@@ -608,7 +608,7 @@ pub struct ReadOnlyRewarderWithAuthority<'info> {
 }
 
 #[derive(Accounts)]
-pub struct SetDailyRewards<'info> {
+pub struct SetAnnualRewards<'info> {
     pub auth: MutableRewarderWithAuthority<'info>,
     pub clock: Sysvar<'info, Clock>,
 }
@@ -618,7 +618,7 @@ pub struct SetDailyRewards<'info> {
 #[derive(Accounts)]
 #[instruction(bump: u8)]
 pub struct CreateQuarry<'info> {
-    /// Quarry.
+    /// [Quarry].
     #[account(
         init,
         seeds = [
@@ -631,16 +631,16 @@ pub struct CreateQuarry<'info> {
     )]
     pub quarry: ProgramAccount<'info, Quarry>,
 
-    /// Rewarder authority.
+    /// [Rewarder] authority.
     pub auth: MutableRewarderWithAuthority<'info>,
 
-    /// Mint of the token to create a quarry for.
+    /// [Mint] of the token to create a [Quarry] for.
     pub token_mint: CpiAccount<'info, Mint>,
 
-    /// Payer of quarry creation.
+    /// Payer of [Quarry] creation.
     pub payer: AccountInfo<'info>,
 
-    /// Clock.
+    /// [Clock].
     pub clock: Sysvar<'info, Clock>,
 
     /// System program.
@@ -649,37 +649,37 @@ pub struct CreateQuarry<'info> {
 
 #[derive(Accounts)]
 pub struct SetFamine<'info> {
-    /// Rewarder of the quarry.
+    /// [Rewarder] of the [Quarry].
     pub auth: ReadOnlyRewarderWithAuthority<'info>,
 
-    /// Quarry updated.
+    /// [Quarry] updated.
     #[account(mut)]
     pub quarry: ProgramAccount<'info, Quarry>,
 }
 
 #[derive(Accounts)]
 pub struct SetRewardsShare<'info> {
-    /// Rewarder of the quarry.
+    /// [Rewarder] of the [Quarry].
     pub auth: MutableRewarderWithAuthority<'info>,
 
-    /// Quarry updated.
+    /// [Quarry] updated.
     #[account(mut)]
     pub quarry: ProgramAccount<'info, Quarry>,
 
-    /// Clock.
+    /// [Clock].
     pub clock: Sysvar<'info, Clock>,
 }
 
 #[derive(Accounts)]
 pub struct UpdateQuarryRewards<'info> {
-    /// Quarry.
+    /// [Quarry].
     #[account(mut)]
     pub quarry: ProgramAccount<'info, Quarry>,
 
-    /// Rewarder
+    /// [Rewarder].
     pub rewarder: ProgramAccount<'info, Rewarder>,
 
-    /// Clock.
+    /// [Clock].
     pub clock: Sysvar<'info, Clock>,
 }
 
@@ -687,11 +687,11 @@ pub struct UpdateQuarryRewards<'info> {
 #[derive(Accounts)]
 #[instruction(bump: u8)]
 pub struct CreateMiner<'info> {
-    /// Authority of the miner.
+    /// Authority of the [Miner].
     #[account(signer)]
     pub authority: AccountInfo<'info>,
 
-    /// Miner to be created.
+    /// [Miner] to be created.
     #[account(
         init,
         seeds = [
@@ -707,16 +707,16 @@ pub struct CreateMiner<'info> {
     /// [Quarry] to create a [Miner] for.
     pub quarry: ProgramAccount<'info, Quarry>,
 
-    /// System program
+    /// System program.
     pub system_program: AccountInfo<'info>,
 
-    /// Payer of miner creation.
+    /// Payer of [Miner] creation.
     pub payer: AccountInfo<'info>,
 
-    /// Mint of the token to create a quarry for.
+    /// [Mint] of the token to create a [Quarry] for.
     pub token_mint: CpiAccount<'info, Mint>,
 
-    /// Token account holding the token mint.
+    /// [TokenAccount] holding the token [Mint].
     pub miner_vault: CpiAccount<'info, TokenAccount>,
 
     /// SPL Token program.
@@ -853,7 +853,7 @@ pub struct WithdrawEvent {
 
 /// Triggered when the daily rewards rate is updated.
 #[event]
-pub struct RewarderDailyRewardsUpdateEvent {
+pub struct RewarderAnnualRewardsUpdateEvent {
     previous_rate: u64,
     new_rate: u64,
     timestamp: u64,
@@ -881,7 +881,7 @@ pub struct QuarryCreateEvent {
 #[event]
 pub struct QuarryRewardsUpdateEvent {
     token_mint: Pubkey,
-    daily_rewards_rate: u64,
+    annual_rewards_rate: u64,
     rewards_share: u64,
     timestamp: u64,
 }

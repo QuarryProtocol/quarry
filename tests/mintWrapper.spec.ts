@@ -198,7 +198,9 @@ describe("MintWrapper", () => {
   });
 
   describe("Mine", () => {
-    const dailyRewardsRate = new BN(1000 * web3.LAMPORTS_PER_SOL);
+    const dailyRewardsRate = new BN(1_000 * web3.LAMPORTS_PER_SOL);
+    const annualRewardsRate = dailyRewardsRate.mul(new BN(365));
+
     const rewardsShare = dailyRewardsRate.div(new BN(10));
     const stakeAmount = 1_000_000000;
     let stakedMintAuthority: anchor.web3.Keypair;
@@ -227,11 +229,11 @@ describe("MintWrapper", () => {
 
       rewarderWrapper = await mine.loadRewarderWrapper(rewarder);
 
-      const setDailyRewardsTX = await rewarderWrapper.setDailyRewards(
-        dailyRewardsRate,
+      const setAnnualRewardsTX = await rewarderWrapper.setAnnualRewards(
+        annualRewardsRate,
         []
       );
-      await expectTX(setDailyRewardsTX).eventually.to.be.fulfilled;
+      await expectTX(setAnnualRewardsTX).eventually.to.be.fulfilled;
 
       const { tx: createQuarryTX } = await rewarderWrapper.createQuarry({
         token: stakeToken,
@@ -294,8 +296,8 @@ describe("MintWrapper", () => {
       expect(quarry.quarryData.rewardsPerTokenStored.toString()).to.equal(
         expectedRewardsPerTokenStored.toString()
       );
-      const expectedRewardsRate = quarry.computeDailyRewardsRate();
-      expect(quarry.quarryData.dailyRewardsRate.toString()).to.equal(
+      const expectedRewardsRate = quarry.computeAnnualRewardsRate();
+      expect(quarry.quarryData.annualRewardsRate.toString()).to.equal(
         expectedRewardsRate.toString()
       );
     });
