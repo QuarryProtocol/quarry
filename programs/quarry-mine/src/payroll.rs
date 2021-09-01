@@ -5,9 +5,7 @@ use std::cmp;
 use std::convert::TryInto;
 use vipers::unwrap_int;
 
-pub const SECONDS_PER_DAY: u128 = 86_400;
-
-pub const SECONDS_PER_YEAR: u128 = SECONDS_PER_DAY * 365;
+pub const SECONDS_PER_YEAR: u128 = 86_400 * 365;
 
 pub const PRECISION_MULTIPLIER: u128 = u64::MAX as u128;
 

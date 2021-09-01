@@ -156,15 +156,8 @@ pub mod quarry_mine {
             .checked_add(new_share)
             .and_then(|v| v.checked_sub(quarry.rewards_share)));
 
-        require!(
-            rewarder.validate_quarry_rewards_share(new_share),
-            InvalidRewardsShare
-        );
-
         quarry.last_update_ts = cmp::min(ctx.accounts.clock.unix_timestamp, quarry.famine_ts);
-        quarry.annual_rewards_rate = unwrap_int!(rewarder
-            .compute_quarry_annual_rewards_rate(new_share)
-            .to_u64());
+        quarry.annual_rewards_rate = rewarder.compute_quarry_annual_rewards_rate(new_share)?;
         quarry.rewards_share = new_share;
 
         emit!(QuarryRewardsUpdateEvent {

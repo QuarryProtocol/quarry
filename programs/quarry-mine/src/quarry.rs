@@ -23,9 +23,8 @@ impl Quarry {
         let updated_rewards_per_token_stored = payroll.calculate_reward_per_token(current_ts)?;
         // Update quarry struct
         self.rewards_per_token_stored = updated_rewards_per_token_stored;
-        self.annual_rewards_rate = unwrap_int!(rewarder
-            .compute_quarry_annual_rewards_rate(self.rewards_share)
-            .to_u64());
+        self.annual_rewards_rate =
+            rewarder.compute_quarry_annual_rewards_rate(self.rewards_share)?;
         self.last_update_ts = payroll.last_time_reward_applicable(current_ts);
 
         Ok(())
@@ -87,11 +86,9 @@ impl Quarry {
 #[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
-    use crate::{
-        payroll::{PRECISION_MULTIPLIER, SECONDS_PER_DAY},
-        quarry::StakeAction,
-    };
+    use crate::{payroll::PRECISION_MULTIPLIER, quarry::StakeAction};
 
+    const SECONDS_PER_DAY: u64 = 86_400;
     const DEFAULT_TOKEN_DECIMALS: u8 = 6;
 
     pub struct MinerVault {
