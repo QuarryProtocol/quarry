@@ -17,9 +17,6 @@ impl<'info> Validate<'info> for NewRewarder<'info> {
     fn validate(&self) -> ProgramResult {
         require!(self.base.is_signer, Unauthorized);
 
-        // ensure the claim fee token account is owned by the rewarder
-        // in a future program upgrade, rewarder token accounts will be able
-        // to be flushed to a DAO
         assert_ata!(
             self.claim_fee_token_account,
             self.rewarder,
@@ -241,9 +238,6 @@ impl<'info> Validate<'info> for UpdateQuarryRewards<'info> {
 
 impl<'info> Validate<'info> for ExtractFees<'info> {
     fn validate(&self) -> ProgramResult {
-        // ensure the claim fee token account is owned by the rewarder
-        // in a future program upgrade, rewarder token accounts will be able
-        // to be flushed to a DAO
         assert_ata!(
             self.claim_fee_token_account,
             self.rewarder,
