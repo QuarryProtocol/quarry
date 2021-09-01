@@ -3,6 +3,7 @@ import { getOrCreateATA } from "@saberhq/token-utils";
 import type { PublicKey } from "@solana/web3.js";
 import { Keypair, SystemProgram, SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
 
+import type { MintWrapperData } from "../../programs";
 import type { MineProgram } from "../../programs/mine";
 import type { QuarrySDK } from "../../sdk";
 import { findRewarderAddress } from "./pda";
@@ -35,9 +36,18 @@ export class MineWrapper {
       baseKP.publicKey,
       this.program.programId
     );
+
+    const mintWrapperDataRaw = await this.provider.getAccountInfo(mintWrapper);
+    if (!mintWrapperDataRaw) {
+      throw new Error(
+        `mint wrapper does not exist at ${mintWrapper.toString()}`
+      );
+    }
+
     const mintWrapperData =
-      await this.sdk.programs.MintWrapper.account.mintWrapper.fetch(
-        mintWrapper
+      this.sdk.programs.MintWrapper.coder.accounts.decode<MintWrapperData>(
+        "MintWrapper",
+        mintWrapperDataRaw.accountInfo.data
       );
 
     const { address: claimFeeTokenAccount, instruction: createATAInstruction } =
