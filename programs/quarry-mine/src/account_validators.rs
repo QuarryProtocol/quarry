@@ -6,19 +6,11 @@ use anchor_spl::token;
 use vipers::validate::Validate;
 use vipers::{assert_ata, assert_keys, assert_owner, assert_program};
 
-use crate::AcceptAuthority;
-use crate::ClaimRewards;
-use crate::CreateMiner;
-use crate::CreateQuarry;
-use crate::MutableRewarderWithAuthority;
-use crate::NewRewarder;
-use crate::ReadOnlyRewarderWithAuthority;
-use crate::SetAnnualRewards;
-use crate::SetFamine;
-use crate::SetRewardsShare;
-use crate::TransferAuthority;
-use crate::UpdateQuarryRewards;
-use crate::UserStake;
+use crate::{
+    AcceptAuthority, ClaimRewards, CreateMiner, CreateQuarry, MutableRewarderWithAuthority,
+    NewRewarder, ReadOnlyRewarderWithAuthority, SetAnnualRewards, SetFamine, SetRewardsShare,
+    TransferAuthority, UpdateQuarryRewards, UserStake,
+};
 
 impl<'info> Validate<'info> for NewRewarder<'info> {
     fn validate(&self) -> ProgramResult {
@@ -34,11 +26,6 @@ impl<'info> Validate<'info> for NewRewarder<'info> {
         );
 
         assert_program!(self.system_program, SYSTEM_PROGRAM_ID);
-        assert_keys!(
-            self.mint_wrapper_program,
-            quarry_mint_wrapper::ID,
-            "mint wrapper"
-        );
         assert_keys!(
             self.mint_wrapper.token_mint,
             self.rewards_token_mint,
@@ -163,7 +150,9 @@ impl<'info> Validate<'info> for ClaimRewards<'info> {
 impl<'info> Validate<'info> for TransferAuthority<'info> {
     /// Validates the [Rewarder] is correct.
     fn validate(&self) -> ProgramResult {
-        self.rewarder.only_owner(&self.authority)
+        require!(self.authority.is_signer, Unauthorized);
+        assert_keys!(self.authority, self.rewarder.authority);
+        Ok(())
     }
 }
 
@@ -196,7 +185,9 @@ impl<'info> Validate<'info> for MutableRewarderWithAuthority<'info> {
 impl<'info> Validate<'info> for ReadOnlyRewarderWithAuthority<'info> {
     /// Validates the [Rewarder] is correct.
     fn validate(&self) -> ProgramResult {
-        self.rewarder.only_owner(&self.authority)
+        require!(self.authority.is_signer, Unauthorized);
+        assert_keys!(self.authority, self.rewarder.authority);
+        Ok(())
     }
 }
 

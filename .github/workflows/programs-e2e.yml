@@ -47,6 +47,7 @@ jobs:
         run: yarn install
       - run: ./scripts/generate-idl-types.sh
       - run: yarn build
+      - run: yarn typecheck
       - run: yarn lint
 
   integration-tests:

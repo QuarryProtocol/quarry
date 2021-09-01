@@ -18,6 +18,7 @@ use payroll::Payroll;
 use std::cmp;
 use vipers::assert_keys;
 use vipers::program_err;
+use vipers::unwrap_int;
 use vipers::validate::Validate;
 
 mod account_validators;
@@ -25,18 +26,19 @@ mod payroll;
 mod quarry;
 mod rewarder;
 
+use crate::quarry::StakeAction;
+
 declare_id!("QMNFUvncKBh11ZgEwYtoup3aXvuVxt6fzrcsjk2cjpM");
 
-/// The fees of new rewarders-- 1,000 KBPS = 1 BP or 0.01%.
-const DEFAULT_CLAIM_FEE_KBPS: u64 = 1_000;
+/// Maximum number of tokens that can be rewarded by a [Rewarder] per year.
+pub const MAX_ANNUAL_REWARDS_RATE: u64 = u64::MAX >> 3;
+
+/// The fees of new [Rewarder]s-- 1,000 KBPS = 1 BP or 0.01%.
+/// This may be changed by governance in the future via program upgrade.
+pub const DEFAULT_CLAIM_FEE_KBPS: u64 = 1_000;
 
 #[program]
 pub mod quarry_mine {
-
-    use vipers::unwrap_int;
-
-    use crate::quarry::StakeAction;
-
     use super::*;
 
     /// --------------------------------
@@ -56,8 +58,6 @@ pub mod quarry_mine {
         rewarder.annual_rewards_rate = 0;
         rewarder.num_quarries = 0;
         rewarder.total_rewards_shares = 0;
-
-        rewarder.mint_wrapper_program = ctx.accounts.mint_wrapper_program.key();
         rewarder.mint_wrapper = ctx.accounts.mint_wrapper.key();
 
         rewarder.rewards_token_mint = ctx.accounts.rewards_token_mint.key();
@@ -73,7 +73,7 @@ pub mod quarry_mine {
         Ok(())
     }
 
-    /// Transfers the rewarder authority to a different account.
+    /// Transfers the [Rewarder] authority to a different account.
     #[access_control(ctx.accounts.validate())]
     pub fn transfer_authority(
         ctx: Context<TransferAuthority>,
@@ -98,6 +98,10 @@ pub mod quarry_mine {
     /// Sets the amount of reward tokens distributed to all [Quarry]s per day.
     #[access_control(ctx.accounts.validate())]
     pub fn set_annual_rewards(ctx: Context<SetAnnualRewards>, new_rate: u64) -> ProgramResult {
+        require!(
+            new_rate <= MAX_ANNUAL_REWARDS_RATE,
+            MaxAnnualRewardsRateExceeded
+        );
         let rewarder = &mut ctx.accounts.auth.rewarder;
         let previous_rate = rewarder.annual_rewards_rate;
         rewarder.annual_rewards_rate = new_rate;
@@ -105,7 +109,7 @@ pub mod quarry_mine {
         emit!(RewarderAnnualRewardsUpdateEvent {
             previous_rate,
             new_rate,
-            timestamp: ctx.accounts.clock.unix_timestamp as u64,
+            timestamp: ctx.accounts.clock.unix_timestamp,
         });
 
         Ok(())
@@ -116,14 +120,16 @@ pub mod quarry_mine {
     /// --------------------------------
 
     /// Creates a new [Quarry].
+    /// This may only be called by the [Rewarder]::authority.
     #[access_control(ctx.accounts.validate())]
     pub fn create_quarry(ctx: Context<CreateQuarry>, bump: u8) -> ProgramResult {
         let rewarder = &mut ctx.accounts.auth.rewarder;
         // Update rewarder's quarry stats
-        rewarder.num_quarries += 1;
+        rewarder.num_quarries = unwrap_int!(rewarder.num_quarries.checked_add(1));
 
         let quarry = &mut ctx.accounts.quarry;
         quarry.bump = bump;
+
         // Set quarry params
         quarry.famine_ts = i64::MAX;
         quarry.rewarder_key = *rewarder.to_account_info().key;
@@ -147,25 +153,18 @@ pub mod quarry_mine {
         let quarry = &mut ctx.accounts.quarry;
         rewarder.total_rewards_shares = unwrap_int!(rewarder
             .total_rewards_shares
-            .checked_sub(quarry.rewards_share)
-            .and_then(|v| v.checked_add(new_share)));
-
-        require!(
-            rewarder.validate_quarry_rewards_share(new_share),
-            InvalidRewardsShare
-        );
+            .checked_add(new_share)
+            .and_then(|v| v.checked_sub(quarry.rewards_share)));
 
         quarry.last_update_ts = cmp::min(ctx.accounts.clock.unix_timestamp, quarry.famine_ts);
-        quarry.annual_rewards_rate = unwrap_int!(rewarder
-            .compute_quarry_annual_rewards_rate(new_share)
-            .to_u64());
+        quarry.annual_rewards_rate = rewarder.compute_quarry_annual_rewards_rate(new_share)?;
         quarry.rewards_share = new_share;
 
         emit!(QuarryRewardsUpdateEvent {
             token_mint: quarry.token_mint_key,
             annual_rewards_rate: quarry.annual_rewards_rate,
             rewards_share: quarry.rewards_share,
-            timestamp: ctx.accounts.clock.unix_timestamp as u64,
+            timestamp: ctx.accounts.clock.unix_timestamp,
         });
 
         Ok(())
@@ -194,7 +193,7 @@ pub mod quarry_mine {
             token_mint: quarry.token_mint_key,
             annual_rewards_rate: quarry.annual_rewards_rate,
             rewards_share: quarry.rewards_share,
-            timestamp: current_ts as u64,
+            timestamp: current_ts,
         });
 
         Ok(())
@@ -430,14 +429,15 @@ pub struct Rewarder {
     pub authority: Pubkey,
     /// Pending authority which must accept the authority
     pub pending_authority: Pubkey,
-    /// Number of quarries the rewarder manages
+
+    /// Number of [Quarry]s the [Rewarder] manages.
+    /// If more than this many [Quarry]s are desired, one can create
+    /// a second rewarder.
     pub num_quarries: u16,
     /// Amount of reward tokens distributed per day
     pub annual_rewards_rate: u64,
-    /// Total amount of rewards shares allocated to quarries
+    /// Total amount of rewards shares allocated to [Quarry]s
     pub total_rewards_shares: u64,
-    /// Mint wrapper program that the rewarder will pull from.
-    pub mint_wrapper_program: Pubkey,
     /// Mint wrapper.
     pub mint_wrapper: Pubkey,
     /// Mint of the rewards token for this [Rewarder].
@@ -550,9 +550,6 @@ pub struct NewRewarder<'info> {
 
     /// Clock.
     pub clock: Sysvar<'info, Clock>,
-
-    /// Mint wrapper program.
-    pub mint_wrapper_program: AccountInfo<'info>,
 
     /// Mint wrapper.
     pub mint_wrapper: CpiAccount<'info, quarry_mint_wrapper::MintWrapper>,
@@ -854,9 +851,9 @@ pub struct WithdrawEvent {
 /// Triggered when the daily rewards rate is updated.
 #[event]
 pub struct RewarderAnnualRewardsUpdateEvent {
-    previous_rate: u64,
-    new_rate: u64,
-    timestamp: u64,
+    pub previous_rate: u64,
+    pub new_rate: u64,
+    pub timestamp: i64,
 }
 
 /// Triggered when a new miner is created.
@@ -880,10 +877,10 @@ pub struct QuarryCreateEvent {
 /// Triggered when a quarry's reward share is updated.
 #[event]
 pub struct QuarryRewardsUpdateEvent {
-    token_mint: Pubkey,
-    annual_rewards_rate: u64,
-    rewards_share: u64,
-    timestamp: u64,
+    pub token_mint: Pubkey,
+    pub annual_rewards_rate: u64,
+    pub rewards_share: u64,
+    pub timestamp: i64,
 }
 
 /// --------------------------------
@@ -909,4 +906,6 @@ pub enum ErrorCode {
     InvalidTimestamp,
     #[msg("Invalid max claim fee.")]
     InvalidMaxClaimFee,
+    #[msg("Max annual rewards rate exceeded.")]
+    MaxAnnualRewardsRateExceeded,
 }

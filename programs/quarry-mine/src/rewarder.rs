@@ -1,79 +1,111 @@
 //! Rewarder utilities.
-use crate::payroll::SECONDS_PER_DAY;
+
+use anchor_lang::prelude::*;
+use anchor_lang::require;
+use num_traits::ToPrimitive;
+use vipers::unwrap_int;
+
 use crate::Rewarder;
-use anchor_lang::solana_program::account_info::AccountInfo;
-use anchor_lang::solana_program::entrypoint::ProgramResult;
-use anchor_lang::Key;
-use vipers::program_err;
 
 impl Rewarder {
-    /// Enforces that the [Rewarder] owner is the caller.
-    pub fn only_owner<'info>(&self, authority_account: &AccountInfo<'info>) -> ProgramResult {
-        if !authority_account.is_signer || self.authority != authority_account.key() {
-            return program_err!(Unauthorized);
-        }
-        Ok(())
+    /// Computes the amount of rewards a [crate::Quarry] should receive, annualized.
+    /// This should be run only after `total_rewards_shares` has been set.
+    /// Do not call this directly. Use `compute_quarry_annual_rewards_rate`.
+    fn compute_quarry_annual_rewards_rate_unsafe(&self, quarry_rewards_share: u64) -> Option<u64> {
+        (self.annual_rewards_rate as u128)
+            .checked_mul(quarry_rewards_share as u128)?
+            .checked_div(self.total_rewards_shares as u128)?
+            .to_u64()
     }
 
-    /// Computes the rate of rewards of a [crate::Quarry] for a given quarry share.
-    pub fn compute_quarry_annual_rewards_rate(&self, quarry_rewards_share: u64) -> u128 {
-        if self.total_rewards_shares == 0 {
-            0
-        } else {
-            self.annual_rewards_rate as u128 * quarry_rewards_share as u128
-                / self.total_rewards_shares as u128
-        }
-    }
+    /// Computes the amount of rewards a [crate::Quarry] should receive, annualized.
+    /// This should be run only after `total_rewards_shares` has been set.
+    pub fn compute_quarry_annual_rewards_rate(
+        &self,
+        quarry_rewards_share: u64,
+    ) -> Result<u64, ProgramError> {
+        require!(
+            quarry_rewards_share <= self.total_rewards_shares,
+            InvalidRewardsShare
+        );
 
-    /// Validate the quarry rewards share.
-    pub fn validate_quarry_rewards_share(&self, quarry_rewards_share: u64) -> bool {
-        if self.annual_rewards_rate == 0
-            || self.total_rewards_shares == 0
+        // no rewards if:
+        if self.total_rewards_shares == 0 // no shares
+            || self.annual_rewards_rate == 0 // rewards rate is zero
             || quarry_rewards_share == 0
+        // quarry has no share
         {
-            true
-        } else {
-            let daily_rate: u128 = self.compute_quarry_annual_rewards_rate(quarry_rewards_share);
-            daily_rate / SECONDS_PER_DAY > 0
+            return Ok(0);
         }
+
+        let rate: u64 =
+            unwrap_int!(self.compute_quarry_annual_rewards_rate_unsafe(quarry_rewards_share));
+
+        Ok(rate)
     }
 }
 
 #[cfg(test)]
 #[allow(clippy::unwrap_used)]
 mod tests {
-    use crate::payroll::SECONDS_PER_DAY;
-
     use super::*;
     use proptest::prelude::*;
     use rand::thread_rng;
-    use std::convert::TryFrom;
     use std::vec::Vec;
+    use vipers::program_err;
 
-    const DEFAULT_ANNUAL_REWARDS_RATE: u64 = 71_428_571_428_600;
-    const MAX_REWARDS_RATE: u64 = 1_000_000_000_000;
-    const MAX_QUARRIES: u64 = 10_000;
+    use crate::MAX_ANNUAL_REWARDS_RATE;
+
+    const DEFAULT_ANNUAL_REWARDS_RATE: u64 = 100_000_000_000_000_000;
 
     fn add_quarry(l: &mut Rewarder, quarry_share: u64) {
         l.total_rewards_shares += quarry_share;
     }
 
     #[test]
-    fn test_validate_quarry_rewards_share() {
+    fn test_compute_quarry_annual_rewards_rate() {
         let mut rewarder = Rewarder {
             annual_rewards_rate: DEFAULT_ANNUAL_REWARDS_RATE,
             ..Default::default()
         };
-        assert!(rewarder.validate_quarry_rewards_share(DEFAULT_ANNUAL_REWARDS_RATE));
-        rewarder.total_rewards_shares = 1_000_000_000_000;
-        assert!(rewarder.validate_quarry_rewards_share(0));
 
-        assert!(!rewarder.validate_quarry_rewards_share(1));
-        assert!(!rewarder.validate_quarry_rewards_share(10));
-        assert!(!rewarder.validate_quarry_rewards_share(100));
-        assert!(!rewarder.validate_quarry_rewards_share(1000));
-        assert!(rewarder.validate_quarry_rewards_share(10000));
-        assert!(rewarder.validate_quarry_rewards_share(100000));
+        let invalid: Result<u64, ProgramError> = program_err!(InvalidRewardsShare);
+
+        // invalid because there are no shares
+        assert_eq!(
+            rewarder.compute_quarry_annual_rewards_rate(DEFAULT_ANNUAL_REWARDS_RATE),
+            invalid
+        );
+
+        rewarder.total_rewards_shares = 1_000_000_000_000;
+        let tokens_per_share = DEFAULT_ANNUAL_REWARDS_RATE / rewarder.total_rewards_shares;
+
+        assert_eq!(rewarder.compute_quarry_annual_rewards_rate(0), Ok(0));
+        assert_eq!(
+            rewarder.compute_quarry_annual_rewards_rate(1),
+            Ok(tokens_per_share)
+        );
+        assert_eq!(
+            rewarder.compute_quarry_annual_rewards_rate(10),
+            Ok(10 * tokens_per_share)
+        );
+        assert_eq!(
+            rewarder.compute_quarry_annual_rewards_rate(100),
+            Ok(100 * tokens_per_share)
+        );
+        assert_eq!(
+            rewarder.compute_quarry_annual_rewards_rate(1_000),
+            Ok(1_000 * tokens_per_share)
+        );
+
+        assert_eq!(
+            rewarder.compute_quarry_annual_rewards_rate(10_000),
+            Ok(10_000 * tokens_per_share)
+        );
+        assert_eq!(
+            rewarder.compute_quarry_annual_rewards_rate(100_000),
+            Ok(100_000 * tokens_per_share)
+        );
     }
 
     #[test]
@@ -92,10 +124,9 @@ mod tests {
 
         let mut total_rewards_per_day: u64 = 0;
         for i in 0..rewarder.num_quarries {
-            total_rewards_per_day += u64::try_from(
-                rewarder.compute_quarry_annual_rewards_rate(quarry_rewards_shares[i as usize]),
-            )
-            .unwrap();
+            total_rewards_per_day += rewarder
+                .compute_quarry_annual_rewards_rate(quarry_rewards_shares[i as usize])
+                .unwrap();
         }
         let diff = rewarder.annual_rewards_rate - total_rewards_per_day;
 
@@ -128,43 +159,46 @@ mod tests {
                 annual_rewards_rate,
                 ..Default::default()
             };
-            assert_eq!(rewarder.compute_quarry_annual_rewards_rate(quarry_rewards_share), 0);
+            assert_eq!(rewarder.compute_quarry_annual_rewards_rate(quarry_rewards_share), program_err!(InvalidRewardsShare));
+            assert_eq!(rewarder.compute_quarry_annual_rewards_rate(0), Ok(0));
         }
     }
 
     proptest! {
         #[test]
         fn test_compute_quarry_rewards_rate_with_multiple_quarries(
-            annual_rewards_rate in SECONDS_PER_DAY as u64..MAX_REWARDS_RATE,
-            num_quarries in 1..MAX_QUARRIES,
+            annual_rewards_rate in 0..=MAX_ANNUAL_REWARDS_RATE,
+            num_quarries in 0..=u16::MAX,
+            total_rewards_shares in 0..=u64::MAX
         ) {
             let rewarder = &mut Rewarder::default();
-            rewarder.annual_rewards_rate = annual_rewards_rate * num_quarries;
+            rewarder.annual_rewards_rate = annual_rewards_rate;
 
             let mut rng = thread_rng();
             let mut quarry_rewards_shares: Vec<u64> = Vec::new();
-            for _ in 0..num_quarries {
-                let quarry_rewards_share: u32 = rng.gen_range(1..annual_rewards_rate as u32 / 10);
-                add_quarry(rewarder, quarry_rewards_share as u64);
-                quarry_rewards_shares.push(quarry_rewards_share.into());
+
+            let mut total_rewards_shares_remaining = total_rewards_shares;
+            // add all quarries
+            for _ in 0..(num_quarries - 1) {
+                let quarry_rewards_share: u64 = rng.gen_range(0..(total_rewards_shares_remaining / (num_quarries as u64)));
+                add_quarry(rewarder, quarry_rewards_share);
+                quarry_rewards_shares.push(quarry_rewards_share);
+                total_rewards_shares_remaining -= quarry_rewards_share;
             }
+            // last quarry gets the remaining shares
+            add_quarry(rewarder, total_rewards_shares_remaining);
+            quarry_rewards_shares.push(total_rewards_shares_remaining);
 
-            let min_quarry_rewards_share = *quarry_rewards_shares.iter().min().unwrap();
-            prop_assume!(rewarder.annual_rewards_rate.checked_mul(min_quarry_rewards_share).is_some());
-
-            let mut total_rewards_per_day: u128 = 0;
+            let mut total_rewards_per_year: u64 = 0;
             for i in 0..num_quarries {
-                total_rewards_per_day += rewarder.compute_quarry_annual_rewards_rate(quarry_rewards_shares[i as usize]);
+                total_rewards_per_year += rewarder.compute_quarry_annual_rewards_rate(quarry_rewards_shares[i as usize]).unwrap();
             }
-            let diff = rewarder.annual_rewards_rate - u64::try_from(total_rewards_per_day).unwrap();
+            let diff = rewarder.annual_rewards_rate - total_rewards_per_year;
 
-            const MAX_EPSILON: u64 = 200;
-            let epsilon = if diff > num_quarries / 2 {
-                diff - num_quarries / 2
-            } else {
-                num_quarries / 2 - diff
-            };
-            assert!(epsilon <= MAX_EPSILON, "diff: {}, num_quarries / 2: {}, epsilon: {}", diff, num_quarries / 2, epsilon);
+            // the maximum discrepancy should be the number of quarries
+            // each of their rewards can be reduced by 1
+            let max_diff: u64 = num_quarries.into();
+            assert!(diff <= max_diff, "diff: {}, num quarries: {}", diff, num_quarries);
         }
     }
 }
