@@ -18,6 +18,7 @@ use payroll::Payroll;
 use std::cmp;
 use vipers::assert_keys;
 use vipers::program_err;
+use vipers::unwrap_int;
 use vipers::validate::Validate;
 
 mod account_validators;
@@ -25,25 +26,19 @@ mod payroll;
 mod quarry;
 mod rewarder;
 
-declare_id!("QMNFUvncKBh11ZgEwYtoup3aXvuVxt6fzrcsjk2cjpM");
+use crate::quarry::StakeAction;
 
-/// Maximum number of [Quarry]s per [Rewarder].
-pub const MAX_QUARRIES: u64 = 100_000;
+declare_id!("QMNFUvncKBh11ZgEwYtoup3aXvuVxt6fzrcsjk2cjpM");
 
 /// Maximum number of tokens that can be rewarded by a [Rewarder] per year.
 pub const MAX_ANNUAL_REWARDS_RATE: u64 = u64::MAX >> 3;
 
-/// The fees of new rewarders-- 1,000 KBPS = 1 BP or 0.01%.
+/// The fees of new [Rewarder]s-- 1,000 KBPS = 1 BP or 0.01%.
 /// This may be changed by governance in the future via program upgrade.
 pub const DEFAULT_CLAIM_FEE_KBPS: u64 = 1_000;
 
 #[program]
 pub mod quarry_mine {
-
-    use vipers::unwrap_int;
-
-    use crate::quarry::StakeAction;
-
     use super::*;
 
     /// --------------------------------
@@ -105,6 +100,10 @@ pub mod quarry_mine {
     /// Sets the amount of reward tokens distributed to all [Quarry]s per day.
     #[access_control(ctx.accounts.validate())]
     pub fn set_annual_rewards(ctx: Context<SetAnnualRewards>, new_rate: u64) -> ProgramResult {
+        require!(
+            new_rate <= MAX_ANNUAL_REWARDS_RATE,
+            MaxAnnualRewardsRateExceeded
+        );
         let rewarder = &mut ctx.accounts.auth.rewarder;
         let previous_rate = rewarder.annual_rewards_rate;
         rewarder.annual_rewards_rate = new_rate;
@@ -123,14 +122,16 @@ pub mod quarry_mine {
     /// --------------------------------
 
     /// Creates a new [Quarry].
+    /// This may only be called by the [Rewarder]::authority.
     #[access_control(ctx.accounts.validate())]
     pub fn create_quarry(ctx: Context<CreateQuarry>, bump: u8) -> ProgramResult {
         let rewarder = &mut ctx.accounts.auth.rewarder;
         // Update rewarder's quarry stats
-        rewarder.num_quarries += 1;
+        rewarder.num_quarries = unwrap_int!(rewarder.num_quarries.checked_add(1));
 
         let quarry = &mut ctx.accounts.quarry;
         quarry.bump = bump;
+
         // Set quarry params
         quarry.famine_ts = i64::MAX;
         quarry.rewarder_key = *rewarder.to_account_info().key;
@@ -437,7 +438,10 @@ pub struct Rewarder {
     pub authority: Pubkey,
     /// Pending authority which must accept the authority
     pub pending_authority: Pubkey,
-    /// Number of quarries the rewarder manages
+
+    /// Number of [Quarry]s the [Rewarder] manages.
+    /// If more than this many [Quarry]s are desired, one can create
+    /// a second rewarder.
     pub num_quarries: u16,
     /// Amount of reward tokens distributed per day
     pub annual_rewards_rate: u64,
@@ -916,4 +920,6 @@ pub enum ErrorCode {
     InvalidTimestamp,
     #[msg("Invalid max claim fee.")]
     InvalidMaxClaimFee,
+    #[msg("Max annual rewards rate exceeded.")]
+    MaxAnnualRewardsRateExceeded,
 }

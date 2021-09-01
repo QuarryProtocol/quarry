@@ -31,7 +31,7 @@ impl Rewarder {
 #[cfg(test)]
 #[allow(clippy::unwrap_used)]
 mod tests {
-    use crate::{MAX_ANNUAL_REWARDS_RATE, MAX_QUARRIES};
+    use crate::MAX_ANNUAL_REWARDS_RATE;
 
     use super::*;
     use proptest::prelude::*;
@@ -123,7 +123,7 @@ mod tests {
         #[test]
         fn test_compute_quarry_rewards_rate_with_multiple_quarries(
             annual_rewards_rate in 0..=MAX_ANNUAL_REWARDS_RATE,
-            num_quarries in 0..=MAX_QUARRIES,
+            num_quarries in 0..=u16::MAX,
             total_rewards_shares in 0..=u64::MAX
         ) {
             let rewarder = &mut Rewarder::default();
@@ -135,7 +135,7 @@ mod tests {
             let mut total_rewards_shares_remaining = total_rewards_shares;
             // add all quarries
             for _ in 0..(num_quarries - 1) {
-                let quarry_rewards_share: u64 = rng.gen_range(0..(total_rewards_shares_remaining / num_quarries));
+                let quarry_rewards_share: u64 = rng.gen_range(0..(total_rewards_shares_remaining / (num_quarries as u64)));
                 add_quarry(rewarder, quarry_rewards_share);
                 quarry_rewards_shares.push(quarry_rewards_share);
                 total_rewards_shares_remaining -= quarry_rewards_share;
@@ -152,7 +152,7 @@ mod tests {
 
             // the maximum discrepancy should be the number of quarries
             // each of their rewards can be reduced by 1
-            let max_diff: u64 = num_quarries;
+            let max_diff: u64 = num_quarries.into();
             assert!(diff <= max_diff, "diff: {}, num quarries: {}", diff, num_quarries);
         }
     }
