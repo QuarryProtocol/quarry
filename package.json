@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@project-serum/common": "^0.0.1-beta.3",
-    "@saberhq/chai-solana": "^0.14.2",
+    "@saberhq/chai-solana": "^0.16.0",
     "@saberhq/eslint-config": "^0.14.1",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.7.1",
