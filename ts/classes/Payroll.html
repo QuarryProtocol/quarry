@@ -86,11 +86,10 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="Payroll.html#annualRewardsRate" class="tsd-kind-icon">annual<wbr>Rewards<wbr>Rate</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="Payroll.html#famineTs" class="tsd-kind-icon">famine<wbr>Ts</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="Payroll.html#lastCheckpointTs" class="tsd-kind-icon">last<wbr>Checkpoint<wbr>Ts</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="Payroll.html#rewardsPerTokenStored" class="tsd-kind-icon">rewards<wbr>Per<wbr>Token<wbr>Stored</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="Payroll.html#rewardsRatePerSecond" class="tsd-kind-icon">rewards<wbr>Rate<wbr>Per<wbr>Second</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="Payroll.html#tokenDecimals" class="tsd-kind-icon">token<wbr>Decimals</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="Payroll.html#totalTokensDeposited" class="tsd-kind-icon">total<wbr>Tokens<wbr>Deposited</a></li>
 							</ul>
 						</section>
@@ -110,13 +109,13 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Payroll<span class="tsd-signature-symbol">(</span>famineTs<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">BN</span>, lastCheckpointTs<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">BN</span>, rewardsRatePerSecond<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">BN</span>, rewardsPerTokenStored<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">BN</span>, tokenDecimals<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">BN</span>, totalTokensDeposited<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">BN</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="Payroll.html" class="tsd-signature-type" data-tsd-kind="Class">Payroll</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Payroll<span class="tsd-signature-symbol">(</span>famineTs<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">BN</span>, lastCheckpointTs<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">BN</span>, annualRewardsRate<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">BN</span>, rewardsPerTokenStored<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">BN</span>, totalTokensDeposited<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">BN</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="Payroll.html" class="tsd-signature-type" data-tsd-kind="Class">Payroll</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/QuarryProtocol/quarry/blob/05e7ac8/src/wrappers/mine/payroll.ts#L7">src/wrappers/mine/payroll.ts:7</a></li>
+									<li>Defined in <a href="https://github.com/QuarryProtocol/quarry/blob/5ce1dea/src/wrappers/mine/payroll.ts#L8">src/wrappers/mine/payroll.ts:8</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -128,13 +127,10 @@
 									<h5>lastCheckpointTs: <span class="tsd-signature-type">BN</span></h5>
 								</li>
 								<li>
-									<h5>rewardsRatePerSecond: <span class="tsd-signature-type">BN</span></h5>
+									<h5>annualRewardsRate: <span class="tsd-signature-type">BN</span></h5>
 								</li>
 								<li>
 									<h5>rewardsPerTokenStored: <span class="tsd-signature-type">BN</span></h5>
-								</li>
-								<li>
-									<h5>tokenDecimals: <span class="tsd-signature-type">BN</span></h5>
 								</li>
 								<li>
 									<h5>totalTokensDeposited: <span class="tsd-signature-type">BN</span></h5>
@@ -147,6 +143,13 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="annualRewardsRate" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagReadonly">Readonly</span> annual<wbr>Rewards<wbr>Rate</h3>
+					<div class="tsd-signature tsd-kind-icon">annual<wbr>Rewards<wbr>Rate<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">BN</span></div>
+					<aside class="tsd-sources">
+					</aside>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="famineTs" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagReadonly">Readonly</span> famine<wbr>Ts</h3>
@@ -165,20 +168,6 @@
 					<a name="rewardsPerTokenStored" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagReadonly">Readonly</span> rewards<wbr>Per<wbr>Token<wbr>Stored</h3>
 					<div class="tsd-signature tsd-kind-icon">rewards<wbr>Per<wbr>Token<wbr>Stored<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">BN</span></div>
-					<aside class="tsd-sources">
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="rewardsRatePerSecond" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagReadonly">Readonly</span> rewards<wbr>Rate<wbr>Per<wbr>Second</h3>
-					<div class="tsd-signature tsd-kind-icon">rewards<wbr>Rate<wbr>Per<wbr>Second<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">BN</span></div>
-					<aside class="tsd-sources">
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="tokenDecimals" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagReadonly">Readonly</span> token<wbr>Decimals</h3>
-					<div class="tsd-signature tsd-kind-icon">token<wbr>Decimals<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">BN</span></div>
 					<aside class="tsd-sources">
 					</aside>
 				</section>
@@ -202,7 +191,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/QuarryProtocol/quarry/blob/05e7ac8/src/wrappers/mine/payroll.ts#L21">src/wrappers/mine/payroll.ts:21</a></li>
+									<li>Defined in <a href="https://github.com/QuarryProtocol/quarry/blob/5ce1dea/src/wrappers/mine/payroll.ts#L21">src/wrappers/mine/payroll.ts:21</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -230,7 +219,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/QuarryProtocol/quarry/blob/05e7ac8/src/wrappers/mine/payroll.ts#L47">src/wrappers/mine/payroll.ts:47</a></li>
+									<li>Defined in <a href="https://github.com/QuarryProtocol/quarry/blob/5ce1dea/src/wrappers/mine/payroll.ts#L47">src/wrappers/mine/payroll.ts:47</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -278,6 +267,9 @@
 								<a href="Payroll.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="Payroll.html#annualRewardsRate" class="tsd-kind-icon">annual<wbr>Rewards<wbr>Rate</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="Payroll.html#famineTs" class="tsd-kind-icon">famine<wbr>Ts</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
@@ -285,12 +277,6 @@
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="Payroll.html#rewardsPerTokenStored" class="tsd-kind-icon">rewards<wbr>Per<wbr>Token<wbr>Stored</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="Payroll.html#rewardsRatePerSecond" class="tsd-kind-icon">rewards<wbr>Rate<wbr>Per<wbr>Second</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="Payroll.html#tokenDecimals" class="tsd-kind-icon">token<wbr>Decimals</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="Payroll.html#totalTokensDeposited" class="tsd-kind-icon">total<wbr>Tokens<wbr>Deposited</a>
