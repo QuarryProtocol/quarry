@@ -9,6 +9,9 @@
 //! This program is modeled after [Synthetix's StakingRewards.sol](https://github.com/Synthetixio/synthetix/blob/4b9b2ee09b38638de6fe1c38dbe4255a11ebed86/contracts/StakingRewards.sol).
 #![allow(clippy::nonstandard_macro_braces)]
 
+#[macro_use]
+mod macros;
+
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::declare_id;
 use anchor_lang::Key;
@@ -17,14 +20,14 @@ use num_traits::ToPrimitive;
 use payroll::Payroll;
 use std::cmp;
 use vipers::assert_keys;
-use vipers::program_err;
 use vipers::unwrap_int;
 use vipers::validate::Validate;
 
-mod account_validators;
-mod payroll;
-mod quarry;
-mod rewarder;
+pub mod account_validators;
+pub mod addresses;
+pub mod payroll;
+pub mod quarry;
+pub mod rewarder;
 
 use crate::quarry::StakeAction;
 
@@ -203,7 +206,7 @@ pub mod quarry_mine {
     /// Miner functions
     /// --------------------------------
 
-    /// Creates a miner for the given authority.
+    /// Creates a [Miner] for the given authority.
     ///
     /// Anyone can call this; this is an associated account.
     #[access_control(ctx.accounts.validate())]
@@ -226,7 +229,7 @@ pub mod quarry_mine {
         Ok(())
     }
 
-    /// Claims rewards for the miner.
+    /// Claims rewards for the [Miner].
     #[access_control(ctx.accounts.validate())]
     pub fn claim_rewards(ctx: Context<ClaimRewards>) -> ProgramResult {
         let miner = &mut ctx.accounts.stake.miner;
@@ -260,11 +263,7 @@ pub mod quarry_mine {
         let amount_claimable_minus_fees = unwrap_int!(amount_claimable.checked_sub(max_claim_fee));
 
         // Create the signer seeds.
-        let seeds = &[
-            b"Rewarder".as_ref(),
-            ctx.accounts.stake.rewarder.base.as_ref(),
-            &[ctx.accounts.stake.rewarder.bump],
-        ];
+        let seeds = gen_rewarder_signer_seeds!(ctx.accounts.stake.rewarder);
         let signer_seeds = &[&seeds[..]];
 
         // Mint the claimed tokens.
@@ -318,6 +317,7 @@ pub mod quarry_mine {
         Ok(())
     }
 
+    /// Stakes tokens into the [Miner].
     #[access_control(ctx.accounts.validate())]
     pub fn stake_tokens(ctx: Context<UserStake>, amount: u64) -> ProgramResult {
         if amount == 0 {
@@ -354,6 +354,7 @@ pub mod quarry_mine {
         Ok(())
     }
 
+    /// Withdraws tokens from the [Miner].
     #[access_control(ctx.accounts.validate())]
     pub fn withdraw_tokens(ctx: Context<UserStake>, amount: u64) -> ProgramResult {
         if amount == 0 {
@@ -405,9 +406,32 @@ pub mod quarry_mine {
         Ok(())
     }
 
-    /// Stub for generating the ClaimRewards helpers on the frontend.
-    pub fn _unused_stub_claim_rewards(_ctx: Context<ClaimRewards>) -> ProgramResult {
-        program_err!(Unauthorized)
+    /// --------------------------------
+    /// Protocol Functions
+    /// --------------------------------
+
+    /// Extracts fees to the Quarry DAO.
+    /// This can be called by anyone.
+    #[access_control(ctx.accounts.validate())]
+    pub fn extract_fees(ctx: Context<ExtractFees>) -> ProgramResult {
+        let seeds = gen_rewarder_signer_seeds!(ctx.accounts.rewarder);
+        let signer_seeds = &[&seeds[..]];
+
+        // Transfer the tokens to the DAO address.
+        token::transfer(
+            CpiContext::new_with_signer(
+                ctx.accounts.token_program.clone(),
+                token::Transfer {
+                    from: ctx.accounts.claim_fee_token_account.to_account_info(),
+                    to: ctx.accounts.fee_to_token_account.to_account_info(),
+                    authority: ctx.accounts.rewarder.to_account_info(),
+                },
+                signer_seeds,
+            ),
+            ctx.accounts.claim_fee_token_account.amount,
+        )?;
+
+        Ok(())
     }
 }
 
@@ -783,6 +807,25 @@ pub struct UserStake<'info> {
 
     /// Clock
     pub clock: Sysvar<'info, Clock>,
+}
+
+/// Extracts fees to the Quarry DAO.
+#[derive(Accounts)]
+pub struct ExtractFees<'info> {
+    /// Rewarder to extract fees from.
+    pub rewarder: ProgramAccount<'info, Rewarder>,
+
+    /// [TokenAccount] which receives claim fees.
+    #[account(mut)]
+    pub claim_fee_token_account: CpiAccount<'info, TokenAccount>,
+
+    /// [TokenAccount] owned by the [addresses::FEE_TO_ADDRESS].
+    /// Holds DAO claim fees.
+    #[account(mut)]
+    pub fee_to_token_account: CpiAccount<'info, TokenAccount>,
+
+    /// Token program
+    pub token_program: AccountInfo<'info>,
 }
 
 /// --------------------------------
