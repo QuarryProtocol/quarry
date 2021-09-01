@@ -27,8 +27,15 @@ mod rewarder;
 
 declare_id!("QMNFUvncKBh11ZgEwYtoup3aXvuVxt6fzrcsjk2cjpM");
 
+/// Maximum number of [Quarry]s per [Rewarder].
+pub const MAX_QUARRIES: u64 = 100_000;
+
+/// Maximum number of tokens that can be rewarded by a [Rewarder] per year.
+pub const MAX_ANNUAL_REWARDS_RATE: u64 = u64::MAX >> 3;
+
 /// The fees of new rewarders-- 1,000 KBPS = 1 BP or 0.01%.
-const DEFAULT_CLAIM_FEE_KBPS: u64 = 1_000;
+/// This may be changed by governance in the future via program upgrade.
+pub const DEFAULT_CLAIM_FEE_KBPS: u64 = 1_000;
 
 #[program]
 pub mod quarry_mine {

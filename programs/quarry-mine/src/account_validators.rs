@@ -163,7 +163,9 @@ impl<'info> Validate<'info> for ClaimRewards<'info> {
 impl<'info> Validate<'info> for TransferAuthority<'info> {
     /// Validates the [Rewarder] is correct.
     fn validate(&self) -> ProgramResult {
-        self.rewarder.only_owner(&self.authority)
+        require!(self.authority.is_signer, Unauthorized);
+        assert_keys!(self.authority, self.rewarder.authority);
+        Ok(())
     }
 }
 
@@ -196,7 +198,9 @@ impl<'info> Validate<'info> for MutableRewarderWithAuthority<'info> {
 impl<'info> Validate<'info> for ReadOnlyRewarderWithAuthority<'info> {
     /// Validates the [Rewarder] is correct.
     fn validate(&self) -> ProgramResult {
-        self.rewarder.only_owner(&self.authority)
+        require!(self.authority.is_signer, Unauthorized);
+        assert_keys!(self.authority, self.rewarder.authority);
+        Ok(())
     }
 }
 

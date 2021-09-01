@@ -1,0 +1,8 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 8b8660a976cafbc2d2c60844fdddda7ea9311c036bf7a42a8c46e5a0315dfe25 # shrinks to annual_rewards_rate = 3332745090101094, num_quarries = 5535
+cc e54cee0080da142876389bb1403901607c5d2ddd6543c0585bc722f63918b752 # shrinks to annual_rewards_rate = 4468164296739927506, num_quarries = 43, total_rewards_shares = 12793151735638951419

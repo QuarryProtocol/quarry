@@ -140,6 +140,8 @@ impl Payroll {
 
 #[cfg(test)]
 mod tests {
+    use crate::MAX_ANNUAL_REWARDS_RATE;
+
     use super::*;
     use num_traits::ToPrimitive;
     use proptest::prelude::*;
@@ -153,11 +155,15 @@ mod tests {
             } else {
                 0
             };
-            let delta_f = (delta as f64) / ($y as f64);
+            let delta_f = if delta == 0 && $y == 0 {
+                0.0_f64
+            } else {
+                (delta as f64) / ($y as f64)
+            };
             assert!(
                 delta_f < $d,
                 "Delta {} > {}; left: {}, right: {}",
-                delta,
+                delta_f,
                 $d,
                 $x,
                 $y
@@ -183,10 +189,10 @@ mod tests {
         fn test_accumulated_precision_errors_epsilon(
             num_updates in 1..100_i64,
             (final_ts, initial_ts) in total_and_intermediate_ts(),
-            annual_rewards_rate in 0..u64::MAX,
+            annual_rewards_rate in 0..=MAX_ANNUAL_REWARDS_RATE,
             (my_tokens_deposited, total_tokens_deposited) in part_and_total()
         ) {
-            const EPSILON: f64 = 0.001;
+            const EPSILON: f64 = 0.0001;
 
             let mut rewards_per_token_stored: u128 = 0;
             let mut last_checkpoint_ts = initial_ts;
