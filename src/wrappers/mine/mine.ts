@@ -61,7 +61,6 @@ export class MineWrapper {
               systemProgram: SystemProgram.programId,
               clock: SYSVAR_CLOCK_PUBKEY,
               mintWrapper,
-              mintWrapperProgram: this.sdk.programs.MintWrapper.programId,
               rewardsTokenMint: mintWrapperData.tokenMint,
               claimFeeTokenAccount,
             },

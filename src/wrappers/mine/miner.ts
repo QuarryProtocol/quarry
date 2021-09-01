@@ -178,11 +178,11 @@ export class MinerWrapper {
     const ix = this.quarry.program.instruction.claimRewards({
       accounts: {
         mintWrapper: this.quarry.rewarderData.mintWrapper,
-        mintWrapperProgram: this.quarry.rewarderData.mintWrapperProgram,
         minter,
         rewardsTokenMint: this.quarry.rewarderData.rewardsTokenMint,
         rewardsTokenAccount,
         stake: this.userStakeAccounts,
+        mintWrapperProgram: this.sdk.programs.MintWrapper.programId,
         claimFeeTokenAccount: this.quarry.rewarderData.claimFeeTokenAccount,
       },
     });
