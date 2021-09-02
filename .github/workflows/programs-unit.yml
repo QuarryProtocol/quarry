@@ -18,7 +18,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_TOOLCHAIN: nightly-2021-08-14
+  RUST_TOOLCHAIN: nightly-2021-09-01
 
 jobs:
   lint:
