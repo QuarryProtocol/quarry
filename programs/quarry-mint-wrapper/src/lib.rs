@@ -1,5 +1,4 @@
 //! Proxy program for interacting with the token mint.
-#![allow(clippy::nonstandard_macro_braces)]
 
 #[macro_use]
 mod macros;

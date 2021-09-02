@@ -1,3 +1,5 @@
+//! Calculates token distribution rates.
+
 use crate::Quarry;
 use anchor_lang::{prelude::ProgramError, require};
 use spl_math::uint::U192;
@@ -5,8 +7,10 @@ use std::cmp;
 use std::convert::TryInto;
 use vipers::unwrap_int;
 
+/// Number of seconds in a year.
 pub const SECONDS_PER_YEAR: u128 = 86_400 * 365;
 
+/// Number of decimal points of precision that `rewards_per_token_stored` uses.
 pub const PRECISION_MULTIPLIER: u128 = u64::MAX as u128;
 
 /// Calculator for amount of tokens to pay out.
@@ -131,6 +135,7 @@ impl Payroll {
         Ok(result)
     }
 
+    /// Gets the latest time rewards were being distributed.
     pub fn last_time_reward_applicable(&self, current_ts: i64) -> i64 {
         cmp::min(current_ts, self.famine_ts)
     }

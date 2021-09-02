@@ -3,10 +3,12 @@
 
 use anchor_lang::prelude::*;
 
+/// Wrapper module.
 pub mod fee_to {
     solana_program::declare_id!("4MMZH3ih1aSty2nx4MC3kSR94Zb55XsXnqb5jfEcyHWQ");
 }
 
+/// Wrapper module.
 pub mod fee_setter {
     solana_program::declare_id!("4MMZH3ih1aSty2nx4MC3kSR94Zb55XsXnqb5jfEcyHWQ");
 }
