@@ -1,20 +1,21 @@
-name: E2E
+name: Release
 
 on:
+  workflow_dispatch: {}
   push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+    tags:
+      - "v*.*.*"
 
 env:
   CARGO_TERM_COLOR: always
   SOLANA_VERSION: "1.7.10"
   RUST_TOOLCHAIN: nightly-2021-09-01
+  NPM_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
 
 jobs:
-  sdk:
+  release-sdk:
     runs-on: ubuntu-latest
-    name: Build the SDK
+    name: Release SDK on NPM
     steps:
       - uses: actions/checkout@v2
 
@@ -29,14 +30,12 @@ jobs:
         with:
           name: quarry
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-      - name: Parse IDLs
-        run: nix shell .#ci --command ./scripts/parse-idls.sh
 
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
           always-auth: true
-          node-version: "16"
+          node-version: 14.x
       - name: Cache Node modules
         uses: actions/cache@v2
         id: cache-node-modules
@@ -45,45 +44,18 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - name: Install Yarn dependencies
         run: yarn install
-      - run: ./scripts/generate-idl-types.sh
+      - name: Parse IDLs
+        run: nix shell .#ci --command yarn idl:generate
       - run: yarn build
-      - run: yarn typecheck
-      - run: yarn lint
+      - name: Publish
+        run: yarn publish
 
-  integration-tests:
+  release-crate:
     runs-on: ubuntu-latest
+    name: Release crate on crates.io
     steps:
       - uses: actions/checkout@v2
 
-      # Install Rust and Anchor
-      - name: Install Rust nightly
-        uses: actions-rs/toolchain@v1
-        with:
-          override: true
-          profile: minimal
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-      - uses: Swatinem/rust-cache@v1
-      - name: Install Linux dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pkg-config build-essential libudev-dev
-
-      # Install Solana
-      - name: Cache Solana binaries
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/solana
-          key: ${{ runner.os }}-${{ env.SOLANA_VERSION }}
-      - name: Install Solana
-        run: |
-          sh -c "$(curl -sSfL https://release.solana.com/v${{ env.SOLANA_VERSION }}/install)"
-          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
-          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
-          solana --version
-          echo "Generating keypair..."
-          solana-keygen new -o "$HOME/.config/solana/id.json" --no-passphrase --silent
-
-      # Run build
       - uses: cachix/install-nix-action@v13
         with:
           install_url: https://nixos-nix-install-tests.cachix.org/serve/i6laym9jw3wg9mw6ncyrk6gjx4l34vvx/install
@@ -95,22 +67,39 @@ jobs:
         with:
           name: quarry
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-      - name: Build program
-        run: nix shell .#ci --command anchor build
 
-      - name: Cache Node modules
-        uses: actions/cache@v2
-        id: cache-node-modules
+      - name: Install Rust nightly
+        uses: actions-rs/toolchain@v1
         with:
-          path: ./node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
-      - name: Setup Node
-        uses: actions/setup-node@v2
+          override: true
+          profile: minimal
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+      - uses: Swatinem/rust-cache@v1
+      - run: cargo publish --token ${{ secrets.CARGO_PUBLISH_TOKEN }}
+
+  release-binaries:
+    runs-on: ubuntu-latest
+    name: Release verifiable binaries
+    steps:
+      - uses: actions/checkout@v2
+      - uses: cachix/install-nix-action@v13
         with:
-          node-version: "16"
-      - run: yarn install
-      - name: Generate IDL types
-        run: nix shell .#ci --command yarn idl:generate:nolint
-      - run: yarn build
-      - name: Run e2e tests
-        run: nix shell .#ci --command yarn test:e2e
+          install_url: https://nixos-nix-install-tests.cachix.org/serve/i6laym9jw3wg9mw6ncyrk6gjx4l34vvx/install
+          install_options: "--tarball-url-prefix https://nixos-nix-install-tests.cachix.org/serve"
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v10
+        with:
+          name: quarry
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Build programs
+        run: nix shell .#ci --command anchor build -v
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            target/deploy/
+            target/idl/
+            target/verifiable/
