@@ -13,7 +13,7 @@ import type { QuarryWrapper } from "./quarry";
 import type { PendingMiner } from "./types";
 
 type MineUserStakeAccounts = Parameters<
-  MineProgram["instruction"]["unusedStubClaimRewards"]["accounts"]
+  MineProgram["instruction"]["claimRewards"]["accounts"]
 >[0]["stake"];
 
 export class MinerWrapper {

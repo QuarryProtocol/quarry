@@ -6,19 +6,17 @@ use anchor_spl::token;
 use vipers::validate::Validate;
 use vipers::{assert_ata, assert_keys, assert_owner, assert_program};
 
+use crate::addresses;
 use crate::{
-    AcceptAuthority, ClaimRewards, CreateMiner, CreateQuarry, MutableRewarderWithAuthority,
-    NewRewarder, ReadOnlyRewarderWithAuthority, SetAnnualRewards, SetFamine, SetRewardsShare,
-    TransferAuthority, UpdateQuarryRewards, UserStake,
+    AcceptAuthority, ClaimRewards, CreateMiner, CreateQuarry, ExtractFees,
+    MutableRewarderWithAuthority, NewRewarder, ReadOnlyRewarderWithAuthority, SetAnnualRewards,
+    SetFamine, SetRewardsShare, TransferAuthority, UpdateQuarryRewards, UserStake,
 };
 
 impl<'info> Validate<'info> for NewRewarder<'info> {
     fn validate(&self) -> ProgramResult {
         require!(self.base.is_signer, Unauthorized);
 
-        // ensure the claim fee token account is owned by the rewarder
-        // in a future program upgrade, rewarder token accounts will be able
-        // to be flushed to a DAO
         assert_ata!(
             self.claim_fee_token_account,
             self.rewarder,
@@ -233,6 +231,49 @@ impl<'info> Validate<'info> for UpdateQuarryRewards<'info> {
     /// Validates a [ClaimRewards] accounts struct.
     fn validate(&self) -> ProgramResult {
         assert_keys!(self.quarry.rewarder_key, self.rewarder, "rewarder");
+
+        Ok(())
+    }
+}
+
+impl<'info> Validate<'info> for ExtractFees<'info> {
+    fn validate(&self) -> ProgramResult {
+        assert_ata!(
+            self.claim_fee_token_account,
+            self.rewarder,
+            self.rewarder.rewards_token_mint
+        );
+
+        assert_program!(self.token_program, TOKEN_PROGRAM_ID);
+
+        assert_keys!(
+            self.claim_fee_token_account.mint,
+            self.rewarder.rewards_token_mint,
+            "claim_fee_token_account.mint"
+        );
+        assert_keys!(
+            self.fee_to_token_account.mint,
+            self.rewarder.rewards_token_mint,
+            "fee_to_token_account.mint"
+        );
+        assert_keys!(
+            self.fee_to_token_account.owner,
+            addresses::FEE_TO,
+            "fee_to_token_account.owner"
+        );
+        assert_ata!(
+            self.fee_to_token_account,
+            addresses::FEE_TO,
+            self.rewarder.rewards_token_mint,
+            "fee ata"
+        );
+
+        assert_owner!(
+            self.claim_fee_token_account,
+            token::ID,
+            "claim_fee_token_account"
+        );
+        assert_owner!(self.fee_to_token_account, token::ID, "fee_to_token_account");
 
         Ok(())
     }
