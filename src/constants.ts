@@ -19,3 +19,17 @@ export const QUARRY_IDLS = {
   MintWrapper: QuarryMintWrapperJSON,
   Mine: QuarryMineJSON,
 };
+
+/**
+ * Recipient of protocol fees.
+ */
+export const QUARRY_FEE_TO = new PublicKey(
+  "4MMZH3ih1aSty2nx4MC3kSR94Zb55XsXnqb5jfEcyHWQ"
+);
+
+/**
+ * Sets the protocol fees.
+ */
+export const QUARRY_FEE_SETTER = new PublicKey(
+  "4MMZH3ih1aSty2nx4MC3kSR94Zb55XsXnqb5jfEcyHWQ"
+);

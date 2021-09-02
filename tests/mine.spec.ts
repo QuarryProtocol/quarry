@@ -2,10 +2,16 @@ import * as anchor from "@project-serum/anchor";
 import { createMint, getTokenAccount } from "@project-serum/common";
 import { expectTX } from "@saberhq/chai-solana";
 import type { Provider } from "@saberhq/solana-contrib";
-import { DEFAULT_PROVIDER_OPTIONS } from "@saberhq/solana-contrib";
+import {
+  DEFAULT_PROVIDER_OPTIONS,
+  TransactionEnvelope,
+} from "@saberhq/solana-contrib";
 import {
   createInitMintInstructions,
+  getATAAddress,
+  getOrCreateATA,
   Token,
+  TOKEN_PROGRAM_ID,
   TokenAmount,
 } from "@saberhq/token-utils";
 import type { PublicKey } from "@solana/web3.js";
@@ -24,7 +30,7 @@ import type {
   QuarryWrapper,
   RewarderWrapper,
 } from "../src";
-import { findQuarryAddress } from "../src";
+import { findQuarryAddress, QUARRY_FEE_TO } from "../src";
 import {
   DEFAULT_DECIMALS,
   DEFAULT_HARD_CAP,
@@ -119,6 +125,87 @@ describe("Mine", () => {
       });
       await expectTX(tx, "Create new rewarder").to.be.fulfilled;
       rewarderKey = rewarder;
+    });
+
+    describe("DAO fees", () => {
+      it("anyone can claim", async () => {
+        const claimFeeTokenAccount = await getATAAddress({
+          mint: rewardsMint,
+          owner: rewarderKey,
+        });
+        const ata = await getOrCreateATA({
+          owner: QUARRY_FEE_TO,
+          mint: rewardsMint,
+          provider,
+        });
+
+        assert.ok(ata.instruction);
+        await expectTX(new TransactionEnvelope(provider, [ata.instruction])).to
+          .be.fulfilled;
+        await expect(
+          mine.program.rpc.extractFees({
+            accounts: {
+              rewarder: rewarderKey,
+              claimFeeTokenAccount,
+              feeToTokenAccount: ata.address,
+              tokenProgram: TOKEN_PROGRAM_ID,
+            },
+          })
+        ).to.be.fulfilled;
+      });
+
+      it("fail if token account does not exist", async () => {
+        const claimFeeTokenAccount = await getATAAddress({
+          mint: rewardsMint,
+          owner: rewarderKey,
+        });
+        const ata = await getOrCreateATA({
+          owner: QUARRY_FEE_TO,
+          mint: rewardsMint,
+          provider,
+        });
+        try {
+          await mine.program.rpc.extractFees({
+            accounts: {
+              rewarder: rewarderKey,
+              claimFeeTokenAccount,
+              feeToTokenAccount: ata.address,
+              tokenProgram: TOKEN_PROGRAM_ID,
+            },
+          });
+          assert.fail("passed");
+        } catch (e) {
+          console.error(e);
+        }
+      });
+
+      it("fail if not fee to", async () => {
+        const claimFeeTokenAccount = await getATAAddress({
+          mint: rewardsMint,
+          owner: rewarderKey,
+        });
+        const ata = await getOrCreateATA({
+          owner: Keypair.generate().publicKey,
+          mint: rewardsMint,
+          provider,
+        });
+        assert.ok(ata.instruction);
+        await expectTX(new TransactionEnvelope(provider, [ata.instruction])).to
+          .be.fulfilled;
+        try {
+          await mine.program.rpc.extractFees({
+            accounts: {
+              rewarder: rewarderKey,
+              claimFeeTokenAccount,
+              feeToTokenAccount: ata.address,
+              tokenProgram: TOKEN_PROGRAM_ID,
+            },
+          });
+          assert.fail("passed");
+        } catch (e) {
+          console.error(e);
+        }
+      });
     });
 
     it("Is initialized!", async () => {
