@@ -68,7 +68,6 @@ jobs:
           name: quarry
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
-      - uses: actions/checkout@v2
       - name: Install Rust nightly
         uses: actions-rs/toolchain@v1
         with:
@@ -77,3 +76,30 @@ jobs:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
       - uses: Swatinem/rust-cache@v1
       - run: cargo publish --token ${{ secrets.CARGO_PUBLISH_TOKEN }}
+
+  release-binaries:
+    runs-on: ubuntu-latest
+    name: Release verifiable binaries
+    steps:
+      - uses: actions/checkout@v2
+      - uses: cachix/install-nix-action@v13
+        with:
+          install_url: https://nixos-nix-install-tests.cachix.org/serve/i6laym9jw3wg9mw6ncyrk6gjx4l34vvx/install
+          install_options: "--tarball-url-prefix https://nixos-nix-install-tests.cachix.org/serve"
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v10
+        with:
+          name: quarry
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Build programs
+        run: nix shell .#ci --command anchor build -v
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            target/deploy/
+            target/idl/
+            target/verifiable/
