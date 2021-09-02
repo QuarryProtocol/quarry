@@ -5,8 +5,12 @@ use anchor_lang::Key;
 use quarry_mine::Quarry;
 use quarry_mine::Rewarder;
 
+mod account_validators;
+
 #[program]
 pub mod quarry_registry {
+    use vipers::validate::Validate;
+
     use super::*;
 
     /// Provisions a new registry for a [Rewarder].
@@ -22,6 +26,7 @@ pub mod quarry_registry {
         _space: usize,
         bump: u8,
     ) -> ProgramResult {
+        ctx.accounts.validate()?;
         let registry = &mut ctx.accounts.registry;
         registry.bump = bump;
         registry.rewarder = ctx.accounts.rewarder.key();
@@ -33,6 +38,7 @@ pub mod quarry_registry {
 
     /// Synchronizes a [Quarry]'s token mint with the registry of its [Rewarder].
     pub fn sync_quarry(ctx: Context<SyncQuarry>) -> ProgramResult {
+        ctx.accounts.validate()?;
         let quarry = &ctx.accounts.quarry;
         let registry = &mut ctx.accounts.registry;
         registry.tokens[quarry.index as usize] = quarry.token_mint_key;

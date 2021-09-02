@@ -17,3 +17,4 @@ default = []
 [dependencies]
 anchor-lang = "0.13.2"
 quarry-mine = { version = "0.2.0", path = "../quarry-mine" }
+vipers = "0.1.1"
