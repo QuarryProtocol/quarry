@@ -75,6 +75,5 @@ jobs:
           override: true
           profile: minimal
           toolchain: ${{ env.RUST_TOOLCHAIN }}
-          components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v1
       - run: cargo publish --token ${{ secrets.CARGO_PUBLISH_TOKEN }}
