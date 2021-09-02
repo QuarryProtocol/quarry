@@ -66,6 +66,7 @@ export class MinerWrapper {
         systemProgram: SystemProgram.programId,
         payer: this.program.provider.wallet.publicKey,
         minerVault: this.tokenVaultKey,
+        rewarder: this.quarry.quarryData.rewarderKey,
         tokenProgram: TOKEN_PROGRAM_ID,
         tokenMint: this.quarry.token.mintAccount,
       },
