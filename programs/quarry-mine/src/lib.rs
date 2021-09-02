@@ -156,12 +156,14 @@ pub mod quarry_mine {
     pub fn create_quarry(ctx: Context<CreateQuarry>, bump: u8) -> ProgramResult {
         let rewarder = &mut ctx.accounts.auth.rewarder;
         // Update rewarder's quarry stats
+        let index = rewarder.num_quarries;
         rewarder.num_quarries = unwrap_int!(rewarder.num_quarries.checked_add(1));
 
         let quarry = &mut ctx.accounts.quarry;
         quarry.bump = bump;
 
         // Set quarry params
+        quarry.index = index;
         quarry.famine_ts = i64::MAX;
         quarry.rewarder_key = *rewarder.to_account_info().key;
         quarry.annual_rewards_rate = 0;
@@ -520,7 +522,9 @@ pub struct Quarry {
     /// Bump.
     pub bump: u8,
 
-    /// Decimals on the token mint
+    /// Index of the [Quarry].
+    pub index: u16,
+    /// Decimals on the token [Mint].
     pub token_mint_decimals: u8,
     /// Timestamp when quarry rewards cease
     pub famine_ts: i64,
