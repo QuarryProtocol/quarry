@@ -4,7 +4,11 @@
   "description": "Quarry Protocol SDK",
   "main": "dist/index.js",
   "repository": "git@github.com:QuarryProtocol/quarry.git",
-  "author": "Larry Jarry <larry@quarry.so>",
+  "author": "Quarry Protocol <team@quarry.so>",
+  "bugs": {
+    "url": "https://github.com/QuarryProtocol/quarry/issues",
+    "email": "team@quarry.so"
+  },
   "license": "AGPL-3.0",
   "scripts": {
     "build": "tsc -P tsconfig.build.json",

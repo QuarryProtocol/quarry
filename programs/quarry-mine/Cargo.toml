@@ -5,7 +5,7 @@ description = "Distributes liquidity mining rewards to token stakers"
 edition = "2018"
 homepage = "https://quarry.so"
 repository = "https://github.com/QuarryProtocol/quarry"
-authors = ["Larry Jarry <larry@quarry.so"]
+authors = ["Quarry Protocol <team@quarry.so>"]
 license = "AGPL-3.0"
 keywords = ["solana"]
 
