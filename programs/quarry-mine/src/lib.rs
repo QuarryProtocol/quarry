@@ -58,6 +58,7 @@ pub mod quarry_mine {
 
         rewarder.authority = ctx.accounts.authority.key();
         rewarder.pending_authority = Pubkey::default();
+
         rewarder.annual_rewards_rate = 0;
         rewarder.num_quarries = 0;
         rewarder.total_rewards_shares = 0;
@@ -68,11 +69,38 @@ pub mod quarry_mine {
         rewarder.claim_fee_token_account = ctx.accounts.claim_fee_token_account.key();
         rewarder.max_claim_fee_kbps = DEFAULT_CLAIM_FEE_KBPS;
 
+        rewarder.pause_authority = Pubkey::default();
+        rewarder.is_paused = false;
+
         emit!(NewRewarderEvent {
             authority: rewarder.authority,
             timestamp: ctx.accounts.clock.unix_timestamp,
         });
 
+        Ok(())
+    }
+
+    /// Sets the pause authority.
+    #[access_control(ctx.accounts.validate())]
+    pub fn set_pause_authority(ctx: Context<SetPauseAuthority>) -> ProgramResult {
+        let rewarder = &mut ctx.accounts.auth.rewarder;
+        rewarder.pause_authority = ctx.accounts.pause_authority.key();
+        Ok(())
+    }
+
+    /// Pauses the [Rewarder].
+    #[access_control(ctx.accounts.validate())]
+    pub fn pause(ctx: Context<MutableRewarderWithPauseAuthority>) -> ProgramResult {
+        let rewarder = &mut ctx.accounts.rewarder;
+        rewarder.is_paused = true;
+        Ok(())
+    }
+
+    /// Unpauses the [Rewarder].
+    #[access_control(ctx.accounts.validate())]
+    pub fn unpause(ctx: Context<MutableRewarderWithPauseAuthority>) -> ProgramResult {
+        let rewarder = &mut ctx.accounts.rewarder;
+        rewarder.is_paused = false;
         Ok(())
     }
 
@@ -474,6 +502,11 @@ pub struct Rewarder {
     /// This is stored on the [Rewarder] to ensure that the fee will
     /// not exceed this in the future.
     pub max_claim_fee_kbps: u64,
+
+    /// Authority allowed to pause a [Rewarder].
+    pub pause_authority: Pubkey,
+    /// If true, all instructions on the [Rewarder] are paused other than [quarry_mine::unpause].
+    pub is_paused: bool,
 }
 
 /// A pool which distributes tokens to its [Miner]s.
@@ -587,6 +620,16 @@ pub struct NewRewarder<'info> {
     pub claim_fee_token_account: CpiAccount<'info, TokenAccount>,
 }
 
+/// Accounts for [quarry_mine::set_pause_authority].
+#[derive(Accounts)]
+pub struct SetPauseAuthority<'info> {
+    /// [Rewarder].
+    pub auth: MutableRewarderWithAuthority<'info>,
+
+    /// The pause authority.
+    pub pause_authority: AccountInfo<'info>,
+}
+
 /// Accounts for [quarry_mine::transfer_authority].
 #[derive(Accounts)]
 pub struct TransferAuthority<'info> {
@@ -611,6 +654,7 @@ pub struct AcceptAuthority<'info> {
     pub rewarder: ProgramAccount<'info, Rewarder>,
 }
 
+/// Mutable [Rewarder] that requires the authority to be a signer.
 #[derive(Accounts)]
 pub struct MutableRewarderWithAuthority<'info> {
     /// Authority of the rewarder.
@@ -622,6 +666,7 @@ pub struct MutableRewarderWithAuthority<'info> {
     pub rewarder: ProgramAccount<'info, Rewarder>,
 }
 
+/// Read-only [Rewarder] that requires the authority to be a signer.
 #[derive(Accounts)]
 pub struct ReadOnlyRewarderWithAuthority<'info> {
     /// Authority of the rewarder.
@@ -742,6 +787,9 @@ pub struct CreateMiner<'info> {
     /// [Quarry] to create a [Miner] for.
     pub quarry: ProgramAccount<'info, Quarry>,
 
+    /// [Rewarder].
+    pub rewarder: ProgramAccount<'info, Rewarder>,
+
     /// System program.
     pub system_program: AccountInfo<'info>,
 
@@ -840,6 +888,18 @@ pub struct ExtractFees<'info> {
 
     /// Token program
     pub token_program: AccountInfo<'info>,
+}
+
+/// Accounts for [quarry_mine::pause] and [quarry_mine::unpause].
+#[derive(Accounts)]
+pub struct MutableRewarderWithPauseAuthority<'info> {
+    /// Pause authority of the rewarder.
+    #[account(signer)]
+    pub pause_authority: AccountInfo<'info>,
+
+    /// Rewarder of the farm.
+    #[account(mut)]
+    pub rewarder: ProgramAccount<'info, Rewarder>,
 }
 
 /// --------------------------------
@@ -976,4 +1036,6 @@ pub enum ErrorCode {
     InvalidMaxClaimFee,
     #[msg("Max annual rewards rate exceeded.")]
     MaxAnnualRewardsRateExceeded,
+    #[msg("Rewarder is paused.")]
+    Paused,
 }
