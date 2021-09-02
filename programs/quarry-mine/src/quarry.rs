@@ -8,7 +8,9 @@ use num_traits::cast::ToPrimitive;
 
 /// An action for a user to take on the staking pool.
 pub enum StakeAction {
+    /// Stake into a [Quarry].
     Stake,
+    /// Withdraw from the [Quarry].
     Withdraw,
 }
 
@@ -56,6 +58,7 @@ impl Quarry {
         Ok(())
     }
 
+    /// Processes a [StakeAction] for a [Miner],
     pub fn process_stake_action_internal(
         &mut self,
         action: StakeAction,

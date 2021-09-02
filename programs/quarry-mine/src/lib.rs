@@ -7,7 +7,6 @@
 //! - [Miner], which stake tokens into [Quarry]s to receive rewards.
 //!
 //! This program is modeled after [Synthetix's StakingRewards.sol](https://github.com/Synthetixio/synthetix/blob/4b9b2ee09b38638de6fe1c38dbe4255a11ebed86/contracts/StakingRewards.sol).
-#![allow(clippy::nonstandard_macro_braces)]
 
 #[macro_use]
 mod macros;
@@ -40,6 +39,7 @@ pub const MAX_ANNUAL_REWARDS_RATE: u64 = u64::MAX >> 3;
 /// This may be changed by governance in the future via program upgrade.
 pub const DEFAULT_CLAIM_FEE_KBPS: u64 = 1_000;
 
+/// Program for [quarry_mine].
 #[program]
 pub mod quarry_mine {
     use super::*;
@@ -543,6 +543,8 @@ pub struct Miner {
 /// --------------------------------
 
 /* Rewarder contexts */
+
+/// Accounts for [quarry_mine::new_rewarder].
 #[derive(Accounts)]
 #[instruction(bump: u8)]
 pub struct NewRewarder<'info> {
@@ -585,6 +587,7 @@ pub struct NewRewarder<'info> {
     pub claim_fee_token_account: CpiAccount<'info, TokenAccount>,
 }
 
+/// Accounts for [quarry_mine::transfer_authority].
 #[derive(Accounts)]
 pub struct TransferAuthority<'info> {
     /// Authority of the rewarder.
@@ -596,6 +599,7 @@ pub struct TransferAuthority<'info> {
     pub rewarder: ProgramAccount<'info, Rewarder>,
 }
 
+/// Accounts for [quarry_mine::accept_authority].
 #[derive(Accounts)]
 pub struct AcceptAuthority<'info> {
     /// Authority of the next rewarder.
@@ -628,14 +632,19 @@ pub struct ReadOnlyRewarderWithAuthority<'info> {
     pub rewarder: ProgramAccount<'info, Rewarder>,
 }
 
+/// Accounts for [quarry_mine::set_annual_rewards].
 #[derive(Accounts)]
 pub struct SetAnnualRewards<'info> {
+    /// [Rewarder],
     pub auth: MutableRewarderWithAuthority<'info>,
+
+    /// [Clock].
     pub clock: Sysvar<'info, Clock>,
 }
 
 /* Quarry contexts */
 
+/// Accounts for [quarry_mine::create_quarry].
 #[derive(Accounts)]
 #[instruction(bump: u8)]
 pub struct CreateQuarry<'info> {
@@ -668,6 +677,7 @@ pub struct CreateQuarry<'info> {
     pub system_program: AccountInfo<'info>,
 }
 
+/// Accounts for [quarry_mine::set_famine].
 #[derive(Accounts)]
 pub struct SetFamine<'info> {
     /// [Rewarder] of the [Quarry].
@@ -678,6 +688,7 @@ pub struct SetFamine<'info> {
     pub quarry: ProgramAccount<'info, Quarry>,
 }
 
+/// Accounts for [quarry_mine::set_rewards_share].
 #[derive(Accounts)]
 pub struct SetRewardsShare<'info> {
     /// [Rewarder] of the [Quarry].
@@ -691,6 +702,7 @@ pub struct SetRewardsShare<'info> {
     pub clock: Sysvar<'info, Clock>,
 }
 
+/// Accounts for [quarry_mine::update_quarry_rewards].
 #[derive(Accounts)]
 pub struct UpdateQuarryRewards<'info> {
     /// [Quarry].
@@ -705,6 +717,8 @@ pub struct UpdateQuarryRewards<'info> {
 }
 
 /* Miner contexts */
+
+/// Accounts for [quarry_mine::create_miner].
 #[derive(Accounts)]
 #[instruction(bump: u8)]
 pub struct CreateMiner<'info> {
@@ -809,7 +823,7 @@ pub struct UserStake<'info> {
     pub clock: Sysvar<'info, Clock>,
 }
 
-/// Extracts fees to the Quarry DAO.
+/// Accounts for [quarry_mine::extract_fees].
 #[derive(Accounts)]
 pub struct ExtractFees<'info> {
     /// Rewarder to extract fees from.
@@ -894,8 +908,11 @@ pub struct WithdrawEvent {
 /// Triggered when the daily rewards rate is updated.
 #[event]
 pub struct RewarderAnnualRewardsUpdateEvent {
+    /// Previous rate of rewards.
     pub previous_rate: u64,
+    /// New rate of rewards.
     pub new_rate: u64,
+    /// When the event took place.
     pub timestamp: i64,
 }
 
@@ -905,24 +922,32 @@ pub struct MinerCreateEvent {
     /// Authority of the miner.
     #[index]
     pub authority: Pubkey,
+    /// Quarry the miner was created on.
     #[index]
     pub quarry: Pubkey,
+    /// The [Miner].
     pub miner: Pubkey,
 }
 
 /// Triggered when a new quarry is created.
 #[event]
 pub struct QuarryCreateEvent {
+    /// [Mint] of the [Quarry] token.
     pub token_mint: Pubkey,
+    /// When the event took place.
     pub timestamp: i64,
 }
 
 /// Triggered when a quarry's reward share is updated.
 #[event]
 pub struct QuarryRewardsUpdateEvent {
+    /// [Mint] of the [Quarry] token.
     pub token_mint: Pubkey,
+    /// New annual rewards rate
     pub annual_rewards_rate: u64,
+    /// New rewards share.
     pub rewards_share: u64,
+    /// When the event took place.
     pub timestamp: i64,
 }
 
