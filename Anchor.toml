@@ -6,9 +6,13 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [[test.genesis]]
-address = "QMNFUvncKBh11ZgEwYtoup3aXvuVxt6fzrcsjk2cjpM"
+address = "QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB"
 program = "./target/deploy/quarry_mine.so"
 
 [[test.genesis]]
-address = "QMWVettd5nC2Y9nSkXa4pznj2dMfBg5oqvwc4kV8Sa6"
+address = "QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV"
 program = "./target/deploy/quarry_mint_wrapper.so"
+
+[[test.genesis]]
+address = "QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc"
+program = "./target/deploy/quarry_registry.so"

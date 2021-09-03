@@ -964,6 +964,7 @@ version = "1.0.0"
 dependencies = [
  "anchor-lang",
  "quarry-mine",
+ "solana-program",
  "vipers",
 ]
 

@@ -12,7 +12,6 @@
 mod macros;
 
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::declare_id;
 use anchor_lang::Key;
 use anchor_spl::token::{self, Mint, TokenAccount, Transfer};
 use num_traits::ToPrimitive;
@@ -30,7 +29,7 @@ pub mod rewarder;
 
 use crate::quarry::StakeAction;
 
-declare_id!("QMNFUvncKBh11ZgEwYtoup3aXvuVxt6fzrcsjk2cjpM");
+solana_program::declare_id!("QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB");
 
 /// Maximum number of tokens that can be rewarded by a [Rewarder] per year.
 pub const MAX_ANNUAL_REWARDS_RATE: u64 = u64::MAX >> 3;

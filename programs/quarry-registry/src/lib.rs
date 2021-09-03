@@ -7,6 +7,8 @@ use quarry_mine::Rewarder;
 
 mod account_validators;
 
+solana_program::declare_id!("QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc");
+
 #[program]
 pub mod quarry_registry {
     use vipers::validate::Validate;

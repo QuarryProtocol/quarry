@@ -4,14 +4,13 @@
 mod macros;
 
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::declare_id;
 use anchor_lang::Key;
 use anchor_spl::token::{self, Mint, TokenAccount};
 use vipers::validate::Validate;
 
 mod account_validators;
 
-declare_id!("QMWVettd5nC2Y9nSkXa4pznj2dMfBg5oqvwc4kV8Sa6");
+solana_program::declare_id!("QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV");
 
 #[program]
 pub mod quarry_mint_wrapper {
