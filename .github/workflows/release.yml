@@ -108,6 +108,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            target/deploy/
-            target/idl/
-            target/verifiable/
+            target/deploy/*
+            target/idl/*
+            target/verifiable/*
