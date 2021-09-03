@@ -1,6 +1,6 @@
 [package]
 name = "quarry-mint-wrapper"
-version = "0.2.0"
+version = "1.0.0"
 description = "Mints tokens to authorized accounts"
 edition = "2018"
 homepage = "https://quarry.so"
