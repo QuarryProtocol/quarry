@@ -75,15 +75,10 @@ jobs:
           profile: minimal
           toolchain: ${{ env.RUST_TOOLCHAIN }}
       - uses: Swatinem/rust-cache@v1
-      - name: Publish mint wrapper
-        run: cargo publish --token ${{ secrets.CARGO_PUBLISH_TOKEN }}
-        working-directory: programs/quarry-mint-wrapper
-      - name: Publish mine
-        run: cargo publish --token ${{ secrets.CARGO_PUBLISH_TOKEN }}
-        working-directory: programs/quarry-mine
-      - name: Publish registry
-        run: cargo publish --token ${{ secrets.CARGO_PUBLISH_TOKEN }}
-        working-directory: programs/quarry-registry
+      - name: Install cargo-workspaces
+        run: cargo install cargo-workspaces || true
+      - name: Publish crates
+        run: cargo ws publish --from-git --yes --skip-published patch
 
   release-binaries:
     runs-on: ubuntu-latest
