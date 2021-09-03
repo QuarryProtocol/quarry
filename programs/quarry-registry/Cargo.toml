@@ -1,6 +1,6 @@
 [package]
 name = "quarry-registry"
-version = "1.0.2"
+version = "1.1.0"
 description = "Registry of all quarries associated with a rewarder."
 edition = "2018"
 
@@ -16,6 +16,6 @@ default = []
 
 [dependencies]
 anchor-lang = "0.13.2"
-quarry-mine = { version = "1.0.1", path = "../quarry-mine", features = ["cpi"] }
+quarry-mine = { version = "1.1.0", path = "../quarry-mine", features = ["cpi"] }
 solana-program = "1.7.8"
 vipers = "0.1.1"
