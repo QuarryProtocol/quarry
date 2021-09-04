@@ -141,8 +141,7 @@ impl Payroll {
     fn calculate_claimable_upper_bound_unsafe(
         &self,
         current_ts: i64,
-        miner_rewards_earned: u64,
-        miner_rewards_per_token_paid: u128,
+        rewards_per_token_paid: u128,
     ) -> Option<U192> {
         let time_worked = cmp::max(
             0,
@@ -155,50 +154,35 @@ impl Payroll {
             .checked_div(SECONDS_PER_YEAR.into())?;
         let net_rewards_per_token = U192::from(
             self.rewards_per_token_stored
-                .checked_sub(miner_rewards_per_token_paid)?,
+                .checked_sub(rewards_per_token_paid)?,
         );
         let net_quarry_rewards = net_rewards_per_token
             .checked_mul(self.total_tokens_deposited.into())?
             .checked_div(PRECISION_MULTIPLIER.into())?;
 
-        net_quarry_rewards
-                .checked_add(quarry_rewards_accrued)?
-                .checked_add(miner_rewards_earned.into())
+        net_quarry_rewards.checked_add(quarry_rewards_accrued)
     }
 
-    // Compute upper bound of amount claimable to use as sanity check.
-    pub fn calculate_claimable_upper_bound(
-        &self,
-        current_ts: i64,
-        miner_rewards_earned: u64,
-        miner_rewards_per_token_paid: u128,
-    ) -> Result<U192, ProgramError> {
-        let upper_bound = unwrap_int!(self.calculate_claimable_upper_bound_unsafe(
-            current_ts,
-            miner_rewards_earned,
-            miner_rewards_per_token_paid
-        ));
-
-        Ok(upper_bound)
-    }
-
+    /// Sanity check on the amount of rewards to be claimed by the miner.
     pub fn sanity_check(
         &self,
         current_ts: i64,
         amount_claimable: u64,
         miner: &Miner,
     ) -> ProgramResult {
-        let rewards_upperbound = self.calculate_claimable_upper_bound(
-            current_ts,
-            miner.rewards_earned,
-            miner.rewards_per_token_paid,
-        )?;
-        if rewards_upperbound < amount_claimable.into() {
+        let rewards_upperbound =
+            unwrap_int!(self
+                .calculate_claimable_upper_bound_unsafe(current_ts, miner.rewards_per_token_paid,));
+        let amount_claimable_less_already_earned =
+            unwrap_int!(amount_claimable.checked_sub(miner.rewards_earned));
+
+        if rewards_upperbound < amount_claimable_less_already_earned.into() {
             msg!(
-                "rewards_upperbound: {}, amount_claimable: {}, miner: {:?}",
+                "rewards_upperbound: {}, amount_claimable: {}, total_tokens_deposited: {}, miner: {:?}",
                 rewards_upperbound,
                 amount_claimable,
-                miner
+                self.total_tokens_deposited,
+                miner,
             );
             require!(
                 rewards_upperbound >= amount_claimable.into(),
