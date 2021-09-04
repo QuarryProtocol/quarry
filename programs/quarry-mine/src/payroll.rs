@@ -161,11 +161,9 @@ impl Payroll {
             .checked_mul(self.total_tokens_deposited.into())?
             .checked_div(PRECISION_MULTIPLIER.into())?;
 
-        Some(
-            net_quarry_rewards
+        net_quarry_rewards
                 .checked_add(quarry_rewards_accrued)?
-                .checked_add(miner_rewards_earned.into())?,
-        )
+                .checked_add(miner_rewards_earned.into())
     }
 
     // Compute upper bound of amount claimable to use as sanity check.
