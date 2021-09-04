@@ -152,15 +152,15 @@ impl Payroll {
         let quarry_rewards_accrued = U192::from(time_worked)
             .checked_mul(self.annual_rewards_rate.into())?
             .checked_div(SECONDS_PER_YEAR.into())?;
-        let net_rewards_per_token = U192::from(
-            self.rewards_per_token_stored
-                .checked_sub(rewards_per_token_paid)?,
-        );
-        let net_quarry_rewards = net_rewards_per_token
+
+        let net_rewards_per_token = self
+            .rewards_per_token_stored
+            .checked_sub(rewards_per_token_paid)?;
+        let net_quarry_rewards = U192::from(net_rewards_per_token)
             .checked_mul(self.total_tokens_deposited.into())?
             .checked_div(PRECISION_MULTIPLIER.into())?;
 
-        net_quarry_rewards.checked_add(quarry_rewards_accrued)
+        quarry_rewards_accrued.checked_add(net_quarry_rewards)
     }
 
     /// Sanity check on the amount of rewards to be claimed by the miner.
@@ -296,6 +296,30 @@ mod tests {
 
     proptest! {
         #[test]
+        fn test_sanity_check(
+            annual_rewards_rate in 0..=MAX_ANNUAL_REWARDS_RATE,
+            rewards_already_earned in u64::MIN..u64::MAX,
+            (rewards_per_token_stored, rewards_per_token_paid) in total_and_intermediate_u64(),
+            (current_ts, last_checkpoint_ts) in total_and_intermediate_ts(),
+            (my_tokens_deposited, total_tokens_deposited) in part_and_total()
+        ) {
+            let payroll = Payroll::new(
+                i64::MAX,
+                last_checkpoint_ts,
+                annual_rewards_rate,
+                rewards_per_token_stored as u128,
+                total_tokens_deposited as u128
+            );
+
+            let rewards_earned = payroll.calculate_rewards_earned(current_ts, my_tokens_deposited.into(), rewards_per_token_paid.into(), rewards_already_earned.into()).unwrap();
+            let upperbound = payroll.calculate_claimable_upper_bound_unsafe(current_ts, rewards_per_token_paid.into()).unwrap();
+
+            assert!(upperbound >= rewards_earned.into(), "rewards_earned: {}, upperbound: {}", rewards_earned, upperbound);
+        }
+    }
+
+    proptest! {
+        #[test]
         fn test_wpt_with_zero_annual_rewards_rate(
             famine_ts in 0..i64::MAX,
             (current_ts, last_checkpoint_ts) in total_and_intermediate_ts(),
@@ -346,6 +370,14 @@ mod tests {
         pub fn total_and_intermediate_ts()(total in 0..i64::MAX)
                         (intermediate in 0..total, total in Just(total))
                         -> (i64, i64) {
+           (total, intermediate)
+       }
+    }
+
+    prop_compose! {
+        pub fn total_and_intermediate_u64()(total in 0..u64::MAX)
+                        (intermediate in 0..total, total in Just(total))
+                        -> (u64, u64) {
            (total, intermediate)
        }
     }
