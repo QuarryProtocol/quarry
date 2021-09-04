@@ -32,7 +32,7 @@ use crate::quarry::StakeAction;
 solana_program::declare_id!("QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB");
 
 /// Maximum number of tokens that can be rewarded by a [Rewarder] per year.
-pub const MAX_ANNUAL_REWARDS_RATE: u64 = u64::MAX >> 3;
+pub const MAX_ANNUAL_REWARDS_RATE: u64 = u64::MAX >> 7;
 
 /// The fees of new [Rewarder]s-- 1,000 KBPS = 1 BP or 0.01%.
 /// This may be changed by governance in the future via program upgrade.
@@ -542,7 +542,7 @@ pub struct Quarry {
 
 /// An account that has staked tokens into a [Quarry].
 #[account]
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Miner {
     /// Key of the [Quarry] this [Miner] works on.
     pub quarry_key: Pubkey,
@@ -1041,4 +1041,6 @@ pub enum ErrorCode {
     MaxAnnualRewardsRateExceeded,
     #[msg("Rewarder is paused.")]
     Paused,
+    #[msg("Rewards earned exceeded quarry's upper bound.")]
+    UpperboundExceeded,
 }

@@ -1,7 +1,10 @@
 //! Calculates token distribution rates.
 
-use crate::Quarry;
-use anchor_lang::{prelude::ProgramError, require};
+use crate::{Miner, Quarry};
+use anchor_lang::{
+    prelude::{msg, ProgramError, ProgramResult},
+    require,
+};
 use spl_math::uint::U192;
 use std::cmp;
 use std::convert::TryInto;
@@ -133,6 +136,79 @@ impl Payroll {
             rewards_earned,
         ),);
         Ok(result)
+    }
+
+    fn calculate_claimable_upper_bound_unsafe(
+        &self,
+        current_ts: i64,
+        miner_rewards_earned: u64,
+        miner_rewards_per_token_paid: u128,
+    ) -> Option<U192> {
+        let time_worked = cmp::max(
+            0,
+            self.last_time_reward_applicable(current_ts)
+                .checked_sub(self.last_checkpoint_ts)?,
+        );
+
+        let quarry_rewards_accrued = U192::from(time_worked)
+            .checked_mul(self.annual_rewards_rate.into())?
+            .checked_div(SECONDS_PER_YEAR.into())?;
+        let net_rewards_per_token = U192::from(
+            self.rewards_per_token_stored
+                .checked_sub(miner_rewards_per_token_paid)?,
+        );
+        let net_quarry_rewards = net_rewards_per_token
+            .checked_mul(self.total_tokens_deposited.into())?
+            .checked_div(PRECISION_MULTIPLIER.into())?;
+
+        Some(
+            net_quarry_rewards
+                .checked_add(quarry_rewards_accrued)?
+                .checked_add(miner_rewards_earned.into())?,
+        )
+    }
+
+    // Compute upper bound of amount claimable to use as sanity check.
+    pub fn calculate_claimable_upper_bound(
+        &self,
+        current_ts: i64,
+        miner_rewards_earned: u64,
+        miner_rewards_per_token_paid: u128,
+    ) -> Result<U192, ProgramError> {
+        let upper_bound = unwrap_int!(self.calculate_claimable_upper_bound_unsafe(
+            current_ts,
+            miner_rewards_earned,
+            miner_rewards_per_token_paid
+        ));
+
+        Ok(upper_bound)
+    }
+
+    pub fn sanity_check(
+        &self,
+        current_ts: i64,
+        amount_claimable: u64,
+        miner: &Miner,
+    ) -> ProgramResult {
+        let rewards_upperbound = self.calculate_claimable_upper_bound(
+            current_ts,
+            miner.rewards_earned,
+            miner.rewards_per_token_paid,
+        )?;
+        if rewards_upperbound < amount_claimable.into() {
+            msg!(
+                "rewards_upperbound: {}, amount_claimable: {}, miner: {:?}",
+                rewards_upperbound,
+                amount_claimable,
+                miner
+            );
+            require!(
+                rewards_upperbound >= amount_claimable.into(),
+                UpperboundExceeded
+            );
+        }
+
+        Ok(())
     }
 
     /// Gets the latest time rewards were being distributed.

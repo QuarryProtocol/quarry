@@ -51,6 +51,8 @@ impl Quarry {
                 miner.rewards_earned.into(),
             )?
             .to_u64());
+
+        payroll.sanity_check(current_ts, updated_rewards_earned, miner)?;
         // Update miner struct
         miner.rewards_earned = updated_rewards_earned;
         miner.rewards_per_token_paid = self.rewards_per_token_stored;
