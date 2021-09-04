@@ -266,6 +266,7 @@ mod tests {
                     total_tokens_deposited as u128
                 );
                 let current_ts = initial_ts + (((final_ts - initial_ts) as u128) * (i as u128) / (num_updates as u128)).to_i64().unwrap();
+                prop_assume!(current_ts <= i64::MAX >> 1);
                 rewards_per_token_stored = payroll.calculate_reward_per_token(current_ts).unwrap();
                 last_checkpoint_ts = current_ts;
             }
