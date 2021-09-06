@@ -542,7 +542,7 @@ pub struct Quarry {
 
 /// An account that has staked tokens into a [Quarry].
 #[account]
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Miner {
     /// Key of the [Quarry] this [Miner] works on.
     pub quarry_key: Pubkey,
@@ -1041,4 +1041,6 @@ pub enum ErrorCode {
     MaxAnnualRewardsRateExceeded,
     #[msg("Rewarder is paused.")]
     Paused,
+    #[msg("Rewards earned exceeded quarry's upper bound.")]
+    UpperboundExceeded,
 }

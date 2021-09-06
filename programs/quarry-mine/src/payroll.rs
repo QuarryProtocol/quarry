@@ -1,7 +1,10 @@
 //! Calculates token distribution rates.
 
-use crate::Quarry;
-use anchor_lang::{prelude::ProgramError, require};
+use crate::{Miner, Quarry};
+use anchor_lang::{
+    prelude::{msg, ProgramError, ProgramResult},
+    require,
+};
 use spl_math::uint::U192;
 use std::cmp;
 use std::convert::TryInto;
@@ -135,6 +138,61 @@ impl Payroll {
         Ok(result)
     }
 
+    fn calculate_claimable_upper_bound_unsafe(
+        &self,
+        current_ts: i64,
+        rewards_per_token_paid: u128,
+    ) -> Option<U192> {
+        let time_worked = cmp::max(
+            0,
+            self.last_time_reward_applicable(current_ts)
+                .checked_sub(self.last_checkpoint_ts)?,
+        );
+
+        let quarry_rewards_accrued = U192::from(time_worked)
+            .checked_mul(self.annual_rewards_rate.into())?
+            .checked_div(SECONDS_PER_YEAR.into())?;
+
+        let net_rewards_per_token = self
+            .rewards_per_token_stored
+            .checked_sub(rewards_per_token_paid)?;
+        let net_quarry_rewards = U192::from(net_rewards_per_token)
+            .checked_mul(self.total_tokens_deposited.into())?
+            .checked_div(PRECISION_MULTIPLIER.into())?;
+
+        quarry_rewards_accrued.checked_add(net_quarry_rewards)
+    }
+
+    /// Sanity check on the amount of rewards to be claimed by the miner.
+    pub fn sanity_check(
+        &self,
+        current_ts: i64,
+        amount_claimable: u64,
+        miner: &Miner,
+    ) -> ProgramResult {
+        let rewards_upperbound =
+            unwrap_int!(self
+                .calculate_claimable_upper_bound_unsafe(current_ts, miner.rewards_per_token_paid,));
+        let amount_claimable_less_already_earned =
+            unwrap_int!(amount_claimable.checked_sub(miner.rewards_earned));
+
+        if rewards_upperbound < amount_claimable_less_already_earned.into() {
+            msg!(
+                "rewards_upperbound: {}, amount_claimable: {}, total_tokens_deposited: {}, miner: {:?}",
+                rewards_upperbound,
+                amount_claimable,
+                self.total_tokens_deposited,
+                miner,
+            );
+            require!(
+                rewards_upperbound >= amount_claimable.into(),
+                UpperboundExceeded
+            );
+        }
+
+        Ok(())
+    }
+
     /// Gets the latest time rewards were being distributed.
     pub fn last_time_reward_applicable(&self, current_ts: i64) -> i64 {
         cmp::min(current_ts, self.famine_ts)
@@ -208,6 +266,7 @@ mod tests {
                     total_tokens_deposited as u128
                 );
                 let current_ts = initial_ts + (((final_ts - initial_ts) as u128) * (i as u128) / (num_updates as u128)).to_i64().unwrap();
+                prop_assume!(current_ts <= i64::MAX >> 1);
                 rewards_per_token_stored = payroll.calculate_reward_per_token(current_ts).unwrap();
                 last_checkpoint_ts = current_ts;
             }
@@ -233,6 +292,30 @@ mod tests {
                 / U192::from(total_tokens_deposited);
 
             assert_percent_delta!(expected_rewards_earned.as_u128(), rewards_earned, EPSILON);
+        }
+    }
+
+    proptest! {
+        #[test]
+        fn test_sanity_check(
+            annual_rewards_rate in 0..=MAX_ANNUAL_REWARDS_RATE,
+            rewards_already_earned in u64::MIN..u64::MAX,
+            (rewards_per_token_stored, rewards_per_token_paid) in total_and_intermediate_u64(),
+            (current_ts, last_checkpoint_ts) in total_and_intermediate_ts(),
+            (my_tokens_deposited, total_tokens_deposited) in part_and_total()
+        ) {
+            let payroll = Payroll::new(
+                i64::MAX,
+                last_checkpoint_ts,
+                annual_rewards_rate,
+                rewards_per_token_stored as u128,
+                total_tokens_deposited as u128
+            );
+
+            let rewards_earned = payroll.calculate_rewards_earned(current_ts, my_tokens_deposited.into(), rewards_per_token_paid.into(), rewards_already_earned.into()).unwrap();
+            let upperbound = payroll.calculate_claimable_upper_bound_unsafe(current_ts, rewards_per_token_paid.into()).unwrap();
+
+            assert!(upperbound >= rewards_earned.into(), "rewards_earned: {}, upperbound: {}", rewards_earned, upperbound);
         }
     }
 
@@ -288,6 +371,14 @@ mod tests {
         pub fn total_and_intermediate_ts()(total in 0..i64::MAX)
                         (intermediate in 0..total, total in Just(total))
                         -> (i64, i64) {
+           (total, intermediate)
+       }
+    }
+
+    prop_compose! {
+        pub fn total_and_intermediate_u64()(total in 0..u64::MAX)
+                        (intermediate in 0..total, total in Just(total))
+                        -> (u64, u64) {
            (total, intermediate)
        }
     }
