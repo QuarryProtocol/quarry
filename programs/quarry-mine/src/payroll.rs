@@ -138,6 +138,8 @@ impl Payroll {
         Ok(result)
     }
 
+    /// Calculates the amount of tokens which could be claimed
+    /// if there were only one miner in the pool.
     fn calculate_claimable_upper_bound_unsafe(
         &self,
         current_ts: i64,
@@ -170,9 +172,14 @@ impl Payroll {
         amount_claimable: u64,
         miner: &Miner,
     ) -> ProgramResult {
+        require!(
+            self.rewards_per_token_stored >= miner.rewards_per_token_paid,
+            UpperBoundExceeded
+        );
+
         let rewards_upperbound =
             unwrap_int!(self
-                .calculate_claimable_upper_bound_unsafe(current_ts, miner.rewards_per_token_paid,));
+                .calculate_claimable_upper_bound_unsafe(current_ts, miner.rewards_per_token_paid));
         let amount_claimable_less_already_earned =
             unwrap_int!(amount_claimable.checked_sub(miner.rewards_earned));
 
@@ -186,7 +193,7 @@ impl Payroll {
             );
             require!(
                 rewards_upperbound >= amount_claimable.into(),
-                UpperboundExceeded
+                UpperBoundExceeded
             );
         }
 

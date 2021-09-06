@@ -1042,5 +1042,5 @@ pub enum ErrorCode {
     #[msg("Rewarder is paused.")]
     Paused,
     #[msg("Rewards earned exceeded quarry's upper bound.")]
-    UpperboundExceeded,
+    UpperBoundExceeded,
 }
