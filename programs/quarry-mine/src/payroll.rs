@@ -65,18 +65,22 @@ impl Payroll {
         }
     }
 
+    /// Calculates the amount of seconds the [Payroll] should have applied rewards for.
+    fn time_worked(&self, current_ts: i64) -> Option<i64> {
+        Some(cmp::max(
+            0,
+            self.last_time_reward_applicable(current_ts)
+                .checked_sub(self.last_checkpoint_ts)?,
+        ))
+    }
+
     /// Calculates the amount of rewards to pay out for each staked token.
     /// https://github.com/Synthetixio/synthetix/blob/4b9b2ee09b38638de6fe1c38dbe4255a11ebed86/contracts/StakingRewards.sol#L62
     fn calculate_reward_per_token_unsafe(&self, current_ts: i64) -> Option<u128> {
         if self.total_tokens_deposited == 0 {
             Some(self.rewards_per_token_stored)
         } else {
-            let time_worked = cmp::max(
-                0,
-                self.last_time_reward_applicable(current_ts)
-                    .checked_sub(self.last_checkpoint_ts)?,
-            );
-
+            let time_worked = self.time_worked(current_ts)?;
             let reward = U192::from(time_worked)
                 .checked_mul(PRECISION_MULTIPLIER.into())?
                 .checked_mul(self.annual_rewards_rate.into())?
@@ -105,14 +109,16 @@ impl Payroll {
         tokens_deposited: u128,
         rewards_per_token_paid: u128,
         rewards_earned: u128,
-    ) -> Option<u128> {
+    ) -> Option<u64> {
         let net_new_rewards = self
             .calculate_reward_per_token_unsafe(current_ts)?
             .checked_sub(rewards_per_token_paid)?;
         tokens_deposited
             .checked_mul(net_new_rewards)?
             .checked_div(PRECISION_MULTIPLIER)?
-            .checked_add(rewards_earned)
+            .checked_add(rewards_earned)?
+            .try_into()
+            .ok()
     }
 
     /// Calculates the amount of rewards earned for the given number of staked tokens, with safety checks.
@@ -123,7 +129,7 @@ impl Payroll {
         tokens_deposited: u128,
         rewards_per_token_paid: u128,
         rewards_earned: u128,
-    ) -> Result<u128, ProgramError> {
+    ) -> Result<u64, ProgramError> {
         require!(
             tokens_deposited <= self.total_tokens_deposited,
             NotEnoughTokens
@@ -138,27 +144,34 @@ impl Payroll {
         Ok(result)
     }
 
+    /// Calculates an upper bound of the amount of claimable tokens.
     fn calculate_claimable_upper_bound_unsafe(
         &self,
         current_ts: i64,
         rewards_per_token_paid: u128,
-    ) -> Option<U192> {
-        let time_worked = cmp::max(
-            0,
-            self.last_time_reward_applicable(current_ts)
-                .checked_sub(self.last_checkpoint_ts)?,
-        );
+    ) -> Option<u64> {
+        let time_worked = self.time_worked(current_ts)?;
 
-        let quarry_rewards_accrued = U192::from(time_worked)
+        // calculate the amount of additional tokens that should have accrued,
+        // given the annual rewards rate of the [Quarry].
+        let quarry_rewards_accrued: u64 = (time_worked as u128)
             .checked_mul(self.annual_rewards_rate.into())?
-            .checked_div(SECONDS_PER_YEAR.into())?;
+            .checked_div(SECONDS_PER_YEAR)?
+            .try_into()
+            .ok()?;
 
+        // calculate the amount of rewards that should be issued for each token,
+        // based on the last checkpoint
         let net_rewards_per_token = self
             .rewards_per_token_stored
             .checked_sub(rewards_per_token_paid)?;
-        let net_quarry_rewards = U192::from(net_rewards_per_token)
+
+        // calculate the amount of rewards that should be issued
+        let net_quarry_rewards: u64 = U192::from(net_rewards_per_token)
             .checked_mul(self.total_tokens_deposited.into())?
-            .checked_div(PRECISION_MULTIPLIER.into())?;
+            .checked_div(PRECISION_MULTIPLIER.into())?
+            .try_into()
+            .ok()?;
 
         quarry_rewards_accrued.checked_add(net_quarry_rewards)
     }
@@ -176,7 +189,7 @@ impl Payroll {
         let amount_claimable_less_already_earned =
             unwrap_int!(amount_claimable.checked_sub(miner.rewards_earned));
 
-        if rewards_upperbound < amount_claimable_less_already_earned.into() {
+        if rewards_upperbound < amount_claimable_less_already_earned {
             msg!(
                 "rewards_upperbound: {}, amount_claimable: {}, total_tokens_deposited: {}, miner: {:?}",
                 rewards_upperbound,
@@ -184,10 +197,7 @@ impl Payroll {
                 self.total_tokens_deposited,
                 miner,
             );
-            require!(
-                rewards_upperbound >= amount_claimable.into(),
-                UpperboundExceeded
-            );
+            require!(rewards_upperbound >= amount_claimable, UpperboundExceeded);
         }
 
         Ok(())
@@ -291,7 +301,7 @@ mod tests {
                 / U192::from(SECONDS_PER_YEAR)
                 / U192::from(total_tokens_deposited);
 
-            assert_percent_delta!(expected_rewards_earned.as_u128(), rewards_earned, EPSILON);
+            assert_percent_delta!(expected_rewards_earned.as_u64(), rewards_earned, EPSILON);
         }
     }
 
@@ -315,7 +325,7 @@ mod tests {
             let rewards_earned = payroll.calculate_rewards_earned(current_ts, my_tokens_deposited.into(), rewards_per_token_paid.into(), rewards_already_earned.into()).unwrap();
             let upperbound = payroll.calculate_claimable_upper_bound_unsafe(current_ts, rewards_per_token_paid.into()).unwrap();
 
-            assert!(upperbound >= rewards_earned.into(), "rewards_earned: {}, upperbound: {}", rewards_earned, upperbound);
+            assert!(upperbound >= rewards_earned, "rewards_earned: {}, upperbound: {}", rewards_earned, upperbound);
         }
     }
 
@@ -363,7 +373,7 @@ mod tests {
         ) {
             let payroll = Payroll::new(famine_ts, last_checkpoint_ts, annual_rewards_rate, rewards_per_token_stored.into(), total_tokens_deposited.into());
             prop_assume!(payroll.calculate_reward_per_token(current_ts).unwrap() >= rewards_per_token_paid.into());
-            assert_eq!(payroll.calculate_rewards_earned(current_ts, 0, rewards_per_token_paid.into(), rewards_earned.into()).unwrap(), rewards_earned.into())
+            assert_eq!(payroll.calculate_rewards_earned(current_ts, 0, rewards_per_token_paid.into(), rewards_earned.into()).unwrap(), rewards_earned)
         }
     }
 
