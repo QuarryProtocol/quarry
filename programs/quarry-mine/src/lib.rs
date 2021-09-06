@@ -1,3 +1,5 @@
+#![allow(clippy::nonstandard_macro_braces)]
+
 //! Liquidity mining rewards distribution program.
 //!
 //! The program consists of three types of accounts:

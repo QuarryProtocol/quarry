@@ -1,3 +1,5 @@
+#![allow(clippy::nonstandard_macro_braces)]
+
 //! Registry to help the frontend quickly locate all active quarries.
 
 use anchor_lang::prelude::*;
