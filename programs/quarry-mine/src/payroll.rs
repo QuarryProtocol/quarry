@@ -71,11 +71,7 @@ impl Payroll {
         if self.total_tokens_deposited == 0 {
             Some(self.rewards_per_token_stored)
         } else {
-            let time_worked = cmp::max(
-                0,
-                self.last_time_reward_applicable(current_ts)
-                    .checked_sub(self.last_checkpoint_ts)?,
-            );
+            let time_worked = self.calculate_time_worked(current_ts)?;
 
             let reward = U192::from(time_worked)
                 .checked_mul(PRECISION_MULTIPLIER.into())?
@@ -138,6 +134,15 @@ impl Payroll {
         Ok(result)
     }
 
+    /// Calculates the time in which a [Miner] should have earned rewards.
+    fn calculate_time_worked(&self, current_ts: i64) -> Option<i64> {
+        Some(cmp::max(
+            0,
+            self.last_time_reward_applicable(current_ts)
+                .checked_sub(self.last_checkpoint_ts)?,
+        ))
+    }
+
     /// Calculates the amount of tokens which could be claimed
     /// if there were only one miner in the pool.
     fn calculate_claimable_upper_bound_unsafe(
@@ -145,12 +150,7 @@ impl Payroll {
         current_ts: i64,
         rewards_per_token_paid: u128,
     ) -> Option<U192> {
-        let time_worked = cmp::max(
-            0,
-            self.last_time_reward_applicable(current_ts)
-                .checked_sub(self.last_checkpoint_ts)?,
-        );
-
+        let time_worked = self.calculate_time_worked(current_ts)?;
         let quarry_rewards_accrued = U192::from(time_worked)
             .checked_mul(self.annual_rewards_rate.into())?
             .checked_div(SECONDS_PER_YEAR.into())?;
