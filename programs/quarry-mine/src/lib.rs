@@ -34,6 +34,10 @@ solana_program::declare_id!("QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB");
 /// Maximum number of tokens that can be rewarded by a [Rewarder] per year.
 pub const MAX_ANNUAL_REWARDS_RATE: u64 = u64::MAX >> 3;
 
+/// Maximum seconds elapsed between two checkpoints.
+/// [i32::MAX] corresponds to about 70 years.
+pub const MAX_SECONDS_BETWEEN_CHECKPOINTS: i64 = i32::MAX as i64;
+
 /// The fees of new [Rewarder]s-- 1,000 KBPS = 1 BP or 0.01%.
 /// This may be changed by governance in the future via program upgrade.
 pub const DEFAULT_CLAIM_FEE_KBPS: u64 = 1_000;
