@@ -212,9 +212,11 @@ pub struct PerformMint<'info> {
     pub minter_authority: AccountInfo<'info>,
 
     /// Token mint.
+    #[account(mut)]
     pub token_mint: CpiAccount<'info, Mint>,
 
     /// Destination account for minted tokens.
+    #[account(mut)]
     pub destination: CpiAccount<'info, TokenAccount>,
 
     /// Minter information.
