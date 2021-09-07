@@ -46,9 +46,9 @@ impl Quarry {
         let updated_rewards_earned = unwrap_int!(payroll
             .calculate_rewards_earned(
                 current_ts,
-                miner.balance.into(),
+                miner.balance,
                 miner.rewards_per_token_paid,
-                miner.rewards_earned.into(),
+                miner.rewards_earned,
             )?
             .to_u64());
 
