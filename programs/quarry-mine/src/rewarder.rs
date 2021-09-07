@@ -130,19 +130,12 @@ mod tests {
         }
         let diff = rewarder.annual_rewards_rate - total_rewards_per_day;
 
-        const MAX_EPSILON: u64 = 30;
-        let num_quarries = rewarder.num_quarries as u64;
-        let epsilon: u64 = if diff > num_quarries / 2 {
-            diff - num_quarries / 2
-        } else {
-            num_quarries / 2 - diff
-        };
+        let num_quarries = rewarder.num_quarries;
         assert!(
-            epsilon <= MAX_EPSILON,
-            "diff: {}, num_quarries / 2: {}, epsilon: {}",
+            diff <= num_quarries.into(),
+            "diff: {}, num_quarries: {}",
             diff,
-            num_quarries / 2,
-            epsilon
+            num_quarries,
         );
     }
 

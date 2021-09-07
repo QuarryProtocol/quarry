@@ -16,6 +16,10 @@ pub const SECONDS_PER_YEAR: u128 = 86_400 * 365;
 /// Number of decimal points of precision that `rewards_per_token_stored` uses.
 pub const PRECISION_MULTIPLIER: u128 = u64::MAX as u128;
 
+/// Maximum time elapsed since the last checkpoint
+/// 70 years
+pub const MAX_TIME_WORKED: i64 = 86_400 * 365 * 70;
+
 /// Calculator for amount of tokens to pay out.
 pub struct Payroll {
     /// Timestamp of when rewards should end.
@@ -136,11 +140,16 @@ impl Payroll {
 
     /// Calculates the time in which a [Miner] should have earned rewards.
     fn calculate_time_worked(&self, current_ts: i64) -> Option<i64> {
-        Some(cmp::max(
+        let time_worked = cmp::max(
             0,
             self.last_time_reward_applicable(current_ts)
                 .checked_sub(self.last_checkpoint_ts)?,
-        ))
+        );
+        if time_worked > MAX_TIME_WORKED {
+            None
+        } else {
+            Some(time_worked)
+        }
     }
 
     /// Calculates the amount of tokens which could be claimed
@@ -177,22 +186,22 @@ impl Payroll {
             UpperBoundExceeded
         );
 
-        let rewards_upperbound =
+        let rewards_upper_bound =
             unwrap_int!(self
                 .calculate_claimable_upper_bound_unsafe(current_ts, miner.rewards_per_token_paid));
         let amount_claimable_less_already_earned =
             unwrap_int!(amount_claimable.checked_sub(miner.rewards_earned));
 
-        if rewards_upperbound < amount_claimable_less_already_earned.into() {
+        if rewards_upper_bound < amount_claimable_less_already_earned.into() {
             msg!(
-                "rewards_upperbound: {}, amount_claimable: {}, total_tokens_deposited: {}, miner: {:?}",
-                rewards_upperbound,
+                "rewards_upper_bound: {}, amount_claimable: {}, total_tokens_deposited: {}, miner: {:?}",
+                rewards_upper_bound,
                 amount_claimable,
                 self.total_tokens_deposited,
                 miner,
             );
             require!(
-                rewards_upperbound >= amount_claimable.into(),
+                rewards_upper_bound >= amount_claimable.into(),
                 UpperBoundExceeded
             );
         }
@@ -240,7 +249,7 @@ mod tests {
     }
 
     prop_compose! {
-        pub fn part_and_total()(
+        pub fn part_and_total_small()(
             total in 0..u64::MAX
         )(
             // use a really small number here
@@ -251,54 +260,94 @@ mod tests {
        }
     }
 
-    proptest! {
+    prop_compose! {
+        pub fn part_and_total()(
+            total in 0..u64::MAX
+        )(
+            // use a really small number here
+            part in 0..total,
+            total in Just(total)
+        ) -> (u64, u64) {
+           (part, total)
+       }
+    }
+
+    fn check_accumulated_precision_errors_epsilon(
+        num_updates: i64,
+        (final_ts, initial_ts): (i64, i64),
+        annual_rewards_rate: u64,
+        (my_tokens_deposited, total_tokens_deposited): (u64, u64),
+    ) {
         /// Precision errors should not be over EPSILON.
-        #[test]
-        fn test_accumulated_precision_errors_epsilon(
-            num_updates in 1..100_i64,
-            (final_ts, initial_ts) in total_and_intermediate_ts(),
-            annual_rewards_rate in 0..=MAX_ANNUAL_REWARDS_RATE,
-            (my_tokens_deposited, total_tokens_deposited) in part_and_total()
-        ) {
-            const EPSILON: f64 = 0.0001;
+        const EPSILON: f64 = 0.0001;
 
-            let mut rewards_per_token_stored: u128 = 0;
-            let mut last_checkpoint_ts = initial_ts;
-            for i in 0..=num_updates {
-                let payroll = Payroll::new(
-                    i64::MAX,
-                    last_checkpoint_ts,
-                    annual_rewards_rate,
-                    rewards_per_token_stored,
-                    total_tokens_deposited as u128
-                );
-                let current_ts = initial_ts + (((final_ts - initial_ts) as u128) * (i as u128) / (num_updates as u128)).to_i64().unwrap();
-                prop_assume!(current_ts <= i64::MAX >> 1);
-                rewards_per_token_stored = payroll.calculate_reward_per_token(current_ts).unwrap();
-                last_checkpoint_ts = current_ts;
-            }
-
+        let mut rewards_per_token_stored: u128 = 0;
+        let mut last_checkpoint_ts = initial_ts;
+        for i in 0..=num_updates {
             let payroll = Payroll::new(
                 i64::MAX,
                 last_checkpoint_ts,
                 annual_rewards_rate,
                 rewards_per_token_stored,
-                total_tokens_deposited as u128
+                total_tokens_deposited as u128,
             );
-            let rewards_earned = payroll.calculate_rewards_earned(
-                final_ts,
-                my_tokens_deposited as u128,
-                0_u128,
-                0_u128
-            ).unwrap();
+            let current_ts = initial_ts
+                + (((final_ts - initial_ts) as u128) * (i as u128) / (num_updates as u128))
+                    .to_i64()
+                    .unwrap();
+            rewards_per_token_stored = payroll.calculate_reward_per_token(current_ts).unwrap();
+            last_checkpoint_ts = current_ts;
+        }
 
-            let expected_rewards_earned = U192::from(annual_rewards_rate)
-                * U192::from(final_ts - initial_ts)
-                * U192::from(my_tokens_deposited)
-                / U192::from(SECONDS_PER_YEAR)
-                / U192::from(total_tokens_deposited);
+        let payroll = Payroll::new(
+            i64::MAX,
+            last_checkpoint_ts,
+            annual_rewards_rate,
+            rewards_per_token_stored,
+            total_tokens_deposited as u128,
+        );
+        let rewards_earned = payroll
+            .calculate_rewards_earned(final_ts, my_tokens_deposited as u128, 0_u128, 0_u128)
+            .unwrap();
 
-            assert_percent_delta!(expected_rewards_earned.as_u128(), rewards_earned, EPSILON);
+        let expected_rewards_earned = U192::from(annual_rewards_rate)
+            * U192::from(final_ts - initial_ts)
+            * U192::from(my_tokens_deposited)
+            / U192::from(SECONDS_PER_YEAR)
+            / U192::from(total_tokens_deposited);
+
+        assert_percent_delta!(expected_rewards_earned.as_u128(), rewards_earned, EPSILON);
+    }
+
+    proptest! {
+        #[test]
+        fn test_accumulated_precision_errors_epsilon(
+            num_updates in 1..100_i64,
+            (final_ts, initial_ts) in current_and_checkpoint_ts(),
+            annual_rewards_rate in 0..=MAX_ANNUAL_REWARDS_RATE,
+            (my_tokens_deposited, total_tokens_deposited) in part_and_total()
+        ) {
+            check_accumulated_precision_errors_epsilon(
+                num_updates,
+                (final_ts, initial_ts),
+                annual_rewards_rate,
+                (my_tokens_deposited, total_tokens_deposited))
+        }
+    }
+
+    proptest! {
+        #[test]
+        fn test_accumulated_precision_errors_epsilon_small(
+            num_updates in 1..100_i64,
+            (final_ts, initial_ts) in current_and_checkpoint_ts(),
+            annual_rewards_rate in 0..=MAX_ANNUAL_REWARDS_RATE,
+            (my_tokens_deposited, total_tokens_deposited) in part_and_total_small()
+        ) {
+            check_accumulated_precision_errors_epsilon(
+                num_updates,
+                (final_ts, initial_ts),
+                annual_rewards_rate,
+                (my_tokens_deposited, total_tokens_deposited))
         }
     }
 
@@ -306,9 +355,9 @@ mod tests {
         #[test]
         fn test_sanity_check(
             annual_rewards_rate in 0..=MAX_ANNUAL_REWARDS_RATE,
-            rewards_already_earned in u64::MIN..u64::MAX,
             (rewards_per_token_stored, rewards_per_token_paid) in total_and_intermediate_u64(),
-            (current_ts, last_checkpoint_ts) in total_and_intermediate_ts(),
+            rewards_already_earned in 0..=0_u64,
+            (current_ts, last_checkpoint_ts) in current_and_checkpoint_ts(),
             (my_tokens_deposited, total_tokens_deposited) in part_and_total()
         ) {
             let payroll = Payroll::new(
@@ -319,10 +368,21 @@ mod tests {
                 total_tokens_deposited as u128
             );
 
-            let rewards_earned = payroll.calculate_rewards_earned(current_ts, my_tokens_deposited.into(), rewards_per_token_paid.into(), rewards_already_earned.into()).unwrap();
-            let upperbound = payroll.calculate_claimable_upper_bound_unsafe(current_ts, rewards_per_token_paid.into()).unwrap();
+            let miner = Miner {
+                rewards_per_token_paid: rewards_per_token_paid.into(),
+                ..Miner::default()
+            };
 
-            assert!(upperbound >= rewards_earned.into(), "rewards_earned: {}, upperbound: {}", rewards_earned, upperbound);
+            let rewards_earned = payroll.calculate_rewards_earned(
+                current_ts,
+                my_tokens_deposited.into(),
+                rewards_per_token_paid.into(),
+                rewards_already_earned.into()
+            ).unwrap();
+
+            let result = payroll.sanity_check(current_ts, rewards_earned.to_u64().unwrap(), &miner);
+
+            assert_eq!(result, Ok(()));
         }
     }
 
@@ -330,7 +390,7 @@ mod tests {
         #[test]
         fn test_wpt_with_zero_annual_rewards_rate(
             famine_ts in 0..i64::MAX,
-            (current_ts, last_checkpoint_ts) in total_and_intermediate_ts(),
+            (current_ts, last_checkpoint_ts) in current_and_checkpoint_ts(),
             rewards_per_token_stored in u64::MIN..u64::MAX,
             total_tokens_deposited in u64::MIN..u64::MAX,
         ) {
@@ -343,7 +403,7 @@ mod tests {
         #[test]
         fn test_wpt_when_famine(
             famine_ts in 0..i64::MAX,
-            (current_ts, last_checkpoint_ts) in total_and_intermediate_ts(),
+            (current_ts, last_checkpoint_ts) in current_and_checkpoint_ts(),
             annual_rewards_rate in 1..u64::MAX,
             rewards_per_token_stored in u64::MIN..u64::MAX,
             total_tokens_deposited in u64::MIN..u64::MAX,
@@ -361,7 +421,7 @@ mod tests {
         #[test]
         fn test_rewards_earned_when_zero_tokens_deposited(
             famine_ts in 0..i64::MAX,
-            (current_ts, last_checkpoint_ts) in total_and_intermediate_ts(),
+            (current_ts, last_checkpoint_ts) in current_and_checkpoint_ts(),
             annual_rewards_rate in 0..u64::MAX,
             rewards_per_token_stored in u64::MIN..u64::MAX,
             total_tokens_deposited in u64::MIN..u64::MAX,
@@ -375,10 +435,12 @@ mod tests {
     }
 
     prop_compose! {
-        pub fn total_and_intermediate_ts()(total in 0..i64::MAX)
-                        (intermediate in 0..total, total in Just(total))
-                        -> (i64, i64) {
-           (total, intermediate)
+        pub fn current_and_checkpoint_ts()(
+          total in 0..(i32::MAX as i64) // 2038
+        )(
+          intermediate in (cmp::max(0, total - MAX_TIME_WORKED))..total, total in Just(total)
+        ) -> (i64, i64) {
+          (total, intermediate)
        }
     }
 
