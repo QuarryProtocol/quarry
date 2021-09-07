@@ -3,6 +3,11 @@ name = "quarry-registry"
 version = "1.1.0"
 description = "Registry of all quarries associated with a rewarder."
 edition = "2018"
+homepage = "https://quarry.so"
+repository = "https://github.com/QuarryProtocol/quarry"
+authors = ["Quarry Protocol <team@quarry.so>"]
+license = "AGPL-3.0"
+keywords = ["solana"]
 
 [lib]
 crate-type = ["cdylib", "lib"]
