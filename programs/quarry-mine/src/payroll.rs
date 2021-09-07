@@ -327,7 +327,7 @@ mod tests {
             rewards_per_token_stored in u64::MIN..u64::MAX,
             total_tokens_deposited in u64::MIN..u64::MAX,
         ) {
-            let payroll = Payroll::new(famine_ts, last_checkpoint_ts, 0, rewards_per_token_stored.into(), total_tokens_deposited.into());
+            let payroll = Payroll::new(famine_ts, last_checkpoint_ts, 0, rewards_per_token_stored.into(), total_tokens_deposited);
             assert_eq!(payroll.calculate_reward_per_token(current_ts).unwrap(), rewards_per_token_stored.into())
         }
     }
@@ -343,7 +343,7 @@ mod tests {
         ) {
             let payroll = Payroll::new(
                 famine_ts, last_checkpoint_ts, annual_rewards_rate,
-                rewards_per_token_stored.into(), total_tokens_deposited.into()
+                rewards_per_token_stored.into(), total_tokens_deposited
             );
             prop_assume!(famine_ts < current_ts && famine_ts < last_checkpoint_ts);
             assert_eq!(payroll.calculate_reward_per_token(current_ts).unwrap(), rewards_per_token_stored.into())
