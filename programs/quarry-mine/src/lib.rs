@@ -813,6 +813,7 @@ pub struct CreateMiner<'info> {
 #[derive(Accounts)]
 pub struct ClaimRewards<'info> {
     /// Mint wrapper.
+    #[account(mut)]
     pub mint_wrapper: CpiAccount<'info, quarry_mint_wrapper::MintWrapper>,
     /// Mint wrapper program.
     pub mint_wrapper_program: AccountInfo<'info>,
