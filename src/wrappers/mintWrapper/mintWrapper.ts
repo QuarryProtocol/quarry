@@ -127,8 +127,7 @@ export class MintWrapper {
 
   public async newMinter(
     wrapper: PublicKey,
-    authority: PublicKey,
-    allowance: u64
+    authority: PublicKey
   ): Promise<TransactionEnvelope> {
     const [minter, bump] = await findMinterAddress(
       wrapper,
@@ -146,15 +145,6 @@ export class MintWrapper {
           minter,
           payer: this.program.provider.wallet.publicKey,
           systemProgram: SystemProgram.programId,
-        },
-      }),
-      this.program.instruction.minterUpdate(allowance, {
-        accounts: {
-          auth: {
-            mintWrapper: wrapper,
-            admin: this.program.provider.wallet.publicKey,
-          },
-          minter,
         },
       }),
     ]);
@@ -187,6 +177,27 @@ export class MintWrapper {
         },
       }),
     ]);
+  }
+
+  /**
+   * Creates a new Minter with an allowance.
+   * @param wrapper
+   * @param authority
+   * @param allowance
+   * @returns
+   */
+  public async newMinterWithAllowance(
+    wrapper: PublicKey,
+    authority: PublicKey,
+    allowance: u64
+  ): Promise<TransactionEnvelope> {
+    const newMinter = await this.newMinter(wrapper, authority);
+    const updateAllowance = await this.minterUpdate(
+      wrapper,
+      authority,
+      allowance
+    );
+    return newMinter.combine(updateAllowance);
   }
 
   public transferAdmin(

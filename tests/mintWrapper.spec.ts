@@ -160,11 +160,11 @@ describe("MintWrapper", () => {
       );
     });
 
-    it("Adds to the whitelist", async () => {
+    it("Adds a Minter", async () => {
       const allowance = new u64(1_000_000);
       const id = Keypair.generate().publicKey;
       await expectTX(
-        mintWrapper.newMinter(mintWrapperKey, id, allowance),
+        mintWrapper.newMinterWithAllowance(mintWrapperKey, id, allowance),
         "add minter"
       ).to.be.fulfilled;
       expect(
@@ -173,11 +173,11 @@ describe("MintWrapper", () => {
       ).to.bignumber.eq(allowance);
     });
 
-    it("Removes from the whitelist", async () => {
+    it("Removes a Minter", async () => {
       const allowance = new u64(1_000_000);
       const id = Keypair.generate().publicKey;
       await expectTX(
-        mintWrapper.newMinter(mintWrapperKey, id, allowance),
+        mintWrapper.newMinterWithAllowance(mintWrapperKey, id, allowance),
         "add minter"
       ).to.be.fulfilled;
 
@@ -320,7 +320,7 @@ describe("MintWrapper", () => {
 
       // whitelist rewarder
       await expectTX(
-        mintWrapper.newMinter(
+        mintWrapper.newMinterWithAllowance(
           mintWrapperKey,
           rewarder,
           new u64(100_000_000_000000)
