@@ -1,13 +1,18 @@
 import type { Provider } from "@saberhq/solana-contrib";
 import { TransactionEnvelope } from "@saberhq/solana-contrib";
-import { createInitMintInstructions } from "@saberhq/token-utils";
+import type { TokenAmount } from "@saberhq/token-utils";
+import {
+  createInitMintInstructions,
+  getOrCreateATA,
+} from "@saberhq/token-utils";
 import type { u64 } from "@solana/spl-token";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import type { PublicKey } from "@solana/web3.js";
+import type { AccountInfo, PublicKey } from "@solana/web3.js";
 import { Keypair, SystemProgram } from "@solana/web3.js";
 
 import type {
   MinterData,
+  MintWrapperData,
   MintWrapperProgram,
 } from "../../programs/mintWrapper";
 import type { QuarrySDK } from "../../sdk";
@@ -97,6 +102,26 @@ export class MintWrapper {
       mint: mintKP.publicKey,
       tx: initMintTX.combine(initMintProxyTX),
     };
+  }
+
+  /**
+   * Fetches info on a Mint Wrapper.
+   * @param minter
+   * @returns
+   */
+  public async fetchMintWrapper(
+    wrapper: PublicKey
+  ): Promise<MintWrapperData | null> {
+    const accountInfo = await this.program.provider.connection.getAccountInfo(
+      wrapper
+    );
+    if (!accountInfo) {
+      return null;
+    }
+    return this.program.coder.accounts.decode<MintWrapperData>(
+      "MintWrapper",
+      accountInfo.data
+    );
   }
 
   /**
@@ -225,4 +250,39 @@ export class MintWrapper {
       }),
     ]);
   }
+
+  /**
+   * Performs a mint of tokens to an account.
+   * @returns
+   */
+  public performMint = async ({
+    amount,
+    minter,
+  }: {
+    amount: TokenAmount;
+    minter: {
+      accountId: PublicKey;
+      accountInfo: AccountInfo<MinterData>;
+    };
+  }): Promise<TransactionEnvelope> => {
+    const minterData = minter.accountInfo.data;
+    const ata = await getOrCreateATA({
+      provider: this.provider,
+      mint: amount.token.mintAccount,
+      owner: this.provider.wallet.publicKey,
+    });
+    return this.sdk.newTx([
+      ...(ata.instruction ? [ata.instruction] : []),
+      this.program.instruction.performMint(amount.toU64(), {
+        accounts: {
+          mintWrapper: minterData.mintWrapper,
+          minterAuthority: minterData.minterAuthority,
+          tokenMint: amount.token.mintAccount,
+          destination: ata.address,
+          minter: minter.accountId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        },
+      }),
+    ]);
+  };
 }

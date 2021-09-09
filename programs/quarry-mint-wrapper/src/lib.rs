@@ -33,6 +33,9 @@ pub mod quarry_mint_wrapper {
         mint_wrapper.token_mint = ctx.accounts.token_mint.key();
         mint_wrapper.num_minters = 0;
 
+        mint_wrapper.total_allowance = 0;
+        mint_wrapper.total_minted = 0;
+
         emit!(NewMintWrapperEvent {
             mint_wrapper: mint_wrapper.key(),
             hard_cap,
@@ -112,6 +115,12 @@ pub mod quarry_mint_wrapper {
         let previous_allowance = minter.allowance;
         minter.allowance = allowance;
 
+        let mint_wrapper = &mut ctx.accounts.auth.mint_wrapper;
+        mint_wrapper.total_allowance = unwrap_int!(mint_wrapper
+            .total_allowance
+            .checked_add(allowance)
+            .and_then(|v| v.checked_sub(previous_allowance)));
+
         emit!(MinterAllowanceUpdateEvent {
             mint_wrapper: minter.mint_wrapper,
             minter: minter.key(),
@@ -146,6 +155,11 @@ pub mod quarry_mint_wrapper {
             proxy_signer,
         );
         token::mint_to(cpi_ctx, amount)?;
+
+        let mint_wrapper = &mut ctx.accounts.mint_wrapper;
+        mint_wrapper.total_allowance =
+            unwrap_int!(mint_wrapper.total_allowance.checked_sub(amount));
+        mint_wrapper.total_minted = unwrap_int!(mint_wrapper.total_minted.checked_add(amount));
 
         // extra sanity checks
         ctx.accounts.token_mint.reload()?;
@@ -242,7 +256,7 @@ pub struct MinterUpdate<'info> {
 
 #[derive(Accounts)]
 pub struct TransferAdmin<'info> {
-    /// The mint wrapper.
+    /// The [MintWrapper].
     #[account(mut)]
     pub mint_wrapper: ProgramAccount<'info, MintWrapper>,
 
@@ -268,22 +282,23 @@ pub struct AcceptAdmin<'info> {
 /// Accounts for the perform_mint instruction.
 #[derive(Accounts)]
 pub struct PerformMint<'info> {
-    /// Mint wrapper.
+    /// [MintWrapper].
+    #[account(mut)]
     pub mint_wrapper: ProgramAccount<'info, MintWrapper>,
 
-    /// Minter.
+    /// [Minter]'s authority.
     #[account(signer)]
     pub minter_authority: AccountInfo<'info>,
 
-    /// Token mint.
+    /// Token [Mint].
     #[account(mut)]
     pub token_mint: CpiAccount<'info, Mint>,
 
-    /// Destination account for minted tokens.
+    /// Destination [TokenAccount] for minted tokens.
     #[account(mut)]
     pub destination: CpiAccount<'info, TokenAccount>,
 
-    /// Minter information.
+    /// [Minter] information.
     #[account(mut)]
     pub minter: ProgramAccount<'info, Minter>,
 
@@ -298,6 +313,7 @@ pub struct PerformMint<'info> {
 #[derive(Accounts)]
 pub struct OnlyAdmin<'info> {
     /// The mint wrapper.
+    #[account(mut)]
     pub mint_wrapper: ProgramAccount<'info, MintWrapper>,
     #[account(signer)]
     pub admin: AccountInfo<'info>,
@@ -335,6 +351,11 @@ pub struct MintWrapper {
     pub token_mint: Pubkey,
     /// Number of [Minter]s.
     pub num_minters: u64,
+
+    /// Total allowance outstanding.
+    pub total_allowance: u64,
+    /// Total amount of tokens minted through the [MintWrapper].
+    pub total_minted: u64,
 }
 
 /// One who can mint.
