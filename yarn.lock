@@ -233,6 +233,20 @@
     tiny-invariant "^1.1.0"
     tslib "^2.3.0"
 
+"@saberhq/token-utils@^0.18.0":
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/@saberhq/token-utils/-/token-utils-0.18.0.tgz#699c68cc93b25352ae4ab3ab2e791d5434ac46aa"
+  integrity sha512-z4HSMnxLemN3/mo/MwNcLsIKI/E1RNiYR4KRfusTYfpYOz2A7aOCUf7aJTfr8zbpowBNYng2+sQla9UTTK/D+w==
+  dependencies:
+    "@saberhq/solana-contrib" "^0.18.0"
+    "@solana/spl-token" "^0.1.5"
+    "@solana/spl-token-registry" "^0.2.226"
+    "@solana/web3.js" "^1.25.0"
+    "@ubeswap/token-math" "^4.2.0"
+    buffer-layout "^1.2.2"
+    tiny-invariant "^1.1.0"
+    tslib "^2.3.0"
+
 "@solana/buffer-layout@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@solana/buffer-layout/-/buffer-layout-3.0.0.tgz#b9353caeb9a1589cb77a1b145bcb1a9a93114326"
@@ -447,16 +461,16 @@
     "@typescript-eslint/types" "4.31.0"
     eslint-visitor-keys "^2.0.0"
 
-"@ubeswap/token-math@^4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@ubeswap/token-math/-/token-math-4.1.0.tgz#2001b35d76cf803361cb641c8df9af9393abe777"
-  integrity sha512-LgBT5TLRLjkz0u47Ks/cfLRQKviMzIZRgzBHyh7Czbj5IsoJUZYLeGuSBJHJQweSfeJll2KYKClxT4yKS3Mdnw==
+"@ubeswap/token-math@^4.1.0", "@ubeswap/token-math@^4.2.0":
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/@ubeswap/token-math/-/token-math-4.2.0.tgz#639cb4db9da790f9ce6ebf31f2e9a4ae905f4bab"
+  integrity sha512-L3IVv98sm6PZQgry7ciZx0BNvNKCZffRQNaKTnhFvlxaLYSlkRh4iHOcmVYbvn++ipDh7sXpHbcqVZKaKADccw==
   dependencies:
     "@types/bn.js" "^5.1.0"
     big.js "^6.1.1"
     bn.js "^5.2.0"
     decimal.js-light "^2.5.0"
-    jsbi "^3.2.1"
+    jsbi "^3.2.3"
     tiny-invariant "^1.1.0"
     toformat "^2.0.0"
 
@@ -1849,10 +1863,10 @@ js-yaml@^3.13.1:
     argparse "^1.0.7"
     esprima "^4.0.0"
 
-jsbi@^3.2.1:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/jsbi/-/jsbi-3.2.1.tgz#513a8f404abb9d5ba725f5265265b688215ee9f0"
-  integrity sha512-NzcT09wuJReIO829enrY3yRdHFz+ciVIq01PCGPkHlwIv5Dj9v2F4daQ4akwuPHf6xO/oii4Jrd3BsPepOxXrg==
+jsbi@^3.2.3:
+  version "3.2.3"
+  resolved "https://registry.yarnpkg.com/jsbi/-/jsbi-3.2.3.tgz#bb3c3bfcd9f18fbf14e1e6b749d1805b304c663e"
+  integrity sha512-j6G1XZPxyYxALX0XvgJMkyfwCpG/NOmzS8vDwXcAO5y3l2aclpabU9W0yli+G7Bfpv4j9Sg+Ln70i+wENNcaaw==
 
 json-parse-better-errors@^1.0.1:
   version "1.0.2"
