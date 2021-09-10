@@ -38,7 +38,7 @@
   "dependencies": {
     "@project-serum/anchor": "^0.13.2",
     "@saberhq/anchor-contrib": "^0.16.0",
-    "@saberhq/solana-contrib": "^0.16.0",
+    "@saberhq/solana-contrib": "^0.18.0",
     "@saberhq/token-utils": "^0.16.0",
     "@solana/web3.js": "^1.24.1",
     "bn.js": "^5.2.0"
