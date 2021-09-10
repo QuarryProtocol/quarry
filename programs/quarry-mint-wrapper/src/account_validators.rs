@@ -78,6 +78,12 @@ impl<'info> Validate<'info> for AcceptAdmin<'info> {
 
 impl<'info> Validate<'info> for PerformMint<'info> {
     fn validate(&self) -> ProgramResult {
+        require!(
+            self.mint_wrapper.to_account_info().is_writable,
+            Unauthorized
+        );
+        require!(self.minter.to_account_info().is_writable, Unauthorized);
+
         require!(self.minter_authority.is_signer, Unauthorized);
         require!(self.minter.allowance > 0, MinterAllowanceExceeded);
         assert_keys!(self.minter.mint_wrapper, self.mint_wrapper, "mint wrapper");
@@ -103,6 +109,7 @@ impl<'info> Validate<'info> for PerformMint<'info> {
 impl<'info> Validate<'info> for OnlyAdmin<'info> {
     fn validate(&self) -> ProgramResult {
         require!(self.admin.is_signer, Unauthorized);
+        require!(self.admin.is_writable, Unauthorized);
         assert_keys!(self.admin, self.mint_wrapper.admin, "admin");
         Ok(())
     }

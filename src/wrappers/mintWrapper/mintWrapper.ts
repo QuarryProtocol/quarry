@@ -1,13 +1,18 @@
 import type { Provider } from "@saberhq/solana-contrib";
 import { TransactionEnvelope } from "@saberhq/solana-contrib";
-import { createInitMintInstructions } from "@saberhq/token-utils";
+import type { TokenAmount } from "@saberhq/token-utils";
+import {
+  createInitMintInstructions,
+  getOrCreateATA,
+} from "@saberhq/token-utils";
 import type { u64 } from "@solana/spl-token";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import type { PublicKey } from "@solana/web3.js";
+import type { AccountInfo, PublicKey } from "@solana/web3.js";
 import { Keypair, SystemProgram } from "@solana/web3.js";
 
 import type {
   MinterData,
+  MintWrapperData,
   MintWrapperProgram,
 } from "../../programs/mintWrapper";
 import type { QuarrySDK } from "../../sdk";
@@ -100,6 +105,26 @@ export class MintWrapper {
   }
 
   /**
+   * Fetches info on a Mint Wrapper.
+   * @param minter
+   * @returns
+   */
+  public async fetchMintWrapper(
+    wrapper: PublicKey
+  ): Promise<MintWrapperData | null> {
+    const accountInfo = await this.program.provider.connection.getAccountInfo(
+      wrapper
+    );
+    if (!accountInfo) {
+      return null;
+    }
+    return this.program.coder.accounts.decode<MintWrapperData>(
+      "MintWrapper",
+      accountInfo.data
+    );
+  }
+
+  /**
    * Fetches info on a minter.
    * @param minter
    * @returns
@@ -127,8 +152,7 @@ export class MintWrapper {
 
   public async newMinter(
     wrapper: PublicKey,
-    authority: PublicKey,
-    allowance: u64
+    authority: PublicKey
   ): Promise<TransactionEnvelope> {
     const [minter, bump] = await findMinterAddress(
       wrapper,
@@ -146,15 +170,6 @@ export class MintWrapper {
           minter,
           payer: this.program.provider.wallet.publicKey,
           systemProgram: SystemProgram.programId,
-        },
-      }),
-      this.program.instruction.minterUpdate(allowance, {
-        accounts: {
-          auth: {
-            mintWrapper: wrapper,
-            admin: this.program.provider.wallet.publicKey,
-          },
-          minter,
         },
       }),
     ]);
@@ -189,6 +204,27 @@ export class MintWrapper {
     ]);
   }
 
+  /**
+   * Creates a new Minter with an allowance.
+   * @param wrapper
+   * @param authority
+   * @param allowance
+   * @returns
+   */
+  public async newMinterWithAllowance(
+    wrapper: PublicKey,
+    authority: PublicKey,
+    allowance: u64
+  ): Promise<TransactionEnvelope> {
+    const newMinter = await this.newMinter(wrapper, authority);
+    const updateAllowance = await this.minterUpdate(
+      wrapper,
+      authority,
+      allowance
+    );
+    return newMinter.combine(updateAllowance);
+  }
+
   public transferAdmin(
     wrapper: PublicKey,
     nextAdmin: PublicKey
@@ -214,4 +250,39 @@ export class MintWrapper {
       }),
     ]);
   }
+
+  /**
+   * Performs a mint of tokens to an account.
+   * @returns
+   */
+  public performMint = async ({
+    amount,
+    minter,
+  }: {
+    amount: TokenAmount;
+    minter: {
+      accountId: PublicKey;
+      accountInfo: AccountInfo<MinterData>;
+    };
+  }): Promise<TransactionEnvelope> => {
+    const minterData = minter.accountInfo.data;
+    const ata = await getOrCreateATA({
+      provider: this.provider,
+      mint: amount.token.mintAccount,
+      owner: this.provider.wallet.publicKey,
+    });
+    return this.sdk.newTx([
+      ...(ata.instruction ? [ata.instruction] : []),
+      this.program.instruction.performMint(amount.toU64(), {
+        accounts: {
+          mintWrapper: minterData.mintWrapper,
+          minterAuthority: minterData.minterAuthority,
+          tokenMint: amount.token.mintAccount,
+          destination: ata.address,
+          minter: minter.accountId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        },
+      }),
+    ]);
+  };
 }

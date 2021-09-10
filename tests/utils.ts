@@ -12,7 +12,7 @@ import { Transaction } from "@solana/web3.js";
 import type { QuarrySDK, QuarryWrapper } from "../src";
 
 export const DEFAULT_DECIMALS = 6;
-export const DEFAULT_HARD_CAP = 19_884_700_000;
+export const DEFAULT_HARD_CAP = 1_000_000_000_000;
 
 export const newUserStakeTokenAccount = async (
   sdk: QuarrySDK,

@@ -8,7 +8,6 @@ import {
 } from "@saberhq/solana-contrib";
 import type {
   ConfirmOptions,
-  Keypair,
   PublicKey,
   Signer,
   TransactionInstruction,
@@ -38,7 +37,7 @@ export class QuarrySDK {
   /**
    * Creates a new instance of the SDK with the given keypair.
    */
-  public withKeypair(keypair: Keypair): QuarrySDK {
+  public withKeypair(keypair: Signer): QuarrySDK {
     const provider = new SignerWallet(keypair).createProvider(
       this.provider.connection,
       this.provider.sendConnection

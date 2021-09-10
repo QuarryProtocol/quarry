@@ -6,6 +6,7 @@ mod macros;
 use anchor_lang::prelude::*;
 use anchor_lang::Key;
 use anchor_spl::token::{self, Mint, TokenAccount};
+use vipers::unwrap_int;
 use vipers::validate::Validate;
 
 mod account_validators;
@@ -14,9 +15,11 @@ solana_program::declare_id!("QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV");
 
 #[program]
 pub mod quarry_mint_wrapper {
-    use vipers::unwrap_int;
-
     use super::*;
+
+    /// --------------------------------
+    /// [MintWrapper] instructions
+    /// --------------------------------
 
     /// Creates a new [MintWrapper].
     #[access_control(ctx.accounts.validate())]
@@ -28,9 +31,54 @@ pub mod quarry_mint_wrapper {
         mint_wrapper.admin = ctx.accounts.admin.key();
         mint_wrapper.pending_admin = Pubkey::default();
         mint_wrapper.token_mint = ctx.accounts.token_mint.key();
+        mint_wrapper.num_minters = 0;
+
+        mint_wrapper.total_allowance = 0;
+        mint_wrapper.total_minted = 0;
+
+        emit!(NewMintWrapperEvent {
+            mint_wrapper: mint_wrapper.key(),
+            hard_cap,
+            admin: ctx.accounts.admin.key(),
+            token_mint: ctx.accounts.token_mint.key()
+        });
 
         Ok(())
     }
+
+    /// Transfers admin to another account.
+    #[access_control(ctx.accounts.validate())]
+    pub fn transfer_admin(ctx: Context<TransferAdmin>) -> Result<()> {
+        let mint_wrapper = &mut ctx.accounts.mint_wrapper;
+        mint_wrapper.pending_admin = ctx.accounts.next_admin.key();
+
+        emit!(MintWrapperAdminProposeEvent {
+            mint_wrapper: mint_wrapper.key(),
+            current_admin: mint_wrapper.admin,
+            pending_admin: mint_wrapper.pending_admin,
+        });
+        Ok(())
+    }
+
+    /// Accepts the new admin.
+    #[access_control(ctx.accounts.validate())]
+    pub fn accept_admin(ctx: Context<AcceptAdmin>) -> Result<()> {
+        let mint_wrapper = &mut ctx.accounts.mint_wrapper;
+        let previous_admin = mint_wrapper.admin;
+        mint_wrapper.admin = ctx.accounts.pending_admin.key();
+        mint_wrapper.pending_admin = Pubkey::default();
+
+        emit!(MintWrapperAdminUpdateEvent {
+            mint_wrapper: mint_wrapper.key(),
+            previous_admin,
+            admin: mint_wrapper.admin,
+        });
+        Ok(())
+    }
+
+    /// --------------------------------
+    /// [Minter] instructions
+    /// --------------------------------
 
     /// Creates a new [Minter].
     #[access_control(ctx.accounts.validate())]
@@ -40,7 +88,23 @@ pub mod quarry_mint_wrapper {
         minter.mint_wrapper = ctx.accounts.auth.mint_wrapper.key();
         minter.minter_authority = ctx.accounts.minter_authority.key();
         minter.bump = bump;
+
+        let index = ctx.accounts.auth.mint_wrapper.num_minters;
+        minter.index = index;
+
+        // update num minters
+        let mint_wrapper = &mut ctx.accounts.auth.mint_wrapper;
+        mint_wrapper.num_minters = unwrap_int!(index.checked_add(1));
+
         minter.allowance = 0;
+        minter.total_minted = 0;
+
+        emit!(NewMinterEvent {
+            mint_wrapper: minter.mint_wrapper,
+            minter: minter.key(),
+            index: minter.index,
+            minter_authority: minter.minter_authority,
+        });
         Ok(())
     }
 
@@ -48,24 +112,21 @@ pub mod quarry_mint_wrapper {
     #[access_control(ctx.accounts.validate())]
     pub fn minter_update(ctx: Context<MinterUpdate>, allowance: u64) -> ProgramResult {
         let minter = &mut ctx.accounts.minter;
+        let previous_allowance = minter.allowance;
         minter.allowance = allowance;
-        Ok(())
-    }
 
-    /// Transfers admin to another account.
-    #[access_control(ctx.accounts.validate())]
-    pub fn transfer_admin(ctx: Context<TransferAdmin>) -> Result<()> {
-        let mint_wrapper = &mut ctx.accounts.mint_wrapper;
-        mint_wrapper.pending_admin = ctx.accounts.next_admin.key();
-        Ok(())
-    }
+        let mint_wrapper = &mut ctx.accounts.auth.mint_wrapper;
+        mint_wrapper.total_allowance = unwrap_int!(mint_wrapper
+            .total_allowance
+            .checked_add(allowance)
+            .and_then(|v| v.checked_sub(previous_allowance)));
 
-    /// Accepts the new admin.
-    #[access_control(ctx.accounts.validate())]
-    pub fn accept_admin(ctx: Context<AcceptAdmin>) -> Result<()> {
-        let mint_wrapper = &mut ctx.accounts.mint_wrapper;
-        mint_wrapper.admin = ctx.accounts.pending_admin.key();
-        mint_wrapper.pending_admin = Pubkey::default();
+        emit!(MinterAllowanceUpdateEvent {
+            mint_wrapper: minter.mint_wrapper,
+            minter: minter.key(),
+            previous_allowance,
+            allowance: minter.allowance,
+        });
         Ok(())
     }
 
@@ -80,6 +141,7 @@ pub mod quarry_mint_wrapper {
         require!(new_supply <= mint_wrapper.hard_cap, HardcapExceeded);
 
         minter.allowance = unwrap_int!(minter.allowance.checked_sub(amount));
+        minter.total_minted = unwrap_int!(minter.total_minted.checked_add(amount));
 
         let seeds = gen_wrapper_signer_seeds!(mint_wrapper);
         let proxy_signer = &[&seeds[..]];
@@ -93,6 +155,22 @@ pub mod quarry_mint_wrapper {
             proxy_signer,
         );
         token::mint_to(cpi_ctx, amount)?;
+
+        let mint_wrapper = &mut ctx.accounts.mint_wrapper;
+        mint_wrapper.total_allowance =
+            unwrap_int!(mint_wrapper.total_allowance.checked_sub(amount));
+        mint_wrapper.total_minted = unwrap_int!(mint_wrapper.total_minted.checked_add(amount));
+
+        // extra sanity checks
+        ctx.accounts.token_mint.reload()?;
+        require!(new_supply == ctx.accounts.token_mint.supply, Unauthorized);
+
+        emit!(MinterMintEvent {
+            mint_wrapper: mint_wrapper.key(),
+            minter: minter.key(),
+            amount,
+            destination: ctx.accounts.destination.key(),
+        });
         Ok(())
     }
 }
@@ -178,7 +256,7 @@ pub struct MinterUpdate<'info> {
 
 #[derive(Accounts)]
 pub struct TransferAdmin<'info> {
-    /// The mint wrapper.
+    /// The [MintWrapper].
     #[account(mut)]
     pub mint_wrapper: ProgramAccount<'info, MintWrapper>,
 
@@ -204,22 +282,23 @@ pub struct AcceptAdmin<'info> {
 /// Accounts for the perform_mint instruction.
 #[derive(Accounts)]
 pub struct PerformMint<'info> {
-    /// Mint wrapper.
+    /// [MintWrapper].
+    #[account(mut)]
     pub mint_wrapper: ProgramAccount<'info, MintWrapper>,
 
-    /// Minter.
+    /// [Minter]'s authority.
     #[account(signer)]
     pub minter_authority: AccountInfo<'info>,
 
-    /// Token mint.
+    /// Token [Mint].
     #[account(mut)]
     pub token_mint: CpiAccount<'info, Mint>,
 
-    /// Destination account for minted tokens.
+    /// Destination [TokenAccount] for minted tokens.
     #[account(mut)]
     pub destination: CpiAccount<'info, TokenAccount>,
 
-    /// Minter information.
+    /// [Minter] information.
     #[account(mut)]
     pub minter: ProgramAccount<'info, Minter>,
 
@@ -234,6 +313,7 @@ pub struct PerformMint<'info> {
 #[derive(Accounts)]
 pub struct OnlyAdmin<'info> {
     /// The mint wrapper.
+    #[account(mut)]
     pub mint_wrapper: ProgramAccount<'info, MintWrapper>,
     #[account(signer)]
     pub admin: AccountInfo<'info>,
@@ -269,6 +349,13 @@ pub struct MintWrapper {
 
     /// Mint of the token.
     pub token_mint: Pubkey,
+    /// Number of [Minter]s.
+    pub num_minters: u64,
+
+    /// Total allowance outstanding.
+    pub total_allowance: u64,
+    /// Total amount of tokens minted through the [MintWrapper].
+    pub total_minted: u64,
 }
 
 /// One who can mint.
@@ -288,10 +375,109 @@ pub struct Minter {
     pub mint_wrapper: Pubkey,
     /// Address that can mint.
     pub minter_authority: Pubkey,
+    /// Bump seed.
     pub bump: u8,
 
-    /// Limit of number of tokens that this minter can mint.
+    /// Auto-incrementing index of the [Minter].
+    pub index: u64,
+
+    /// Limit of number of tokens that this [Minter] can mint.
     pub allowance: u64,
+    /// Cumulative sum of the number of tokens ever minted by this [Minter].
+    pub total_minted: u64,
+}
+
+/// --------------------------------
+/// Events
+/// --------------------------------
+
+/// Triggered when a [MintWrapper] is created.
+#[event]
+pub struct NewMintWrapperEvent {
+    /// The [MintWrapper].
+    #[index]
+    pub mint_wrapper: Pubkey,
+
+    /// Hard cap.
+    pub hard_cap: u64,
+    /// The admin.
+    pub admin: Pubkey,
+    /// The [Mint] of the token.
+    pub token_mint: Pubkey,
+}
+
+/// Triggered when a [MintWrapper]'s admin is proposed.
+#[event]
+pub struct MintWrapperAdminProposeEvent {
+    /// The [MintWrapper].
+    #[index]
+    pub mint_wrapper: Pubkey,
+
+    /// The [MintWrapper]'s current admin.
+    pub current_admin: Pubkey,
+    /// The [MintWrapper]'s pending admin.
+    pub pending_admin: Pubkey,
+}
+
+/// Triggered when a [MintWrapper]'s admin is transferred.
+#[event]
+pub struct MintWrapperAdminUpdateEvent {
+    /// The [MintWrapper].
+    #[index]
+    pub mint_wrapper: Pubkey,
+
+    /// The [MintWrapper]'s previous admin.
+    pub previous_admin: Pubkey,
+    /// The [MintWrapper]'s new admin.
+    pub admin: Pubkey,
+}
+
+/// Triggered when a [Minter] is created.
+#[event]
+pub struct NewMinterEvent {
+    /// The [MintWrapper].
+    #[index]
+    pub mint_wrapper: Pubkey,
+    /// The [Minter].
+    #[index]
+    pub minter: Pubkey,
+
+    /// The [Minter]'s index.
+    pub index: u64,
+    /// The [Minter]'s authority.
+    pub minter_authority: Pubkey,
+}
+
+/// Triggered when a [Minter]'s allowance is updated.
+#[event]
+pub struct MinterAllowanceUpdateEvent {
+    /// The [MintWrapper].
+    #[index]
+    pub mint_wrapper: Pubkey,
+    /// The [Minter].
+    #[index]
+    pub minter: Pubkey,
+
+    /// The [Minter]'s previous allowance.
+    pub previous_allowance: u64,
+    /// The [Minter]'s new allowance.
+    pub allowance: u64,
+}
+
+/// Triggered when a [Minter] performs a mint.
+#[event]
+pub struct MinterMintEvent {
+    /// The [MintWrapper].
+    #[index]
+    pub mint_wrapper: Pubkey,
+    /// The [Minter].
+    #[index]
+    pub minter: Pubkey,
+
+    /// Amount minted.
+    pub amount: u64,
+    /// Mint destination.
+    pub destination: Pubkey,
 }
 
 /// --------------------------------
