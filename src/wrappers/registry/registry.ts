@@ -36,19 +36,14 @@ export class QuarryRegistry {
       this.program.programId
     );
     const createRegistryTX = new TransactionEnvelope(this.provider, [
-      this.program.instruction.newRegistry(
-        numQuarries,
-        8 + 1 + 32 + 32 * numQuarries,
-        bump,
-        {
-          accounts: {
-            rewarder: rewarderKey,
-            registry,
-            payer,
-            systemProgram: SystemProgram.programId,
-          },
-        }
-      ),
+      this.program.instruction.newRegistry(numQuarries, bump, {
+        accounts: {
+          rewarder: rewarderKey,
+          registry,
+          payer,
+          systemProgram: SystemProgram.programId,
+        },
+      }),
     ]);
     return {
       tx: createRegistryTX,
