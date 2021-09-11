@@ -3,10 +3,10 @@ import { TransactionEnvelope } from "@saberhq/solana-contrib";
 import type { PublicKey } from "@solana/web3.js";
 import { SystemProgram } from "@solana/web3.js";
 
-import type { RegistryProgram } from "../programs";
-import type { QuarrySDK } from "../sdk";
-import { findQuarryAddress } from "./mine";
-import { findRegistryAddress } from "./registry/pda";
+import type { RegistryProgram } from "../../programs";
+import type { QuarrySDK } from "../../sdk";
+import { findQuarryAddress } from "../mine";
+import { findRegistryAddress } from "./pda";
 
 export class QuarryRegistry {
   public readonly program: RegistryProgram;

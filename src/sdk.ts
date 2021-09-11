@@ -17,7 +17,7 @@ import invariant from "tiny-invariant";
 
 import type { Programs } from "./constants";
 import { QUARRY_ADDRESSES, QUARRY_IDLS } from "./constants";
-import { MineWrapper, MintWrapper } from "./wrappers";
+import { MineWrapper, MintWrapper, QuarryRegistry } from "./wrappers";
 
 export interface Environment {
   rewarder: PublicKey;
@@ -58,6 +58,10 @@ export class QuarrySDK {
 
   get mine(): MineWrapper {
     return new MineWrapper(this);
+  }
+
+  get registry(): QuarryRegistry {
+    return new QuarryRegistry(this);
   }
 
   /**
