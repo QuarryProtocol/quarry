@@ -25,7 +25,7 @@ pub mod quarry_registry {
     pub fn new_registry(
         ctx: Context<NewRegistry>,
         max_quarries: u16,
-        _space: u16,
+        _space: u32,
         bump: u8,
     ) -> ProgramResult {
         ctx.accounts.validate()?;
@@ -50,7 +50,7 @@ pub mod quarry_registry {
 
 /// Accounts for [quarry_registry::new_registry].
 #[derive(Accounts)]
-#[instruction(space: u16, bump: u8)]
+#[instruction(_max_quarries: u16, space: u32, bump: u8)]
 pub struct NewRegistry<'info> {
     /// [Rewarder].
     pub rewarder: CpiAccount<'info, Rewarder>,
