@@ -22,12 +22,7 @@ pub mod quarry_registry {
     /// * `max_quarries` - The maximum number of quarries that can be held in the registry.
     /// * `space` - The amount of space to provision for the [Registry], in bytes. Since a [Pubkey] is 32 bytes, this should be about `8 + 1 + 32 + 32 * max_quarries`.
     /// * `bump` - Bump seed.
-    pub fn new_registry(
-        ctx: Context<NewRegistry>,
-        max_quarries: u16,
-        _space: u16,
-        bump: u8,
-    ) -> ProgramResult {
+    pub fn new_registry(ctx: Context<NewRegistry>, max_quarries: u16, bump: u8) -> ProgramResult {
         ctx.accounts.validate()?;
         let registry = &mut ctx.accounts.registry;
         registry.bump = bump;
@@ -50,7 +45,7 @@ pub mod quarry_registry {
 
 /// Accounts for [quarry_registry::new_registry].
 #[derive(Accounts)]
-#[instruction(space: u16, bump: u8)]
+#[instruction(max_quarries: u16, bump: u8)]
 pub struct NewRegistry<'info> {
     /// [Rewarder].
     pub rewarder: CpiAccount<'info, Rewarder>,
@@ -60,11 +55,11 @@ pub struct NewRegistry<'info> {
         init,
         seeds = [
             b"QuarryRegistry".as_ref(),
-            rewarder.key().to_bytes().as_ref(),
-            &[bump],
+            rewarder.key().to_bytes().as_ref()
         ],
+        bump = bump,
         payer = payer,
-        space = space as usize
+        space = (8 + 1 + 32 + 32 * max_quarries + 100) as usize
     )]
     pub registry: ProgramAccount<'info, Registry>,
 
@@ -78,7 +73,6 @@ pub struct NewRegistry<'info> {
 
 /// Accounts for [quarry_registry::sync_quarry].
 #[derive(Accounts)]
-#[instruction(bump: u8)]
 pub struct SyncQuarry<'info> {
     /// [Quarry] to sync.
     pub quarry: CpiAccount<'info, Quarry>,
