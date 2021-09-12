@@ -217,7 +217,7 @@ describe("MintWrapper", () => {
       ).to.bignumber.eq(allowance);
 
       const amount = new TokenAmount(token, new u64(1_000));
-      const minterSDK = sdk.withKeypair(kp);
+      const minterSDK = sdk.withSigner(kp);
       const [minterAddress] = await findMinterAddress(mintWrapperKey, id);
       const minterData =
         await minterSDK.programs.MintWrapper.account.minter.fetch(

@@ -37,8 +37,8 @@ export class QuarrySDK {
   /**
    * Creates a new instance of the SDK with the given keypair.
    */
-  public withKeypair(keypair: Signer): QuarrySDK {
-    const provider = new SignerWallet(keypair).createProvider(
+  public withSigner(signer: Signer): QuarrySDK {
+    const provider = new SignerWallet(signer).createProvider(
       this.provider.connection,
       this.provider.sendConnection
     );
