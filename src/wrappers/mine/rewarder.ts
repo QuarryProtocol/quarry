@@ -133,7 +133,7 @@ export class RewarderWrapper {
     mints: PublicKey[]
   ): Promise<TransactionEnvelope> {
     const tx = await this.syncQuarryRewards(mints);
-    return tx.combine(this.setAnnualRewards({ newAnnualRate }));
+    return this.setAnnualRewards({ newAnnualRate }).combine(tx);
   }
 
   /**
