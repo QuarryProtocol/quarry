@@ -362,7 +362,6 @@ mod tests {
             .calculate_claimable_upper_bound_unsafe(current_ts, 0)
             .unwrap();
 
-
         assert!(
             upperbound >= rewards_earned.into(),
             "rewards_earned: {}, upperbound: {}",
