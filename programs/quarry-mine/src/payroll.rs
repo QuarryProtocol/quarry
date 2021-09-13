@@ -72,11 +72,7 @@ impl Payroll {
         if self.total_tokens_deposited == 0 {
             Some(self.rewards_per_token_stored)
         } else {
-            let time_worked = cmp::max(
-                0,
-                self.last_time_reward_applicable(current_ts)
-                    .checked_sub(self.last_checkpoint_ts)?,
-            );
+            let time_worked = self.compute_time_worked(current_ts)?;
 
             let reward = U192::from(time_worked)
                 .checked_mul(PRECISION_MULTIPLIER.into())?
@@ -147,11 +143,7 @@ impl Payroll {
         current_ts: i64,
         rewards_per_token_paid: u128,
     ) -> Option<U192> {
-        let time_worked = cmp::max(
-            0,
-            self.last_time_reward_applicable(current_ts)
-                .checked_sub(self.last_checkpoint_ts)?,
-        );
+        let time_worked = self.compute_time_worked(current_ts)?;
 
         let quarry_rewards_accrued = U192::from(time_worked)
             .checked_mul(self.annual_rewards_rate.into())?
@@ -200,6 +192,15 @@ impl Payroll {
     /// Gets the latest time rewards were being distributed.
     pub fn last_time_reward_applicable(&self, current_ts: i64) -> i64 {
         cmp::min(current_ts, self.famine_ts)
+    }
+
+    /// Calculates the amount of seconds the [Payroll] should have applied rewards for.
+    fn compute_time_worked(&self, current_ts: i64) -> Option<i64> {
+        Some(cmp::max(
+            0,
+            self.last_time_reward_applicable(current_ts)
+                .checked_sub(self.last_checkpoint_ts)?,
+        ))
     }
 }
 
