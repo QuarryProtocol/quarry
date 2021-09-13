@@ -315,6 +315,15 @@ pub mod quarry_mine {
 
         let amount_claimable_minus_fees = unwrap_int!(amount_claimable.checked_sub(max_claim_fee));
 
+        // Claim all rewards.
+        miner.rewards_earned = 0;
+
+        // Setup remaining variables
+        let minter_authority = ctx.accounts.stake.rewarder.to_account_info();
+        let token_mint = ctx.accounts.rewards_token_mint.clone();
+        let token_program = ctx.accounts.stake.token_program.clone();
+        let mint_wrapper_program = ctx.accounts.mint_wrapper_program.clone();
+
         // Create the signer seeds.
         let seeds = gen_rewarder_signer_seeds!(ctx.accounts.stake.rewarder);
         let signer_seeds = &[&seeds[..]];
@@ -322,14 +331,14 @@ pub mod quarry_mine {
         // Mint the claimed tokens.
         quarry_mint_wrapper::cpi::perform_mint(
             CpiContext::new_with_signer(
-                ctx.accounts.mint_wrapper_program.clone(),
+                mint_wrapper_program.clone(),
                 quarry_mint_wrapper::PerformMint {
                     mint_wrapper: mint_wrapper.clone(),
-                    minter_authority: ctx.accounts.stake.rewarder.to_account_info(),
-                    token_mint: ctx.accounts.rewards_token_mint.clone(),
+                    minter_authority: minter_authority.clone(),
+                    token_mint: token_mint.clone(),
                     destination: rewards_token_account,
                     minter: minter.clone(),
-                    token_program: ctx.accounts.stake.token_program.clone(),
+                    token_program: token_program.clone(),
                 },
                 signer_seeds,
             ),
@@ -339,20 +348,19 @@ pub mod quarry_mine {
         // Mint the fees.
         quarry_mint_wrapper::cpi::perform_mint(
             CpiContext::new_with_signer(
-                ctx.accounts.mint_wrapper_program.clone(),
+                mint_wrapper_program,
                 quarry_mint_wrapper::PerformMint {
                     mint_wrapper,
-                    minter_authority: ctx.accounts.stake.rewarder.to_account_info(),
-                    token_mint: ctx.accounts.rewards_token_mint.clone(),
+                    minter_authority,
+                    token_mint,
                     destination: Account::try_from(&ctx.accounts.claim_fee_token_account)?,
                     minter,
-                    token_program: ctx.accounts.stake.token_program.clone(),
+                    token_program,
                 },
                 signer_seeds,
             ),
             max_claim_fee,
         )?;
-        miner.rewards_earned = 0;
 
         emit!(ClaimEvent {
             authority: ctx.accounts.stake.authority.key(),
