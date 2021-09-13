@@ -148,6 +148,7 @@ impl Payroll {
         let quarry_rewards_accrued = U192::from(time_worked)
             .checked_mul(self.annual_rewards_rate.into())?
             .checked_div(SECONDS_PER_YEAR.into())?;
+
         let net_rewards_per_token = self
             .rewards_per_token_stored
             .checked_sub(rewards_per_token_paid)?;
