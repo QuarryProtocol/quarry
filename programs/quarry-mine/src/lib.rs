@@ -300,13 +300,11 @@ pub mod quarry_mine {
             CpiContext::new_with_signer(
                 ctx.accounts.mint_wrapper_program.clone(),
                 quarry_mint_wrapper::PerformMint {
-                    mint_wrapper: ctx.accounts.mint_wrapper.clone().into(),
+                    mint_wrapper: ctx.accounts.mint_wrapper.clone(),
                     minter_authority: ctx.accounts.stake.rewarder.to_account_info(),
                     token_mint: ctx.accounts.rewards_token_mint.clone(),
                     destination: ctx.accounts.rewards_token_account.clone(),
-                    minter: Account::<quarry_mint_wrapper::Minter>::try_from(
-                        &ctx.accounts.minter.to_account_info(),
-                    )?,
+                    minter: ctx.accounts.minter.clone(),
                     token_program: ctx.accounts.stake.token_program.clone(),
                 },
                 signer_seeds,
@@ -319,13 +317,11 @@ pub mod quarry_mine {
             CpiContext::new_with_signer(
                 ctx.accounts.mint_wrapper_program.clone(),
                 quarry_mint_wrapper::PerformMint {
-                    mint_wrapper: ctx.accounts.mint_wrapper.clone().into(),
+                    mint_wrapper: ctx.accounts.mint_wrapper.clone(),
                     minter_authority: ctx.accounts.stake.rewarder.to_account_info(),
                     token_mint: ctx.accounts.rewards_token_mint.clone(),
                     destination: ctx.accounts.claim_fee_token_account.clone(),
-                    minter: Account::<quarry_mint_wrapper::Minter>::try_from(
-                        &ctx.accounts.minter.to_account_info(),
-                    )?,
+                    minter: ctx.accounts.minter.clone(),
                     token_program: ctx.accounts.stake.token_program.clone(),
                 },
                 signer_seeds,
