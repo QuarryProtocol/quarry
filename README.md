@@ -30,6 +30,14 @@ Quarry was built with the intention of helping more Solana projects launch on-ch
 | `quarry-registry`            | Registry to index all quarries of a rewarder.         | [![crates](https://img.shields.io/crates/v/quarry-registry)](https://crates.io/crates/quarry-registry)                          | [![Docs.rs](https://docs.rs/quarry-registry/badge.svg)](https://docs.rs/quarry-registry)         |
 | `@quarryprotocol/quarry-sdk` | TypeScript SDK for Quarry                             | [![npm](https://img.shields.io/npm/v/@quarryprotocol/quarry-sdk.svg)](https://www.npmjs.com/package/@quarryprotocol/quarry-sdk) | [![Docs](https://img.shields.io/badge/docs-typedoc-blue)](https://docs.quarry.so/ts/)            |
 
+## Addresses
+
+Program addresses are the same on devnet and mainnet-beta.
+
+- MintWrapper: [`QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV`](https://explorer.solana.com/address/QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV)
+- Mine: [`QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB`](https://explorer.solana.com/address/QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB)
+- Registry: [`QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc`](https://explorer.solana.com/address/QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc)
+
 ## Documentation
 
 Documentation is a work in progress. For now, one should read [the end-to-end tests of the SDK](/tests/mintWrapper.spec.ts).
