@@ -240,6 +240,10 @@ pub mod quarry_mine {
     /// Anyone can call this; this is an associated account.
     #[access_control(ctx.accounts.validate())]
     pub fn create_miner(ctx: Context<CreateMiner>, bump: u8) -> ProgramResult {
+        let quarry = &mut ctx.accounts.quarry;
+        let index = quarry.num_miners;
+        quarry.num_miners = unwrap_int!(quarry.num_miners.checked_add(1));
+
         let miner = &mut ctx.accounts.miner;
         miner.authority = ctx.accounts.authority.key();
         miner.bump = bump;
@@ -248,6 +252,7 @@ pub mod quarry_mine {
         miner.rewards_earned = 0;
         miner.rewards_per_token_paid = 0;
         miner.balance = 0;
+        miner.index = index;
 
         emit!(MinerCreateEvent {
             authority: miner.authority,
@@ -538,6 +543,8 @@ pub struct Quarry {
 
     /// Total number of tokens deposited into the quarry.
     pub total_tokens_deposited: u64,
+    /// Number of [Miner]s.
+    pub num_miners: u64,
 }
 
 /// An account that has staked tokens into a [Quarry].
@@ -572,6 +579,9 @@ pub struct Miner {
 
     /// Number of tokens the [Miner] holds.
     pub balance: u64,
+
+    /// Index of the [Miner].
+    pub index: u64,
 }
 
 /// --------------------------------
@@ -788,6 +798,7 @@ pub struct CreateMiner<'info> {
     pub miner: ProgramAccount<'info, Miner>,
 
     /// [Quarry] to create a [Miner] for.
+    #[account(mut)]
     pub quarry: ProgramAccount<'info, Quarry>,
 
     /// [Rewarder].
