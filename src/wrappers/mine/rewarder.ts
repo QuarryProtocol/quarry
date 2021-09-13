@@ -1,4 +1,4 @@
-import type { TransactionEnvelope } from "@saberhq/solana-contrib";
+import { TransactionEnvelope } from "@saberhq/solana-contrib";
 import type { Token } from "@saberhq/token-utils";
 import type { u64 } from "@solana/spl-token";
 import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
@@ -100,16 +100,18 @@ export class RewarderWrapper {
   }
 
   /**
-   * Updates to daily rewards rate on the quarry, and update rewards on quarries assocated with each mint provided.
+   * Updates annual rewards rate on the Rewarder.
+   * One must sync after this.
    * @param param0
    */
-  public async setAnnualRewards(
-    newAnnualRate: u64,
-    mints: PublicKey[]
-  ): Promise<TransactionEnvelope> {
-    const authority = this.program.provider.wallet.publicKey;
-    const tx = await this.syncQuarryRewards(mints);
-    tx.instructions.unshift(
+  public setAnnualRewards({
+    newAnnualRate,
+    authority = this.program.provider.wallet.publicKey,
+  }: {
+    newAnnualRate: u64;
+    authority?: PublicKey;
+  }): TransactionEnvelope {
+    return new TransactionEnvelope(this.sdk.provider, [
       this.program.instruction.setAnnualRewards(newAnnualRate, {
         accounts: {
           auth: {
@@ -118,9 +120,20 @@ export class RewarderWrapper {
           },
           clock: SYSVAR_CLOCK_PUBKEY,
         },
-      })
-    );
-    return tx;
+      }),
+    ]);
+  }
+
+  /**
+   * Updates to annual rewards rate on the quarry, and update rewards on quarries assocated with each mint provided.
+   * @param param0
+   */
+  public async setAndSyncAnnualRewards(
+    newAnnualRate: u64,
+    mints: PublicKey[]
+  ): Promise<TransactionEnvelope> {
+    const tx = await this.syncQuarryRewards(mints);
+    return this.setAnnualRewards({ newAnnualRate }).combine(tx);
   }
 
   /**

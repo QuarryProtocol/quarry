@@ -308,8 +308,8 @@ describe("Mine", () => {
       rewarderKey = theRewarderKey;
       rewarder = await mine.loadRewarderWrapper(rewarderKey);
       await expectTX(
-        await rewarder.setAnnualRewards(ANNUAL_REWARDS_RATE, []),
-        "set daily rewards"
+        await rewarder.setAndSyncAnnualRewards(ANNUAL_REWARDS_RATE, []),
+        "set annual rewards"
       );
     });
 
@@ -542,7 +542,7 @@ describe("Mine", () => {
           })
         );
 
-        const tx = await rewarder.setAnnualRewards(
+        const tx = await rewarder.setAndSyncAnnualRewards(
           nextAnnualRewardsRate,
           tokens.map((t) => t.mintAccount)
         );
@@ -584,7 +584,7 @@ describe("Mine", () => {
         );
 
         // Restore daily rewards rate
-        const txRestore = await rewarder.setAnnualRewards(
+        const txRestore = await rewarder.setAndSyncAnnualRewards(
           ANNUAL_REWARDS_RATE,
           tokens.map((t) => t.mintAccount)
         );
@@ -621,8 +621,9 @@ describe("Mine", () => {
       await expectTX(tx, "Create new rewarder").to.be.fulfilled;
       rewarderKey = theRewarderKey;
       rewarder = await mine.loadRewarderWrapper(rewarderKey);
-      await expectTX(await rewarder.setAnnualRewards(ANNUAL_REWARDS_RATE, []))
-        .to.be.fulfilled;
+      await expectTX(
+        await rewarder.setAndSyncAnnualRewards(ANNUAL_REWARDS_RATE, [])
+      ).to.be.fulfilled;
 
       const { tx: quarryTx } = await rewarder.createQuarry({
         token: stakeToken,

@@ -91,7 +91,7 @@ describe("Registry", () => {
 
     rewarderWrapper = await mine.loadRewarderWrapper(rewarder);
 
-    const setAnnualRewardsTX = await rewarderWrapper.setAnnualRewards(
+    const setAnnualRewardsTX = await rewarderWrapper.setAndSyncAnnualRewards(
       annualRewardsRate,
       []
     );
