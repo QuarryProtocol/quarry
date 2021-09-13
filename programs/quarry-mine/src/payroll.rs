@@ -17,6 +17,7 @@ pub const SECONDS_PER_YEAR: u128 = 86_400 * 365;
 pub const PRECISION_MULTIPLIER: u128 = u64::MAX as u128;
 
 /// Calculator for amount of tokens to pay out.
+#[derive(Debug)]
 pub struct Payroll {
     /// Timestamp of when rewards should end.
     pub famine_ts: i64,
@@ -178,10 +179,11 @@ impl Payroll {
 
         if rewards_upperbound < amount_claimable_less_already_earned.into() {
             msg!(
-                "rewards_upperbound: {}, amount_claimable: {}, total_tokens_deposited: {}, miner: {:?}",
+                "current_ts: {}, rewards_upperbound: {}, amount_claimable: {}, payroll: {:?}, miner: {:?}",
+                current_ts,
                 rewards_upperbound,
                 amount_claimable,
-                self.total_tokens_deposited,
+                self,
                 miner,
             );
             require!(
@@ -317,6 +319,38 @@ mod tests {
 
             assert!(upperbound >= rewards_earned.into(), "rewards_earned: {}, upperbound: {}", rewards_earned, upperbound);
         }
+    }
+
+    #[test]
+    fn test_sanity_check_specific() {
+        let annual_rewards_rate = 365_000_000_000_000;
+        let total_tokens_deposited = 1_000_000;
+
+        let rewards_per_token_stored: u128 = 576247267536447296791024;
+
+        let last_checkpoint_ts = 1631494525;
+        let payroll = Payroll::new(
+            i64::MAX,
+            last_checkpoint_ts,
+            annual_rewards_rate,
+            rewards_per_token_stored,
+            total_tokens_deposited,
+        );
+
+        let current_ts = 1631494531;
+        let rewards_earned = payroll
+            .calculate_rewards_earned(current_ts, total_tokens_deposited, 0, 0)
+            .unwrap();
+        let upperbound = payroll
+            .calculate_claimable_upper_bound_unsafe(current_ts, 0)
+            .unwrap();
+
+        assert!(
+            upperbound >= rewards_earned.into(),
+            "rewards_earned: {}, upperbound: {}",
+            rewards_earned,
+            upperbound
+        );
     }
 
     proptest! {
