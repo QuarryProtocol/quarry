@@ -280,7 +280,7 @@ pub struct AcceptAdmin<'info> {
 }
 
 /// Accounts for the perform_mint instruction.
-#[derive(Accounts)]
+#[derive(Accounts, Clone)]
 pub struct PerformMint<'info> {
     /// [MintWrapper].
     #[account(mut)]

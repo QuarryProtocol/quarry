@@ -175,29 +175,12 @@ impl<'info> Validate<'info> for ClaimRewards<'info> {
             "mint wrapper program"
         );
 
-        // minter validate
-        // assert_keys!(
-        //     self.minter.minter_authority,
-        //     self.stake.rewarder,
-        //     "rewarder"
-        // );
-
         // rewards_token_mint validate
         assert_keys!(
             self.rewards_token_mint,
             self.stake.rewarder.rewards_token_mint,
             "rewards token mint",
         );
-        assert_keys!(
-            self.rewards_token_mint,
-            self.rewards_token_account.mint,
-            "rewards token account mint",
-        );
-        // assert_keys!(
-        //     self.rewards_token_mint,
-        //     self.mint_wrapper.token_mint,
-        //     "mint wrapper mint",
-        // );
         assert_keys!(
             self.rewards_token_mint.mint_authority.unwrap(),
             self.mint_wrapper,

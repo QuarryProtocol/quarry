@@ -278,8 +278,32 @@ pub mod quarry_mine {
             return Ok(());
         }
 
+        // minter + validations
         let minter: Account<quarry_mint_wrapper::Minter> = Account::try_from(&ctx.accounts.minter)?;
         require!(amount_claimable <= minter.allowance, InsufficientAllowance);
+        assert_keys!(
+            minter.minter_authority,
+            ctx.accounts.stake.rewarder,
+            "rewarder"
+        );
+
+        // mint_wrapper + validations
+        let mint_wrapper: Account<quarry_mint_wrapper::MintWrapper> =
+            Account::try_from(&ctx.accounts.mint_wrapper)?;
+        assert_keys!(
+            ctx.accounts.rewards_token_mint,
+            mint_wrapper.token_mint,
+            "mint wrapper mint",
+        );
+
+        // rewards_token_account + validations
+        let rewards_token_account: Account<TokenAccount> =
+            Account::try_from(&ctx.accounts.rewards_token_account)?;
+        assert_keys!(
+            ctx.accounts.rewards_token_mint,
+            rewards_token_account.mint,
+            "rewards token account mint",
+        );
 
         // Calculate rewards
         let max_claim_fee_kbps = ctx.accounts.stake.rewarder.max_claim_fee_kbps;
@@ -300,10 +324,10 @@ pub mod quarry_mine {
             CpiContext::new_with_signer(
                 ctx.accounts.mint_wrapper_program.clone(),
                 quarry_mint_wrapper::PerformMint {
-                    mint_wrapper: Account::try_from(&ctx.accounts.mint_wrapper)?,
+                    mint_wrapper: mint_wrapper.clone(),
                     minter_authority: ctx.accounts.stake.rewarder.to_account_info(),
                     token_mint: ctx.accounts.rewards_token_mint.clone(),
-                    destination: ctx.accounts.rewards_token_account.clone(),
+                    destination: rewards_token_account,
                     minter: minter.clone(),
                     token_program: ctx.accounts.stake.token_program.clone(),
                 },
@@ -317,10 +341,10 @@ pub mod quarry_mine {
             CpiContext::new_with_signer(
                 ctx.accounts.mint_wrapper_program.clone(),
                 quarry_mint_wrapper::PerformMint {
-                    mint_wrapper: Account::try_from(&ctx.accounts.mint_wrapper)?,
+                    mint_wrapper,
                     minter_authority: ctx.accounts.stake.rewarder.to_account_info(),
                     token_mint: ctx.accounts.rewards_token_mint.clone(),
-                    destination: ctx.accounts.claim_fee_token_account.clone(),
+                    destination: Account::try_from(&ctx.accounts.claim_fee_token_account)?,
                     minter,
                     token_program: ctx.accounts.stake.token_program.clone(),
                 },
@@ -829,11 +853,11 @@ pub struct ClaimRewards<'info> {
 
     /// Account to claim rewards for.
     #[account(mut)]
-    pub rewards_token_account: Account<'info, TokenAccount>,
+    pub rewards_token_account: AccountInfo<'info>,
 
     /// Account to send claim fees to.
     #[account(mut)]
-    pub claim_fee_token_account: Account<'info, TokenAccount>,
+    pub claim_fee_token_account: AccountInfo<'info>,
 
     /// Claim accounts
     pub stake: UserClaim<'info>,
