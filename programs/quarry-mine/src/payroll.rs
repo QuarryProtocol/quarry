@@ -338,38 +338,37 @@ mod tests {
         }
     }
 
-    // #[test]
-    // fn test_sanity_check_specific() {
-    //     let total_tokens_deposited = 1_000_000;
-    //     let annual_rewards_rate = 365_000_000_000_000;
-    //     let rewards_per_token_stored: u128 = 576247267536447296791024;
+    #[test]
+    fn test_sanity_check_off_by_one_case() {
+        let total_tokens_deposited = 1_000_000;
+        let annual_rewards_rate = 365_000_000_000_000;
+        let rewards_per_token_stored: u128 = 576247267536447296791024;
 
-    //     let last_checkpoint_ts = 1631494525;
-    //     let payroll = Payroll::new(
-    //         i64::MAX,
-    //         last_checkpoint_ts,
-    //         annual_rewards_rate,
-    //         rewards_per_token_stored,
-    //         total_tokens_deposited,
-    //     );
+        let last_checkpoint_ts = 1631494525;
+        let payroll = Payroll::new(
+            i64::MAX,
+            last_checkpoint_ts,
+            annual_rewards_rate,
+            rewards_per_token_stored,
+            total_tokens_deposited,
+        );
 
-    //     let current_ts = 1631494531;
+        let current_ts = 1631494531;
+        let rewards_earned = payroll
+            .calculate_rewards_earned(current_ts, total_tokens_deposited, 0, 0)
+            .unwrap();
+        let upperbound = payroll
+            .calculate_claimable_upper_bound_unsafe(current_ts, 0)
+            .unwrap();
 
-    //     let rewards_earned = payroll
-    //         .calculate_rewards_earned(current_ts, total_tokens_deposited, 0, 0)
-    //         .unwrap();
-    //     let upperbound = payroll
-    //         .calculate_claimable_upper_bound_unsafe(current_ts, 0)
-    //         .unwrap();
 
-
-    //     assert!(
-    //         upperbound >= rewards_earned.into(),
-    //         "rewards_earned: {}, upperbound: {}",
-    //         rewards_earned,
-    //         upperbound
-    //     );
-    // }
+        assert!(
+            upperbound >= rewards_earned.into(),
+            "rewards_earned: {}, upperbound: {}",
+            rewards_earned,
+            upperbound
+        );
+    }
 
     proptest! {
         #[test]
