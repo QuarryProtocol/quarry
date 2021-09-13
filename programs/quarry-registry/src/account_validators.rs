@@ -9,7 +9,7 @@ use crate::{NewRegistry, SyncQuarry};
 impl<'info> Validate<'info> for NewRegistry<'info> {
     fn validate(&self) -> ProgramResult {
         assert_owner!(self.rewarder, quarry_mine::ID);
-        assert_program!(self.system_program, SYSTEM_PROGRAM_ID);
+        assert_program!(self.system_program, system);
         Ok(())
     }
 }

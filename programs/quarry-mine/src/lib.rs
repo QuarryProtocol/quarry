@@ -304,7 +304,7 @@ pub mod quarry_mine {
                     minter_authority: ctx.accounts.stake.rewarder.to_account_info(),
                     token_mint: ctx.accounts.rewards_token_mint.clone(),
                     destination: ctx.accounts.rewards_token_account.clone(),
-                    minter: ProgramAccount::<quarry_mint_wrapper::Minter>::try_from(
+                    minter: Account::<quarry_mint_wrapper::Minter>::try_from(
                         &ctx.accounts.minter.to_account_info(),
                     )?,
                     token_program: ctx.accounts.stake.token_program.clone(),
@@ -323,7 +323,7 @@ pub mod quarry_mine {
                     minter_authority: ctx.accounts.stake.rewarder.to_account_info(),
                     token_mint: ctx.accounts.rewards_token_mint.clone(),
                     destination: ctx.accounts.claim_fee_token_account.clone(),
-                    minter: ProgramAccount::<quarry_mint_wrapper::Minter>::try_from(
+                    minter: Account::<quarry_mint_wrapper::Minter>::try_from(
                         &ctx.accounts.minter.to_account_info(),
                     )?,
                     token_program: ctx.accounts.stake.token_program.clone(),
@@ -593,12 +593,12 @@ pub struct NewRewarder<'info> {
         init,
         seeds = [
             b"Rewarder".as_ref(),
-            base.key().to_bytes().as_ref(),
-            &[bump],
+            base.key().to_bytes().as_ref()
         ],
+        bump = bump,
         payer = payer
     )]
-    pub rewarder: ProgramAccount<'info, Rewarder>,
+    pub rewarder: Account<'info, Rewarder>,
 
     /// Initial authority of the rewarder.
     pub authority: AccountInfo<'info>,
@@ -614,13 +614,13 @@ pub struct NewRewarder<'info> {
     pub clock: Sysvar<'info, Clock>,
 
     /// Mint wrapper.
-    pub mint_wrapper: CpiAccount<'info, quarry_mint_wrapper::MintWrapper>,
+    pub mint_wrapper: Account<'info, quarry_mint_wrapper::MintWrapper>,
 
     /// Rewards token mint.
-    pub rewards_token_mint: CpiAccount<'info, Mint>,
+    pub rewards_token_mint: Account<'info, Mint>,
 
     /// Token account in which the rewards token fees are collected.
-    pub claim_fee_token_account: CpiAccount<'info, TokenAccount>,
+    pub claim_fee_token_account: Account<'info, TokenAccount>,
 }
 
 /// Accounts for [quarry_mine::set_pause_authority].
@@ -642,7 +642,7 @@ pub struct TransferAuthority<'info> {
 
     /// Rewarder of the farm.
     #[account(mut)]
-    pub rewarder: ProgramAccount<'info, Rewarder>,
+    pub rewarder: Account<'info, Rewarder>,
 }
 
 /// Accounts for [quarry_mine::accept_authority].
@@ -654,7 +654,7 @@ pub struct AcceptAuthority<'info> {
 
     /// Rewarder of the farm.
     #[account(mut)]
-    pub rewarder: ProgramAccount<'info, Rewarder>,
+    pub rewarder: Account<'info, Rewarder>,
 }
 
 /// Mutable [Rewarder] that requires the authority to be a signer.
@@ -666,7 +666,7 @@ pub struct MutableRewarderWithAuthority<'info> {
 
     /// Rewarder of the farm.
     #[account(mut)]
-    pub rewarder: ProgramAccount<'info, Rewarder>,
+    pub rewarder: Account<'info, Rewarder>,
 }
 
 /// Read-only [Rewarder] that requires the authority to be a signer.
@@ -677,7 +677,7 @@ pub struct ReadOnlyRewarderWithAuthority<'info> {
     pub authority: AccountInfo<'info>,
 
     /// Rewarder of the farm.
-    pub rewarder: ProgramAccount<'info, Rewarder>,
+    pub rewarder: Account<'info, Rewarder>,
 }
 
 /// Accounts for [quarry_mine::set_annual_rewards].
@@ -702,18 +702,18 @@ pub struct CreateQuarry<'info> {
         seeds = [
             b"Quarry".as_ref(),
             auth.rewarder.key().to_bytes().as_ref(),
-            token_mint.key().to_bytes().as_ref(),
-            &[bump],
+            token_mint.key().to_bytes().as_ref()
         ],
+        bump = bump,
         payer = payer
     )]
-    pub quarry: ProgramAccount<'info, Quarry>,
+    pub quarry: Account<'info, Quarry>,
 
     /// [Rewarder] authority.
     pub auth: MutableRewarderWithAuthority<'info>,
 
     /// [Mint] of the token to create a [Quarry] for.
-    pub token_mint: CpiAccount<'info, Mint>,
+    pub token_mint: Account<'info, Mint>,
 
     /// Payer of [Quarry] creation.
     pub payer: AccountInfo<'info>,
@@ -733,7 +733,7 @@ pub struct SetFamine<'info> {
 
     /// [Quarry] updated.
     #[account(mut)]
-    pub quarry: ProgramAccount<'info, Quarry>,
+    pub quarry: Account<'info, Quarry>,
 }
 
 /// Accounts for [quarry_mine::set_rewards_share].
@@ -744,7 +744,7 @@ pub struct SetRewardsShare<'info> {
 
     /// [Quarry] updated.
     #[account(mut)]
-    pub quarry: ProgramAccount<'info, Quarry>,
+    pub quarry: Account<'info, Quarry>,
 
     /// [Clock].
     pub clock: Sysvar<'info, Clock>,
@@ -755,10 +755,10 @@ pub struct SetRewardsShare<'info> {
 pub struct UpdateQuarryRewards<'info> {
     /// [Quarry].
     #[account(mut)]
-    pub quarry: ProgramAccount<'info, Quarry>,
+    pub quarry: Account<'info, Quarry>,
 
     /// [Rewarder].
-    pub rewarder: ProgramAccount<'info, Rewarder>,
+    pub rewarder: Account<'info, Rewarder>,
 
     /// [Clock].
     pub clock: Sysvar<'info, Clock>,
@@ -780,18 +780,18 @@ pub struct CreateMiner<'info> {
         seeds = [
             b"Miner".as_ref(),
             quarry.key().to_bytes().as_ref(),
-            authority.key().to_bytes().as_ref(),
-            &[bump],
+            authority.key().to_bytes().as_ref()
         ],
+        bump = bump,
         payer = payer
     )]
-    pub miner: ProgramAccount<'info, Miner>,
+    pub miner: Account<'info, Miner>,
 
     /// [Quarry] to create a [Miner] for.
-    pub quarry: ProgramAccount<'info, Quarry>,
+    pub quarry: Account<'info, Quarry>,
 
     /// [Rewarder].
-    pub rewarder: ProgramAccount<'info, Rewarder>,
+    pub rewarder: Account<'info, Rewarder>,
 
     /// System program.
     pub system_program: AccountInfo<'info>,
@@ -800,10 +800,10 @@ pub struct CreateMiner<'info> {
     pub payer: AccountInfo<'info>,
 
     /// [Mint] of the token to create a [Quarry] for.
-    pub token_mint: CpiAccount<'info, Mint>,
+    pub token_mint: Account<'info, Mint>,
 
     /// [TokenAccount] holding the token [Mint].
-    pub miner_vault: CpiAccount<'info, TokenAccount>,
+    pub miner_vault: Account<'info, TokenAccount>,
 
     /// SPL Token program.
     pub token_program: AccountInfo<'info>,
@@ -814,24 +814,24 @@ pub struct CreateMiner<'info> {
 pub struct ClaimRewards<'info> {
     /// Mint wrapper.
     #[account(mut)]
-    pub mint_wrapper: CpiAccount<'info, quarry_mint_wrapper::MintWrapper>,
+    pub mint_wrapper: Account<'info, quarry_mint_wrapper::MintWrapper>,
     /// Mint wrapper program.
     pub mint_wrapper_program: AccountInfo<'info>,
     /// [quarry_mint_wrapper::Minter] information.
     #[account(mut)]
-    pub minter: CpiAccount<'info, quarry_mint_wrapper::Minter>,
+    pub minter: Account<'info, quarry_mint_wrapper::Minter>,
 
     /// Mint of the rewards token.
     #[account(mut)]
-    pub rewards_token_mint: CpiAccount<'info, Mint>,
+    pub rewards_token_mint: Account<'info, Mint>,
 
     /// Account to claim rewards for.
     #[account(mut)]
-    pub rewards_token_account: CpiAccount<'info, TokenAccount>,
+    pub rewards_token_account: Account<'info, TokenAccount>,
 
     /// Account to send claim fees to.
     #[account(mut)]
-    pub claim_fee_token_account: CpiAccount<'info, TokenAccount>,
+    pub claim_fee_token_account: Account<'info, TokenAccount>,
 
     /// User's stake.
     pub stake: UserStake<'info>,
@@ -851,25 +851,25 @@ pub struct UserStake<'info> {
 
     /// Miner.
     #[account(mut)]
-    pub miner: ProgramAccount<'info, Miner>,
+    pub miner: Account<'info, Miner>,
 
     /// Quarry to claim from.
     #[account(mut)]
-    pub quarry: ProgramAccount<'info, Quarry>,
+    pub quarry: Account<'info, Quarry>,
 
     /// Vault of the miner.
     #[account(mut)]
-    pub miner_vault: CpiAccount<'info, TokenAccount>,
+    pub miner_vault: Account<'info, TokenAccount>,
 
     /// User's staked token account
     #[account(mut)]
-    pub token_account: CpiAccount<'info, TokenAccount>,
+    pub token_account: Account<'info, TokenAccount>,
 
     /// Token program
     pub token_program: AccountInfo<'info>,
 
     /// Rewarder
-    pub rewarder: ProgramAccount<'info, Rewarder>,
+    pub rewarder: Account<'info, Rewarder>,
 
     /// Clock
     pub clock: Sysvar<'info, Clock>,
@@ -879,16 +879,16 @@ pub struct UserStake<'info> {
 #[derive(Accounts)]
 pub struct ExtractFees<'info> {
     /// Rewarder to extract fees from.
-    pub rewarder: ProgramAccount<'info, Rewarder>,
+    pub rewarder: Account<'info, Rewarder>,
 
     /// [TokenAccount] which receives claim fees.
     #[account(mut)]
-    pub claim_fee_token_account: CpiAccount<'info, TokenAccount>,
+    pub claim_fee_token_account: Account<'info, TokenAccount>,
 
     /// [TokenAccount] owned by the [addresses::FEE_TO_ADDRESS].
     /// Holds DAO claim fees.
     #[account(mut)]
-    pub fee_to_token_account: CpiAccount<'info, TokenAccount>,
+    pub fee_to_token_account: Account<'info, TokenAccount>,
 
     /// Token program
     pub token_program: AccountInfo<'info>,
@@ -903,7 +903,7 @@ pub struct MutableRewarderWithPauseAuthority<'info> {
 
     /// Rewarder of the farm.
     #[account(mut)]
-    pub rewarder: ProgramAccount<'info, Rewarder>,
+    pub rewarder: Account<'info, Rewarder>,
 }
 
 /// --------------------------------

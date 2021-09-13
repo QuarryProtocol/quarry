@@ -28,7 +28,7 @@ impl<'info> Validate<'info> for NewRewarder<'info> {
             self.rewards_token_mint
         );
 
-        assert_program!(self.system_program, SYSTEM_PROGRAM_ID);
+        assert_program!(self.system_program, system);
         assert_keys!(
             self.mint_wrapper.token_mint,
             self.rewards_token_mint,
@@ -107,7 +107,7 @@ impl<'info> Validate<'info> for CreateQuarry<'info> {
     fn validate(&self) -> ProgramResult {
         self.auth.validate()?;
         require!(!self.auth.rewarder.is_paused, Paused);
-        assert_program!(self.system_program, SYSTEM_PROGRAM_ID);
+        assert_program!(self.system_program, system);
         assert_owner!(self.token_mint, token::ID, "token_mint");
         Ok(())
     }
@@ -152,8 +152,8 @@ impl<'info> Validate<'info> for CreateMiner<'info> {
         assert_ata!(self.miner_vault, self.miner, self.token_mint, "miner vault");
         assert_keys!(self.quarry.rewarder_key, self.rewarder, "rewarder");
 
-        assert_program!(self.system_program, SYSTEM_PROGRAM_ID);
-        assert_program!(self.token_program, TOKEN_PROGRAM_ID);
+        assert_program!(self.system_program, system);
+        assert_program!(self.token_program, token);
 
         assert_owner!(self.token_mint, token::ID, "token_mint");
         assert_owner!(self.miner_vault, token::ID, "miner_vault");
@@ -254,7 +254,7 @@ impl<'info> Validate<'info> for UserStake<'info> {
         // rewarder
         assert_keys!(self.quarry.rewarder_key, self.rewarder, "rewarder");
 
-        assert_program!(self.token_program, TOKEN_PROGRAM_ID);
+        assert_program!(self.token_program, token);
 
         assert_owner!(self.miner_vault, token::ID, "miner_vault");
         assert_owner!(self.token_account, token::ID, "token_account");
@@ -272,7 +272,7 @@ impl<'info> Validate<'info> for ExtractFees<'info> {
             self.rewarder.rewards_token_mint
         );
 
-        assert_program!(self.token_program, TOKEN_PROGRAM_ID);
+        assert_program!(self.token_program, token);
 
         assert_keys!(
             self.claim_fee_token_account.mint,

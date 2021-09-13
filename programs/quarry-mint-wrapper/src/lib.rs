@@ -190,19 +190,19 @@ pub struct NewWrapper<'info> {
         init,
         seeds = [
             b"MintWrapper",
-            base.key().to_bytes().as_ref(),
-            &[bump]
+            base.key().to_bytes().as_ref()
         ],
+        bump = bump,
         payer = payer
     )]
-    pub mint_wrapper: ProgramAccount<'info, MintWrapper>,
+    pub mint_wrapper: Account<'info, MintWrapper>,
 
     /// Admin-to-be of the [MintWrapper].
     pub admin: AccountInfo<'info>,
 
     /// Token mint to mint.
     #[account(mut)]
-    pub token_mint: CpiAccount<'info, Mint>,
+    pub token_mint: Account<'info, Mint>,
 
     /// Token program.
     pub token_program: AccountInfo<'info>,
@@ -230,12 +230,12 @@ pub struct NewMinter<'info> {
         seeds = [
             b"MintWrapperMinter",
             auth.mint_wrapper.key().to_bytes().as_ref(),
-            minter_authority.key().to_bytes().as_ref(),
-            &[bump]
+            minter_authority.key().to_bytes().as_ref()
         ],
+        bump = bump,
         payer = payer
     )]
-    pub minter: ProgramAccount<'info, Minter>,
+    pub minter: Account<'info, Minter>,
 
     /// Payer for creating the minter.
     pub payer: AccountInfo<'info>,
@@ -251,14 +251,14 @@ pub struct MinterUpdate<'info> {
     pub auth: OnlyAdmin<'info>,
     /// Information about the minter.
     #[account(mut)]
-    pub minter: ProgramAccount<'info, Minter>,
+    pub minter: Account<'info, Minter>,
 }
 
 #[derive(Accounts)]
 pub struct TransferAdmin<'info> {
     /// The [MintWrapper].
     #[account(mut)]
-    pub mint_wrapper: ProgramAccount<'info, MintWrapper>,
+    pub mint_wrapper: Account<'info, MintWrapper>,
 
     /// The previous admin.
     #[account(signer)]
@@ -272,7 +272,7 @@ pub struct TransferAdmin<'info> {
 pub struct AcceptAdmin<'info> {
     /// The mint wrapper.
     #[account(mut)]
-    pub mint_wrapper: ProgramAccount<'info, MintWrapper>,
+    pub mint_wrapper: Account<'info, MintWrapper>,
 
     /// The new admin.
     #[account(signer)]
@@ -284,7 +284,7 @@ pub struct AcceptAdmin<'info> {
 pub struct PerformMint<'info> {
     /// [MintWrapper].
     #[account(mut)]
-    pub mint_wrapper: ProgramAccount<'info, MintWrapper>,
+    pub mint_wrapper: Account<'info, MintWrapper>,
 
     /// [Minter]'s authority.
     #[account(signer)]
@@ -292,15 +292,15 @@ pub struct PerformMint<'info> {
 
     /// Token [Mint].
     #[account(mut)]
-    pub token_mint: CpiAccount<'info, Mint>,
+    pub token_mint: Account<'info, Mint>,
 
     /// Destination [TokenAccount] for minted tokens.
     #[account(mut)]
-    pub destination: CpiAccount<'info, TokenAccount>,
+    pub destination: Account<'info, TokenAccount>,
 
     /// [Minter] information.
     #[account(mut)]
-    pub minter: ProgramAccount<'info, Minter>,
+    pub minter: Account<'info, Minter>,
 
     /// SPL Token program.
     pub token_program: AccountInfo<'info>,
@@ -314,7 +314,7 @@ pub struct PerformMint<'info> {
 pub struct OnlyAdmin<'info> {
     /// The mint wrapper.
     #[account(mut)]
-    pub mint_wrapper: ProgramAccount<'info, MintWrapper>,
+    pub mint_wrapper: Account<'info, MintWrapper>,
     #[account(signer)]
     pub admin: AccountInfo<'info>,
 }
