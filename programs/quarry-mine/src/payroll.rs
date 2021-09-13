@@ -341,7 +341,8 @@ mod tests {
     }
 
     #[test]
-    fn test_sanity_check_off_by_one_case() {    // FIXME: Find out why sometimes upperbound can be off by one. 
+    fn test_sanity_check_off_by_one_case() {
+        // FIXME: Find out why sometimes upperbound can be off by one.
         let total_tokens_deposited = 1_000_000;
         let annual_rewards_rate = 365_000_000_000_000;
         let rewards_per_token_stored: u128 = 576247267536447296791024;
