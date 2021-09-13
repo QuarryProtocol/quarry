@@ -11,7 +11,7 @@ use crate::{
     AcceptAuthority, ClaimRewards, CreateMiner, CreateQuarry, ExtractFees,
     MutableRewarderWithAuthority, MutableRewarderWithPauseAuthority, NewRewarder,
     ReadOnlyRewarderWithAuthority, SetAnnualRewards, SetFamine, SetPauseAuthority, SetRewardsShare,
-    TransferAuthority, UpdateQuarryRewards, UserStake,
+    TransferAuthority, UpdateQuarryRewards, UserClaim, UserStake,
 };
 
 /// --------------------------------
@@ -176,11 +176,11 @@ impl<'info> Validate<'info> for ClaimRewards<'info> {
         );
 
         // minter validate
-        assert_keys!(
-            self.minter.minter_authority,
-            self.stake.rewarder,
-            "rewarder"
-        );
+        // assert_keys!(
+        //     self.minter.minter_authority,
+        //     self.stake.rewarder,
+        //     "rewarder"
+        // );
 
         // rewards_token_mint validate
         assert_keys!(
@@ -193,11 +193,11 @@ impl<'info> Validate<'info> for ClaimRewards<'info> {
             self.rewards_token_account.mint,
             "rewards token account mint",
         );
-        assert_keys!(
-            self.rewards_token_mint,
-            self.mint_wrapper.token_mint,
-            "mint wrapper mint",
-        );
+        // assert_keys!(
+        //     self.rewards_token_mint,
+        //     self.mint_wrapper.token_mint,
+        //     "mint wrapper mint",
+        // );
         assert_keys!(
             self.rewards_token_mint.mint_authority.unwrap(),
             self.mint_wrapper,
@@ -219,6 +219,25 @@ impl<'info> Validate<'info> for ClaimRewards<'info> {
             token::ID,
             "rewards_token_account"
         );
+
+        Ok(())
+    }
+}
+
+impl<'info> Validate<'info> for UserClaim<'info> {
+    fn validate(&self) -> ProgramResult {
+        require!(!self.rewarder.is_paused, Paused);
+        // authority
+        require!(self.authority.is_signer, Unauthorized);
+        assert_keys!(self.authority, self.miner.authority, "miner authority");
+
+        // quarry
+        assert_keys!(self.miner.quarry_key, self.quarry.key(), "quarry");
+
+        // rewarder
+        assert_keys!(self.quarry.rewarder_key, self.rewarder, "rewarder");
+
+        assert_program!(self.token_program, token);
 
         Ok(())
     }

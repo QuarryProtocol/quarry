@@ -268,23 +268,18 @@ pub mod quarry_mine {
     pub fn claim_rewards(ctx: Context<ClaimRewards>) -> ProgramResult {
         let miner = &mut ctx.accounts.stake.miner;
 
-        let clock = &ctx.accounts.stake.clock;
+        let now = ctx.accounts.stake.clock.unix_timestamp;
         let quarry = &mut ctx.accounts.stake.quarry;
-        quarry.update_rewards_and_miner(
-            miner,
-            &ctx.accounts.stake.rewarder,
-            clock.unix_timestamp,
-        )?;
+        quarry.update_rewards_and_miner(miner, &ctx.accounts.stake.rewarder, now)?;
 
         let amount_claimable = miner.rewards_earned;
         if amount_claimable == 0 {
             // 0 claimable -- skip all logic
             return Ok(());
         }
-        require!(
-            amount_claimable <= ctx.accounts.minter.allowance,
-            InsufficientAllowance
-        );
+
+        let minter: Account<quarry_mint_wrapper::Minter> = Account::try_from(&ctx.accounts.minter)?;
+        require!(amount_claimable <= minter.allowance, InsufficientAllowance);
 
         // Calculate rewards
         let max_claim_fee_kbps = ctx.accounts.stake.rewarder.max_claim_fee_kbps;
@@ -305,11 +300,11 @@ pub mod quarry_mine {
             CpiContext::new_with_signer(
                 ctx.accounts.mint_wrapper_program.clone(),
                 quarry_mint_wrapper::PerformMint {
-                    mint_wrapper: ctx.accounts.mint_wrapper.clone(),
+                    mint_wrapper: Account::try_from(&ctx.accounts.mint_wrapper)?,
                     minter_authority: ctx.accounts.stake.rewarder.to_account_info(),
                     token_mint: ctx.accounts.rewards_token_mint.clone(),
                     destination: ctx.accounts.rewards_token_account.clone(),
-                    minter: ctx.accounts.minter.clone(),
+                    minter: minter.clone(),
                     token_program: ctx.accounts.stake.token_program.clone(),
                 },
                 signer_seeds,
@@ -322,11 +317,11 @@ pub mod quarry_mine {
             CpiContext::new_with_signer(
                 ctx.accounts.mint_wrapper_program.clone(),
                 quarry_mint_wrapper::PerformMint {
-                    mint_wrapper: ctx.accounts.mint_wrapper.clone(),
+                    mint_wrapper: Account::try_from(&ctx.accounts.mint_wrapper)?,
                     minter_authority: ctx.accounts.stake.rewarder.to_account_info(),
                     token_mint: ctx.accounts.rewards_token_mint.clone(),
                     destination: ctx.accounts.claim_fee_token_account.clone(),
-                    minter: ctx.accounts.minter.clone(),
+                    minter,
                     token_program: ctx.accounts.stake.token_program.clone(),
                 },
                 signer_seeds,
@@ -337,8 +332,8 @@ pub mod quarry_mine {
 
         emit!(ClaimEvent {
             authority: ctx.accounts.stake.authority.key(),
-            staked_token: ctx.accounts.stake.token_account.mint,
-            timestamp: clock.unix_timestamp,
+            staked_token: ctx.accounts.stake.quarry.token_mint_key,
+            timestamp: now,
             rewards_token: ctx.accounts.rewards_token_mint.key(),
             amount: amount_claimable_minus_fees,
             fees: max_claim_fee,
@@ -821,12 +816,12 @@ pub struct CreateMiner<'info> {
 pub struct ClaimRewards<'info> {
     /// Mint wrapper.
     #[account(mut)]
-    pub mint_wrapper: Account<'info, quarry_mint_wrapper::MintWrapper>,
+    pub mint_wrapper: AccountInfo<'info>,
     /// Mint wrapper program.
     pub mint_wrapper_program: AccountInfo<'info>,
     /// [quarry_mint_wrapper::Minter] information.
     #[account(mut)]
-    pub minter: Account<'info, quarry_mint_wrapper::Minter>,
+    pub minter: AccountInfo<'info>,
 
     /// Mint of the rewards token.
     #[account(mut)]
@@ -840,8 +835,38 @@ pub struct ClaimRewards<'info> {
     #[account(mut)]
     pub claim_fee_token_account: Account<'info, TokenAccount>,
 
-    /// User's stake.
-    pub stake: UserStake<'info>,
+    /// Claim accounts
+    pub stake: UserClaim<'info>,
+}
+
+/// Claim accounts
+///
+/// This accounts struct is always used in the context of the user authority
+/// staking into an account. This is NEVER used by an admin.
+///
+/// Validation should be extremely conservative.
+#[derive(Accounts, Clone)]
+pub struct UserClaim<'info> {
+    /// Miner authority (i.e. the user).
+    #[account(signer)]
+    pub authority: AccountInfo<'info>,
+
+    /// Miner.
+    #[account(mut)]
+    pub miner: Account<'info, Miner>,
+
+    /// Quarry to claim from.
+    #[account(mut)]
+    pub quarry: Account<'info, Quarry>,
+
+    /// Token program
+    pub token_program: AccountInfo<'info>,
+
+    /// Rewarder
+    pub rewarder: Account<'info, Rewarder>,
+
+    /// Clock
+    pub clock: Sysvar<'info, Clock>,
 }
 
 /// Staking accounts
