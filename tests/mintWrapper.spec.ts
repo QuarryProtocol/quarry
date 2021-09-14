@@ -64,7 +64,10 @@ describe("MintWrapper", () => {
   });
 
   it("Check MintWrapper", async () => {
-    const mintInfo = await serumCmn.getMintInfo(provider, rewardsMint);
+    const mintInfo = await serumCmn.getMintInfo(
+      anchor.getProvider(),
+      rewardsMint
+    );
     assert.ok(mintInfo.mintAuthority?.equals(mintWrapperKey));
 
     const mintWrapperState =
@@ -197,7 +200,7 @@ describe("MintWrapper", () => {
 
       await expectTX(
         new PendingTransaction(
-          provider,
+          provider.connection,
           await provider.connection.requestAirdrop(
             kp.publicKey,
             LAMPORTS_PER_SOL

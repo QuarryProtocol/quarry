@@ -90,7 +90,7 @@ describe("Mine Rewards", () => {
   beforeEach(async () => {
     stakedMintAuthority = Keypair.generate();
     stakeTokenMint = await serumCmn.createMint(
-      provider,
+      anchor.getProvider(),
       stakedMintAuthority.publicKey,
       DEFAULT_DECIMALS
     );
@@ -249,7 +249,7 @@ describe("Mine Rewards", () => {
       owner: provider.wallet.publicKey,
     });
     const rewardsTokenAccountInfo = await serumCmn.getTokenAccount(
-      provider,
+      anchor.getProvider(),
       rewardsTokenAccount
     );
     expect(rewardsTokenAccountInfo.amount.toString()).to.equal(

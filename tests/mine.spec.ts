@@ -2,10 +2,7 @@ import * as anchor from "@project-serum/anchor";
 import { createMint, getTokenAccount } from "@project-serum/common";
 import { expectTX } from "@saberhq/chai-solana";
 import type { Provider } from "@saberhq/solana-contrib";
-import {
-  DEFAULT_PROVIDER_OPTIONS,
-  TransactionEnvelope,
-} from "@saberhq/solana-contrib";
+import { TransactionEnvelope } from "@saberhq/solana-contrib";
 import {
   createInitMintInstructions,
   getATAAddress,
@@ -64,11 +61,7 @@ describe("Mine", () => {
     mintWrapper = sdk.mintWrapper;
     mine = sdk.mine;
 
-    anchorProvider = new anchor.Provider(
-      provider.sendConnection,
-      provider.wallet,
-      DEFAULT_PROVIDER_OPTIONS
-    );
+    anchorProvider = anchor.getProvider();
   });
 
   before(async () => {
