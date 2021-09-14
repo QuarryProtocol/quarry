@@ -329,36 +329,34 @@ pub mod quarry_mine {
         let signer_seeds = &[&seeds[..]];
 
         // Mint the claimed tokens.
+        let claim_mint_accounts = quarry_mint_wrapper::PerformMint {
+            mint_wrapper: mint_wrapper.clone(),
+            minter_authority: minter_authority.clone(),
+            token_mint: token_mint.clone(),
+            destination: rewards_token_account,
+            minter: minter.clone(),
+            token_program: token_program.clone(),
+        };
         quarry_mint_wrapper::cpi::perform_mint(
             CpiContext::new_with_signer(
                 mint_wrapper_program.clone(),
-                quarry_mint_wrapper::PerformMint {
-                    mint_wrapper: mint_wrapper.clone(),
-                    minter_authority: minter_authority.clone(),
-                    token_mint: token_mint.clone(),
-                    destination: rewards_token_account,
-                    minter: minter.clone(),
-                    token_program: token_program.clone(),
-                },
+                claim_mint_accounts,
                 signer_seeds,
             ),
             amount_claimable_minus_fees,
         )?;
 
         // Mint the fees.
+        let fee_mint_accounts = quarry_mint_wrapper::PerformMint {
+            mint_wrapper,
+            minter_authority,
+            token_mint,
+            destination: Account::try_from(&ctx.accounts.claim_fee_token_account)?,
+            minter,
+            token_program,
+        };
         quarry_mint_wrapper::cpi::perform_mint(
-            CpiContext::new_with_signer(
-                mint_wrapper_program,
-                quarry_mint_wrapper::PerformMint {
-                    mint_wrapper,
-                    minter_authority,
-                    token_mint,
-                    destination: Account::try_from(&ctx.accounts.claim_fee_token_account)?,
-                    minter,
-                    token_program,
-                },
-                signer_seeds,
-            ),
+            CpiContext::new_with_signer(mint_wrapper_program, fee_mint_accounts, signer_seeds),
             max_claim_fee,
         )?;
 
