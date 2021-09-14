@@ -1,4 +1,4 @@
-import type * as anchor from "@project-serum/anchor";
+import * as anchor from "@project-serum/anchor";
 import * as serumCmn from "@project-serum/common";
 import { expectTX } from "@saberhq/chai-solana";
 import type { Provider } from "@saberhq/solana-contrib";
@@ -23,6 +23,7 @@ import { makeSDK } from "./workspace";
 describe("Registry", () => {
   const dailyRewardsRate = new BN(1_000 * LAMPORTS_PER_SOL);
   const annualRewardsRate = dailyRewardsRate.mul(new BN(365));
+  const anchorProvider = anchor.getProvider();
 
   let sdk: QuarrySDK;
   let provider: Provider;
@@ -75,7 +76,7 @@ describe("Registry", () => {
   beforeEach(async () => {
     stakedMintAuthority = Keypair.generate();
     stakeTokenMint = await serumCmn.createMint(
-      provider,
+      anchorProvider,
       stakedMintAuthority.publicKey,
       DEFAULT_DECIMALS
     );

@@ -4,6 +4,7 @@ import type { Provider } from "@saberhq/solana-contrib";
 import {
   DEFAULT_PROVIDER_OPTIONS,
   SignerWallet,
+  SolanaProvider,
   TransactionEnvelope,
 } from "@saberhq/solana-contrib";
 import type {
@@ -38,9 +39,11 @@ export class QuarrySDK {
    * Creates a new instance of the SDK with the given keypair.
    */
   public withSigner(signer: Signer): QuarrySDK {
-    const provider = new SignerWallet(signer).createProvider(
+    const provider = new SolanaProvider(
       this.provider.connection,
-      this.provider.sendConnection
+      this.provider.broadcaster,
+      new SignerWallet(signer),
+      this.provider.opts
     );
     return QuarrySDK.load({
       provider,
@@ -100,7 +103,7 @@ export class QuarrySDK {
         const idl = QUARRY_IDLS[programName];
         invariant(idl, `Unknown IDL: ${programName}`);
         const anchorProvider = new AnchorProvider(
-          provider.sendConnection,
+          provider.connection,
           provider.wallet,
           confirmOptions ?? DEFAULT_PROVIDER_OPTIONS
         );

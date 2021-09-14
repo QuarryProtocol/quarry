@@ -155,23 +155,23 @@
     bn.js "^5.1.2"
     buffer-layout "^1.2.0"
 
-"@saberhq/anchor-contrib@^0.18.0":
-  version "0.18.0"
-  resolved "https://registry.yarnpkg.com/@saberhq/anchor-contrib/-/anchor-contrib-0.18.0.tgz#79b24f4b24726e7a1927a415bc1ae3cd13a6571b"
-  integrity sha512-dNCY/BtIBfwJrUOup3qDU6f9UdB86jy7J0qdSiz51jiYnwPj2/2Z7lN7ODQ+KN5mZPK6bZYgjipRSsxgzMKK9A==
+"@saberhq/anchor-contrib@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@saberhq/anchor-contrib/-/anchor-contrib-1.0.0.tgz#15a08bc5ac93ac2c3fa96352686289772c80602c"
+  integrity sha512-CH97l3Uop2j4VnTPtRshsvvZUI9AiUJpIgCfayQb1ciflHThhkcKT6A3dErK/9AoW2BUcO2FUKTvnMFwOONKKA==
   dependencies:
     "@project-serum/anchor" "^0.15.0"
     "@solana/web3.js" "^1.25.0"
     eventemitter3 "^4.0.7"
 
-"@saberhq/chai-solana@^0.18.0":
-  version "0.18.0"
-  resolved "https://registry.yarnpkg.com/@saberhq/chai-solana/-/chai-solana-0.18.0.tgz#da5614a345ba6ab2ebd28d66fbe82589947f884d"
-  integrity sha512-0PTUaY8cPCiGD941W6aQwAqyl+aPBfJWGQAHsW4aW8VpdvGb3ykiqkSZRi0OcjZmiCyPDHuCFUVsXlb1LL6mvg==
+"@saberhq/chai-solana@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@saberhq/chai-solana/-/chai-solana-1.0.0.tgz#3ed317e568310c1003699847e56b2a50b257420d"
+  integrity sha512-iaBRiMjhZ36S/RHsBDnxxYl+Tfwk/YyVpMf3VfPQUcQXyuCAliHxV36eMQWEGzE395INarMrpAZqEvfLex66UQ==
   dependencies:
     "@project-serum/anchor" "^0.15.0"
-    "@saberhq/solana-contrib" "^0.18.0"
-    "@saberhq/token-utils" "^0.18.0"
+    "@saberhq/solana-contrib" "^1.0.0"
+    "@saberhq/token-utils" "^1.0.0"
     "@solana/web3.js" "^1.25.0"
     "@types/chai" "^4.2.21"
     "@types/chai-as-promised" "^7.1.4"
@@ -181,10 +181,10 @@
     chai-bn "^0.3.0"
     tslib "^2.3.0"
 
-"@saberhq/eslint-config@^0.18.0":
-  version "0.18.0"
-  resolved "https://registry.yarnpkg.com/@saberhq/eslint-config/-/eslint-config-0.18.0.tgz#6dd0bde32327099b17ac90a85e9f848a0f48eba2"
-  integrity sha512-1nkinZ0h1I6DNitUBUAvXt0ohlB9b9iMAa9DCP3hULbL6BV0ClZQNmDS8T3PsNQKIFO/us5BCgLl9TVhMjqbrQ==
+"@saberhq/eslint-config@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@saberhq/eslint-config/-/eslint-config-1.0.0.tgz#bba98953a1a9beac72bbb9678da517d55a2e8bdc"
+  integrity sha512-NY8AyiVKzA/2k/gONkaC7YkxZUBHIwHOdjg+DbsONXeRw3ciJWKsitwzpW/xna7BgckaWNBeR0WLvWZpEWIc7w==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^4.31.0"
     "@typescript-eslint/parser" "^4.31.0"
@@ -195,10 +195,10 @@
     eslint-plugin-unused-imports "^1.1.2"
     prettier "^2.3.2"
 
-"@saberhq/solana-contrib@^0.18.0":
-  version "0.18.0"
-  resolved "https://registry.yarnpkg.com/@saberhq/solana-contrib/-/solana-contrib-0.18.0.tgz#8a8552f4b1c9cb167add25494fdb2c476c8376a6"
-  integrity sha512-zVW5alyx0ARYC0q24KW8LEaaRCUcuOaOiTTo/lCWXT3/Ng31fdXfVpKWNMuLAm1Ofpw5z/cVdVZZk9ryG9JB0w==
+"@saberhq/solana-contrib@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@saberhq/solana-contrib/-/solana-contrib-1.0.0.tgz#f79c3776a5298bc6a26ef7a09f14115d3108b563"
+  integrity sha512-5PcY97k0PEIRwBiPA7jyW1WpEfvGwEaRbZqAxEO4HTB5X0XjQObB2QjghjM+BSDwNFmfrjJ+S2whLSvxw2FyRw==
   dependencies:
     "@solana/web3.js" "^1.25.0"
     "@types/promise-retry" "^1.1.3"
@@ -207,14 +207,14 @@
     tiny-invariant "^1.1.0"
     tslib "^2.3.0"
 
-"@saberhq/token-utils@^0.18.0":
-  version "0.18.0"
-  resolved "https://registry.yarnpkg.com/@saberhq/token-utils/-/token-utils-0.18.0.tgz#699c68cc93b25352ae4ab3ab2e791d5434ac46aa"
-  integrity sha512-z4HSMnxLemN3/mo/MwNcLsIKI/E1RNiYR4KRfusTYfpYOz2A7aOCUf7aJTfr8zbpowBNYng2+sQla9UTTK/D+w==
+"@saberhq/token-utils@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@saberhq/token-utils/-/token-utils-1.0.0.tgz#c33d8b0509631605d85058d2b169a8540610ac20"
+  integrity sha512-zO3jeed6sAF6iSwRHxwWSL/F+k+PKIGp7kRA8b3PXZnC7ClgG/uPcEcKrOMa29GP7/ZlMHr8gZpG3jVOxP8lwQ==
   dependencies:
-    "@saberhq/solana-contrib" "^0.18.0"
+    "@saberhq/solana-contrib" "^1.0.0"
     "@solana/spl-token" "^0.1.5"
-    "@solana/spl-token-registry" "^0.2.226"
+    "@solana/spl-token-registry" "^0.2.247"
     "@solana/web3.js" "^1.25.0"
     "@ubeswap/token-math" "^4.2.0"
     buffer-layout "^1.2.2"
@@ -228,10 +228,10 @@
   dependencies:
     buffer "~6.0.3"
 
-"@solana/spl-token-registry@^0.2.226":
-  version "0.2.226"
-  resolved "https://registry.yarnpkg.com/@solana/spl-token-registry/-/spl-token-registry-0.2.226.tgz#e080801c7644c92d6e37653bc31ba33ca25dae85"
-  integrity sha512-QPLYfw7Dob4WKC9tGmdgi/zihlRgiH4S2LUzSrIDJXhx2KfNVmkOIqgCutKAJPsqEdDUZ4sQ0YQ4RbBWkWmwUw==
+"@solana/spl-token-registry@^0.2.247":
+  version "0.2.247"
+  resolved "https://registry.yarnpkg.com/@solana/spl-token-registry/-/spl-token-registry-0.2.247.tgz#b39eeb3e4ed1a68fef476b680581dce247d8df59"
+  integrity sha512-aAz6jHsntgaZ3LxTv8t3rPjfKErxSotBNtUk3RfA3KyKSx/toC0CcV6I5SaVaMFTdYJZeJdjkmvDPYvrEea9Ug==
   dependencies:
     cross-fetch "3.0.6"
 

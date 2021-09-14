@@ -18,12 +18,12 @@ export const makeSDK = (): QuarrySDK => {
   const anchorProvider = anchor.Provider.env();
   anchor.setProvider(anchorProvider);
 
-  const provider = new SolanaProvider(
-    anchorProvider.connection,
-    anchorProvider.connection,
-    anchorProvider.wallet,
-    anchorProvider.opts
-  );
+  const provider = SolanaProvider.load({
+    connection: anchorProvider.connection,
+    sendConnection: anchorProvider.connection,
+    wallet: anchorProvider.wallet,
+    opts: anchorProvider.opts,
+  });
   return QuarrySDK.load({
     provider,
   });
