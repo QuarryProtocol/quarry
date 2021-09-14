@@ -308,10 +308,10 @@ pub mod quarry_mine {
         // Calculate rewards
         let max_claim_fee_kbps = ctx.accounts.stake.rewarder.max_claim_fee_kbps;
         require!(max_claim_fee_kbps < 10_000 * 1_000, InvalidMaxClaimFee);
-        let max_claim_fee = unwrap_int!(unwrap_int!((amount_claimable as u128)
+        let max_claim_fee = unwrap_int!((amount_claimable as u128)
             .checked_mul(max_claim_fee_kbps.into())
-            .and_then(|f| f.checked_div((10_000 * 1_000) as u128)))
-        .to_u64());
+            .and_then(|f| f.checked_div((10_000 * 1_000) as u128))
+            .and_then(|f| f.to_u64()));
 
         let amount_claimable_minus_fees = unwrap_int!(amount_claimable.checked_sub(max_claim_fee));
 
