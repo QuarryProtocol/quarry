@@ -14,6 +14,7 @@ import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import * as assert from "assert";
 import BN = require("bn.js");
 import { expect } from "chai";
+import invariant from "tiny-invariant";
 
 import type {
   ClaimEvent,
@@ -183,7 +184,8 @@ describe("Mine Rewards", () => {
     let quarry = await rewarderWrapper.getQuarry(stakeToken);
     expect(quarry).to.exist;
     let miner = await quarry.getMiner(provider.wallet.publicKey);
-    expect(miner).to.exist;
+    invariant(miner, "miner does not exist");
+
     const minerActions = await quarry.getMinerActions(
       provider.wallet.publicKey
     );
@@ -227,6 +229,7 @@ describe("Mine Rewards", () => {
 
     quarry = await rewarderWrapper.getQuarry(stakeToken);
     miner = await quarry.getMiner(provider.wallet.publicKey);
+    invariant(miner, "miner must exist");
 
     // Checks
     const payroll = quarry.payroll;

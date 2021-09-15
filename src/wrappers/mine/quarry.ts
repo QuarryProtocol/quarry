@@ -119,10 +119,14 @@ export class QuarryWrapper {
    * @param authority
    * @returns
    */
-  public async getMiner(authority: PublicKey): Promise<MinerData> {
-    return await this.program.account.miner.fetch(
-      await this.getMinerAddress(authority)
-    );
+  public async getMiner(authority: PublicKey): Promise<MinerData | null> {
+    try {
+      return await this.program.account.miner.fetch(
+        await this.getMinerAddress(authority)
+      );
+    } catch (e) {
+      return null;
+    }
   }
 
   /**
