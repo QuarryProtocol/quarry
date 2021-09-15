@@ -673,6 +673,8 @@ describe("Mine", () => {
       ).to.be.fulfilled;
 
       let miner = await quarry.getMiner(provider.wallet.publicKey);
+      invariant(miner, "miner must exist");
+
       const minerBalance = await getTokenAccount(
         anchorProvider,
         miner.tokenVaultKey
@@ -696,6 +698,7 @@ describe("Mine", () => {
         "Withdraw from the quarry"
       ).to.be.fulfilled;
       miner = await quarry.getMiner(provider.wallet.publicKey);
+      invariant(miner, "miner must exist");
 
       const endMinerBalance = await getTokenAccount(
         anchorProvider,
