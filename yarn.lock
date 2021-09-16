@@ -164,14 +164,14 @@
     "@solana/web3.js" "^1.25.0"
     eventemitter3 "^4.0.7"
 
-"@saberhq/chai-solana@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@saberhq/chai-solana/-/chai-solana-1.0.0.tgz#3ed317e568310c1003699847e56b2a50b257420d"
-  integrity sha512-iaBRiMjhZ36S/RHsBDnxxYl+Tfwk/YyVpMf3VfPQUcQXyuCAliHxV36eMQWEGzE395INarMrpAZqEvfLex66UQ==
+"@saberhq/chai-solana@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@saberhq/chai-solana/-/chai-solana-1.1.0.tgz#31b41109d8bb15290b4dd217ce26852e3e8e3747"
+  integrity sha512-gwoVrRpdR1M+CoUc+Wuj51s7YqpQd1YGNl+TMDHXLO4nsoMcKxm477wfqDzLYxJBuwWXzyueOqxwDjp4f9FanQ==
   dependencies:
     "@project-serum/anchor" "^0.15.0"
     "@saberhq/solana-contrib" "^1.0.0"
-    "@saberhq/token-utils" "^1.0.0"
+    "@saberhq/token-utils" "^1.1.0"
     "@solana/web3.js" "^1.25.0"
     "@types/chai" "^4.2.21"
     "@types/chai-as-promised" "^7.1.4"
@@ -207,17 +207,17 @@
     tiny-invariant "^1.1.0"
     tslib "^2.3.0"
 
-"@saberhq/token-utils@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@saberhq/token-utils/-/token-utils-1.0.0.tgz#c33d8b0509631605d85058d2b169a8540610ac20"
-  integrity sha512-zO3jeed6sAF6iSwRHxwWSL/F+k+PKIGp7kRA8b3PXZnC7ClgG/uPcEcKrOMa29GP7/ZlMHr8gZpG3jVOxP8lwQ==
+"@saberhq/token-utils@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@saberhq/token-utils/-/token-utils-1.1.0.tgz#1658f9f7be49d787179821e99cddf148f61d37cd"
+  integrity sha512-i022KNjF7gLBRw+LcW+7Mn9y3SuSsTjc3R6iy3uSdPNb1bZDraf5yoCyxYWdXIdYNwt6p5FO8lMC1bBvk2sPuA==
   dependencies:
     "@saberhq/solana-contrib" "^1.0.0"
+    "@solana/buffer-layout" "^3.0.0"
     "@solana/spl-token" "^0.1.5"
     "@solana/spl-token-registry" "^0.2.247"
     "@solana/web3.js" "^1.25.0"
     "@ubeswap/token-math" "^4.2.0"
-    buffer-layout "^1.2.2"
     tiny-invariant "^1.1.0"
     tslib "^2.3.0"
 
@@ -679,7 +679,7 @@ buffer-from@^1.0.0, buffer-from@^1.1.0:
   resolved "https://registry.yarnpkg.com/buffer-from/-/buffer-from-1.1.2.tgz#2b146a6fd72e80b4f55d255f35ed59a3a9a41bd5"
   integrity sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==
 
-buffer-layout@^1.2.0, buffer-layout@^1.2.2:
+buffer-layout@^1.2.0:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/buffer-layout/-/buffer-layout-1.2.2.tgz#b9814e7c7235783085f9ca4966a0cfff112259d5"
   integrity sha512-kWSuLN694+KTk8SrYvCqwP2WcgQjoRCiF5b4QDvkkz8EmgD+aWAIceGFKMIAdmF/pH+vpgNV3d3kAKorcdAmWA==
