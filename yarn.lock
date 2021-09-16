@@ -156,12 +156,12 @@
     buffer-layout "^1.2.0"
 
 "@saberhq/anchor-contrib@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@saberhq/anchor-contrib/-/anchor-contrib-1.0.0.tgz#15a08bc5ac93ac2c3fa96352686289772c80602c"
-  integrity sha512-CH97l3Uop2j4VnTPtRshsvvZUI9AiUJpIgCfayQb1ciflHThhkcKT6A3dErK/9AoW2BUcO2FUKTvnMFwOONKKA==
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@saberhq/anchor-contrib/-/anchor-contrib-1.1.1.tgz#bb0e4b498b9a16999c857b717f1714587ff33d65"
+  integrity sha512-ILkpPeyBsnMYnkiIGFw66NKF6KJB25kW1hDglzqPUbigXUcJplvH1g+HnwAsqfAlQaDuf7MWzvRFkq/j2MZylA==
   dependencies:
     "@project-serum/anchor" "^0.15.0"
-    "@solana/web3.js" "^1.25.0"
+    "@solana/web3.js" "^1.27.0"
     eventemitter3 "^4.0.7"
 
 "@saberhq/chai-solana@^1.1.0":
