@@ -790,9 +790,9 @@ pub struct CreateMiner<'info> {
         seeds = [
             b"Miner".as_ref(),
             quarry.key().to_bytes().as_ref(),
-            authority.key().to_bytes().as_ref(),
-            &[bump],
+            authority.key().to_bytes().as_ref()
         ],
+        bump = bump,
         payer = payer
     )]
     pub miner: ProgramAccount<'info, Miner>,
