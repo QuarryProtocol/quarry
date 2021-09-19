@@ -190,9 +190,9 @@ pub struct NewWrapper<'info> {
         init,
         seeds = [
             b"MintWrapper",
-            base.key().to_bytes().as_ref(),
-            &[bump]
+            base.key().to_bytes().as_ref()
         ],
+        bump = bump,
         payer = payer
     )]
     pub mint_wrapper: ProgramAccount<'info, MintWrapper>,
@@ -230,9 +230,9 @@ pub struct NewMinter<'info> {
         seeds = [
             b"MintWrapperMinter",
             auth.mint_wrapper.key().to_bytes().as_ref(),
-            minter_authority.key().to_bytes().as_ref(),
-            &[bump]
+            minter_authority.key().to_bytes().as_ref()
         ],
+        bump = bump,
         payer = payer
     )]
     pub minter: ProgramAccount<'info, Minter>,
