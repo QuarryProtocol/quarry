@@ -603,9 +603,9 @@ pub struct NewRewarder<'info> {
         init,
         seeds = [
             b"Rewarder".as_ref(),
-            base.key().to_bytes().as_ref(),
-            &[bump],
+            base.key().to_bytes().as_ref()
         ],
+        bump = bump,
         payer = payer
     )]
     pub rewarder: ProgramAccount<'info, Rewarder>,
@@ -712,9 +712,9 @@ pub struct CreateQuarry<'info> {
         seeds = [
             b"Quarry".as_ref(),
             auth.rewarder.key().to_bytes().as_ref(),
-            token_mint.key().to_bytes().as_ref(),
-            &[bump],
+            token_mint.key().to_bytes().as_ref()
         ],
+        bump = bump,
         payer = payer
     )]
     pub quarry: ProgramAccount<'info, Quarry>,
@@ -790,9 +790,9 @@ pub struct CreateMiner<'info> {
         seeds = [
             b"Miner".as_ref(),
             quarry.key().to_bytes().as_ref(),
-            authority.key().to_bytes().as_ref(),
-            &[bump],
+            authority.key().to_bytes().as_ref()
         ],
+        bump = bump,
         payer = payer
     )]
     pub miner: ProgramAccount<'info, Miner>,
