@@ -17,7 +17,7 @@
     "idl:generate:nolint": "./scripts/parse-idls.sh && RUN_ESLINT=none ./scripts/generate-idl-types.sh",
     "typecheck": "tsc",
     "lint": "eslint .",
-    "test:e2e": "anchor test --skip-build 'tests/**/*.ts'",
+    "test:e2e": "ANCHOR_PROVIDER_URL=http://localhost:8899 anchor test --skip-build 'tests/**/*.ts'",
     "docs:generate": "typedoc --excludePrivate --includeVersion --out site/ts/ src/index.ts",
     "prepare": "husky install"
   },
