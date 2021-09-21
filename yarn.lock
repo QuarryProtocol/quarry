@@ -195,12 +195,12 @@
     eslint-plugin-unused-imports "^1.1.2"
     prettier "^2.3.2"
 
-"@saberhq/solana-contrib@^1.0.0", "@saberhq/solana-contrib@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@saberhq/solana-contrib/-/solana-contrib-1.1.1.tgz#effafaa5c9a80e6289c986d81a3d79c59ae96bd9"
-  integrity sha512-D3rwz+n/TVKDOp9l9vS9p/vwtD+1yUIWcfo/zekRl/Vytca9axjbYKP5PTF4rtf1QHSHTwDZMAeSQgCGEyp7/A==
+"@saberhq/solana-contrib@^1.0.0", "@saberhq/solana-contrib@^1.1.1", "@saberhq/solana-contrib@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@saberhq/solana-contrib/-/solana-contrib-1.3.0.tgz#f93a765ad408268c5a8a8caac276bd0ab9545acb"
+  integrity sha512-TYaTFnQf9y58K7AHity0LzQB6rSDTg/Elt9wNbgdZEOMSyJJ1Dk9a/eMflK+7l7SD5OTTuJTNZaoVfHawf3PNQ==
   dependencies:
-    "@solana/web3.js" "^1.27.0"
+    "@solana/web3.js" "^1.28.0"
     "@types/promise-retry" "^1.1.3"
     "@types/retry" "^0.12.1"
     promise-retry "^2.0.1"
@@ -208,15 +208,15 @@
     tslib "^2.3.0"
 
 "@saberhq/token-utils@^1.1.0", "@saberhq/token-utils@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@saberhq/token-utils/-/token-utils-1.1.1.tgz#dc6cb1fc5e1b1b15c7be7bc0af176fe735b14ca0"
-  integrity sha512-3OKf/kxD9AkJRHXOLSBIk8yhfHQKXMKm3sNOMsRTkbZWL837zDJYIF0e9mh1HOaQ0Ad7ebvEdffotno5DNl2Hw==
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@saberhq/token-utils/-/token-utils-1.3.0.tgz#4ced88adfae269a9c90a281035b54573ed3b2f60"
+  integrity sha512-gb6QwrYU89/SDcm/xHr5Dxau/1GeUOVPZCsjlt0Mjt0SK++yIN+SIvdq07CW4ScUW0rpHjR27zXUc3Jjzjq42A==
   dependencies:
-    "@saberhq/solana-contrib" "^1.1.1"
+    "@saberhq/solana-contrib" "^1.3.0"
     "@solana/buffer-layout" "^3.0.0"
     "@solana/spl-token" "^0.1.5"
     "@solana/spl-token-registry" "^0.2.247"
-    "@solana/web3.js" "^1.27.0"
+    "@solana/web3.js" "^1.28.0"
     "@ubeswap/token-math" "^4.2.0"
     tiny-invariant "^1.1.0"
     tslib "^2.3.0"
@@ -247,10 +247,10 @@
     buffer-layout "^1.2.0"
     dotenv "10.0.0"
 
-"@solana/web3.js@^1.17.0", "@solana/web3.js@^1.21.0", "@solana/web3.js@^1.25.0", "@solana/web3.js@^1.26.0", "@solana/web3.js@^1.27.0":
-  version "1.27.0"
-  resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.27.0.tgz#e8db617455a03e6cfc087fa692cdb03e722b71aa"
-  integrity sha512-1vz503S39CgVwT3b8Y8HhDl4u7NpyoG/UtJKwlPZCYx+11q/qqcfpdbHXNSq2cu7FQma3MHa5wHILd8k1Vz2wQ==
+"@solana/web3.js@^1.17.0", "@solana/web3.js@^1.21.0", "@solana/web3.js@^1.26.0", "@solana/web3.js@^1.27.0", "@solana/web3.js@^1.28.0":
+  version "1.29.0"
+  resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.29.0.tgz#61cb40e2190f13ae8084d20012cb81f8fade78fa"
+  integrity sha512-5427ZZ7l34xdf07EU6e/8IDQ0gr87lMAU+6UHGrlmOp+lhM39rwN6RmRoOiQYailH15TM5pM3YeQO8KZXEOMIA==
   dependencies:
     "@babel/runtime" "^7.12.5"
     "@solana/buffer-layout" "^3.0.0"
