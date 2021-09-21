@@ -17,7 +17,7 @@
     "idl:generate:nolint": "./scripts/parse-idls.sh && RUN_ESLINT=none ./scripts/generate-idl-types.sh",
     "typecheck": "tsc",
     "lint": "eslint .",
-    "test:e2e": "anchor test --skip-build 'tests/**/*.ts'",
+    "test:e2e": "ANCHOR_WALLET=~/.config/solana/id.json anchor test --skip-build 'tests/**/*.ts'",
     "docs:generate": "typedoc --excludePrivate --includeVersion --out site/ts/ src/index.ts",
     "prepare": "husky install"
   },
@@ -36,8 +36,8 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@project-serum/anchor": "^0.15.0",
-    "@saberhq/anchor-contrib": "^1.0.0",
+    "@project-serum/anchor": "^0.16.1",
+    "@saberhq/anchor-contrib": "^1.3.1",
     "@saberhq/solana-contrib": "^1.0.0",
     "@saberhq/token-utils": "^1.1.0",
     "@solana/web3.js": "^1.26.0",
