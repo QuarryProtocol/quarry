@@ -182,9 +182,9 @@
     tslib "^2.3.0"
 
 "@saberhq/eslint-config@^1.3.1":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@saberhq/eslint-config/-/eslint-config-1.3.1.tgz#20c3fde2b1bbfabb5e167bd6136e7decbdc2e036"
-  integrity sha512-HUWFmvaoDathKqgQ8Js6X/5VnHNcTbhpsxFUh/nxp5A9D08RJiTmu/6v+6JPZBMnDHOCgHb58DeTHZhganY8Cw==
+  version "1.3.5"
+  resolved "https://registry.yarnpkg.com/@saberhq/eslint-config/-/eslint-config-1.3.5.tgz#9ef77e850fc4f3753a1c4542fd7569dd69093ab0"
+  integrity sha512-E6sspKY7Lnkl6OVoaTI1JBKlUDktZ2D/OYjZKPa006B/2M9W7679aXpgQK47eLJX7x4nwFZ3ccikts7nrmkixg==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^4.31.0"
     "@typescript-eslint/parser" "^4.31.2"
