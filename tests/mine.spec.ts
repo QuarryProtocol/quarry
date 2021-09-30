@@ -1,12 +1,13 @@
 import * as anchor from "@project-serum/anchor";
-import { createMint, getTokenAccount } from "@project-serum/common";
 import { expectTX } from "@saberhq/chai-solana";
 import type { Provider } from "@saberhq/solana-contrib";
 import { TransactionEnvelope } from "@saberhq/solana-contrib";
 import {
   createInitMintInstructions,
+  createMint,
   getATAAddress,
   getOrCreateATA,
+  getTokenAccount,
   Token,
   TOKEN_PROGRAM_ID,
   TokenAmount,
@@ -53,22 +54,19 @@ describe("Mine", () => {
   let provider: Provider;
   let mintWrapper: MintWrapper;
   let mine: MineWrapper;
-  let anchorProvider: anchor.Provider;
 
   before("Initialize SDK", () => {
     sdk = makeSDK();
     provider = sdk.provider;
     mintWrapper = sdk.mintWrapper;
     mine = sdk.mine;
-
-    anchorProvider = anchor.getProvider();
   });
 
   before(async () => {
     await assert.doesNotReject(async () => {
       stakedMintAuthority = web3.Keypair.generate();
       stakeTokenMint = await createMint(
-        anchorProvider,
+        provider,
         stakedMintAuthority.publicKey,
         DEFAULT_DECIMALS
       );
@@ -423,7 +421,7 @@ describe("Mine", () => {
       it("Unauthorized", async () => {
         const fakeAuthority = web3.Keypair.generate();
         const nextMint = await createMint(
-          anchorProvider,
+          provider,
           provider.wallet.publicKey,
           DEFAULT_DECIMALS
         );
@@ -492,7 +490,7 @@ describe("Mine", () => {
         let totalRewardsShare = ZERO;
         const numQuarries = 5;
         for (let i = 0; i < numQuarries; i++) {
-          const mint = await createMint(anchorProvider);
+          const mint = await createMint(provider);
           const token = Token.fromMint(mint, DEFAULT_DECIMALS, {
             name: "stake token",
           });
@@ -646,7 +644,7 @@ describe("Mine", () => {
       assert.strictEqual(minerData.quarryKey.toBase58(), quarry.key.toBase58());
 
       const minerBalance = await getTokenAccount(
-        anchorProvider,
+        provider,
         minerData.tokenVaultKey
       );
       expect(minerBalance.amount).to.bignumber.eq(ZERO);
@@ -675,19 +673,13 @@ describe("Mine", () => {
       let miner = await quarry.getMiner(provider.wallet.publicKey);
       invariant(miner, "miner must exist");
 
-      const minerBalance = await getTokenAccount(
-        anchorProvider,
-        miner.tokenVaultKey
-      );
+      const minerBalance = await getTokenAccount(provider, miner.tokenVaultKey);
       expect(minerBalance.amount).to.bignumber.eq(new BN(amount));
 
-      let minerVaultInfo = await getTokenAccount(
-        anchorProvider,
-        miner.tokenVaultKey
-      );
+      let minerVaultInfo = await getTokenAccount(provider, miner.tokenVaultKey);
       expect(minerVaultInfo.amount).to.bignumber.eq(new BN(amount));
       let userStakeTokenAccountInfo = await getTokenAccount(
-        anchorProvider,
+        provider,
         userStakeTokenAccount
       );
       expect(userStakeTokenAccountInfo.amount).to.bignumber.eq(ZERO);
@@ -701,18 +693,15 @@ describe("Mine", () => {
       invariant(miner, "miner must exist");
 
       const endMinerBalance = await getTokenAccount(
-        anchorProvider,
+        provider,
         miner.tokenVaultKey
       );
       expect(endMinerBalance.amount).to.bignumber.eq(ZERO);
 
-      minerVaultInfo = await getTokenAccount(
-        anchorProvider,
-        miner.tokenVaultKey
-      );
+      minerVaultInfo = await getTokenAccount(provider, miner.tokenVaultKey);
       expect(minerVaultInfo.amount.toNumber()).to.eq(ZERO.toNumber());
       userStakeTokenAccountInfo = await getTokenAccount(
-        anchorProvider,
+        provider,
         userStakeTokenAccount
       );
       expect(userStakeTokenAccountInfo.amount.toNumber()).to.eq(amount);
