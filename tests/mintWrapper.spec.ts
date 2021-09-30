@@ -1,10 +1,10 @@
 import * as anchor from "@project-serum/anchor";
-import * as serumCmn from "@project-serum/common";
 import { expectTX } from "@saberhq/chai-solana";
 import type { Provider } from "@saberhq/solana-contrib";
 import { PendingTransaction } from "@saberhq/solana-contrib";
 import {
   createInitMintInstructions,
+  getMintInfo,
   Token,
   TokenAmount,
 } from "@saberhq/token-utils";
@@ -64,10 +64,7 @@ describe("MintWrapper", () => {
   });
 
   it("Check MintWrapper", async () => {
-    const mintInfo = await serumCmn.getMintInfo(
-      anchor.getProvider(),
-      rewardsMint
-    );
+    const mintInfo = await getMintInfo(provider, rewardsMint);
     assert.ok(mintInfo.mintAuthority?.equals(mintWrapperKey));
 
     const mintWrapperState =

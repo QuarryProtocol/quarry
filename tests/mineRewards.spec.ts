@@ -1,10 +1,11 @@
 import * as anchor from "@project-serum/anchor";
-import * as serumCmn from "@project-serum/common";
 import { expectTX } from "@saberhq/chai-solana";
 import type { Provider } from "@saberhq/solana-contrib";
 import {
   createInitMintInstructions,
+  createMint,
   getATAAddress,
+  getTokenAccount,
   Token,
   TokenAmount,
 } from "@saberhq/token-utils";
@@ -90,8 +91,8 @@ describe("Mine Rewards", () => {
 
   beforeEach(async () => {
     stakedMintAuthority = Keypair.generate();
-    stakeTokenMint = await serumCmn.createMint(
-      anchor.getProvider(),
+    stakeTokenMint = await createMint(
+      provider,
       stakedMintAuthority.publicKey,
       DEFAULT_DECIMALS
     );
@@ -251,8 +252,8 @@ describe("Mine Rewards", () => {
       mint: rewardsMint,
       owner: provider.wallet.publicKey,
     });
-    const rewardsTokenAccountInfo = await serumCmn.getTokenAccount(
-      anchor.getProvider(),
+    const rewardsTokenAccountInfo = await getTokenAccount(
+      provider,
       rewardsTokenAccount
     );
     expect(rewardsTokenAccountInfo.amount.toString()).to.equal(
