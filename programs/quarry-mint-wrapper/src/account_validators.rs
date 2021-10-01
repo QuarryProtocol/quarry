@@ -109,7 +109,6 @@ impl<'info> Validate<'info> for PerformMint<'info> {
 impl<'info> Validate<'info> for OnlyAdmin<'info> {
     fn validate(&self) -> ProgramResult {
         require!(self.admin.is_signer, Unauthorized);
-        require!(self.admin.is_writable, Unauthorized);
         assert_keys!(self.admin, self.mint_wrapper.admin, "admin");
         Ok(())
     }
