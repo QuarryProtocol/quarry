@@ -149,7 +149,6 @@ impl<'info> Validate<'info> for CreateMiner<'info> {
         assert_ata!(self.miner_vault, self.miner, self.token_mint, "miner vault");
         assert_keys!(self.miner_vault.owner, self.miner, "miner vault owner");
         assert_keys!(self.miner_vault.mint, self.token_mint, "miner vault mint");
-        assert_ata!(self.miner_vault, self.miner, self.token_mint, "miner vault");
         assert_keys!(self.quarry.rewarder_key, self.rewarder, "rewarder");
 
         assert_program!(self.system_program, SYSTEM_PROGRAM_ID);
