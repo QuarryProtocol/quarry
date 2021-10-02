@@ -12,7 +12,6 @@ pkgs.mkShell {
     ])) ++ [
       rustup
       cargo-deps
-      # cargo-watch
       gh
 
       # sdk
@@ -26,7 +25,6 @@ pkgs.mkShell {
       gnused
 
       libiconv
-      wrangler
     ] ++ (pkgs.lib.optionals pkgs.stdenv.isDarwin [
       pkgs.darwin.apple_sdk.frameworks.AppKit
       pkgs.darwin.apple_sdk.frameworks.IOKit

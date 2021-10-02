@@ -34,7 +34,7 @@ import {
   DEFAULT_HARD_CAP,
   newUserStakeTokenAccount,
 } from "./utils";
-import { assertError, makeSDK } from "./workspace";
+import { makeSDK } from "./workspace";
 
 const ZERO = new BN(0);
 
@@ -455,31 +455,25 @@ describe("Mine", () => {
       });
 
       it("Invalid PDA", async () => {
-        await assert.rejects(
-          async () => {
-            await mine.program.rpc.createQuarry(1, {
-              accounts: {
-                quarry: web3.Keypair.generate().publicKey,
-                auth: {
-                  authority: provider.wallet.publicKey,
-                  rewarder: rewarderKey,
-                },
-                tokenMint: stakeTokenMint,
-                payer: provider.wallet.publicKey,
-                clock: web3.SYSVAR_CLOCK_PUBKEY,
-                systemProgram: web3.SystemProgram.programId,
+        await assert.rejects(async () => {
+          const [quarryKey, bump] = await findQuarryAddress(
+            rewarderKey,
+            Keypair.generate().publicKey
+          );
+          await mine.program.rpc.createQuarry(bump, {
+            accounts: {
+              quarry: quarryKey,
+              auth: {
+                authority: provider.wallet.publicKey,
+                rewarder: rewarderKey,
               },
-            });
-          },
-          (err: { code: number; name: string; msg?: string }) => {
-            assertError(err, {
-              name: "ConstraintAssociatedInit",
-              code: 146,
-              msg: "A seeds constraint was violated",
-            }); // constraint seeds invalid
-            return true;
-          }
-        );
+              tokenMint: stakeTokenMint,
+              payer: provider.wallet.publicKey,
+              clock: web3.SYSVAR_CLOCK_PUBKEY,
+              systemProgram: web3.SystemProgram.programId,
+            },
+          });
+        });
       });
     });
 

@@ -5,6 +5,7 @@ mod macros;
 
 use anchor_lang::prelude::*;
 use anchor_lang::Key;
+use anchor_spl::token::Token;
 use anchor_spl::token::{self, Mint, TokenAccount};
 use vipers::unwrap_int;
 use vipers::validate::Validate;
@@ -146,7 +147,7 @@ pub mod quarry_mint_wrapper {
         let seeds = gen_wrapper_signer_seeds!(mint_wrapper);
         let proxy_signer = &[&seeds[..]];
         let cpi_ctx = CpiContext::new_with_signer(
-            ctx.accounts.token_program.clone(),
+            ctx.accounts.token_program.to_account_info(),
             token::MintTo {
                 mint: ctx.accounts.token_mint.to_account_info(),
                 to: ctx.accounts.destination.to_account_info(),
@@ -183,8 +184,7 @@ pub mod quarry_mint_wrapper {
 #[instruction(bump: u8)]
 pub struct NewWrapper<'info> {
     /// Base account.
-    #[account(signer)]
-    pub base: AccountInfo<'info>,
+    pub base: Signer<'info>,
 
     #[account(
         init,
@@ -195,23 +195,23 @@ pub struct NewWrapper<'info> {
         bump = bump,
         payer = payer
     )]
-    pub mint_wrapper: ProgramAccount<'info, MintWrapper>,
+    pub mint_wrapper: Account<'info, MintWrapper>,
 
     /// Admin-to-be of the [MintWrapper].
-    pub admin: AccountInfo<'info>,
+    pub admin: UncheckedAccount<'info>,
 
     /// Token mint to mint.
     #[account(mut)]
-    pub token_mint: CpiAccount<'info, Mint>,
+    pub token_mint: Account<'info, Mint>,
 
     /// Token program.
-    pub token_program: AccountInfo<'info>,
+    pub token_program: Program<'info, Token>,
 
     /// Payer.
-    pub payer: AccountInfo<'info>,
+    pub payer: UncheckedAccount<'info>,
 
     /// System program.
-    pub system_program: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 /// Adds a minter.
@@ -222,7 +222,7 @@ pub struct NewMinter<'info> {
     pub auth: OnlyAdmin<'info>,
 
     /// Account to authorize as a minter.
-    pub minter_authority: AccountInfo<'info>,
+    pub minter_authority: UncheckedAccount<'info>,
 
     /// Information about the minter.
     #[account(
@@ -235,13 +235,13 @@ pub struct NewMinter<'info> {
         bump = bump,
         payer = payer
     )]
-    pub minter: ProgramAccount<'info, Minter>,
+    pub minter: Account<'info, Minter>,
 
     /// Payer for creating the minter.
-    pub payer: AccountInfo<'info>,
+    pub payer: Signer<'info>,
 
     /// System program.
-    pub system_program: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 /// Updates a minter.
@@ -251,59 +251,58 @@ pub struct MinterUpdate<'info> {
     pub auth: OnlyAdmin<'info>,
     /// Information about the minter.
     #[account(mut)]
-    pub minter: ProgramAccount<'info, Minter>,
+    pub minter: Account<'info, Minter>,
 }
 
 #[derive(Accounts)]
 pub struct TransferAdmin<'info> {
     /// The [MintWrapper].
     #[account(mut)]
-    pub mint_wrapper: ProgramAccount<'info, MintWrapper>,
+    pub mint_wrapper: Account<'info, MintWrapper>,
 
     /// The previous admin.
-    #[account(signer)]
-    pub admin: AccountInfo<'info>,
+    pub admin: Signer<'info>,
 
     /// The next admin.
-    pub next_admin: AccountInfo<'info>,
+    pub next_admin: UncheckedAccount<'info>,
 }
 
 #[derive(Accounts)]
 pub struct AcceptAdmin<'info> {
     /// The mint wrapper.
     #[account(mut)]
-    pub mint_wrapper: ProgramAccount<'info, MintWrapper>,
+    pub mint_wrapper: Account<'info, MintWrapper>,
 
     /// The new admin.
-    #[account(signer)]
-    pub pending_admin: AccountInfo<'info>,
+    pub pending_admin: Signer<'info>,
 }
 
 /// Accounts for the perform_mint instruction.
-#[derive(Accounts)]
+#[derive(Accounts, Clone)]
 pub struct PerformMint<'info> {
     /// [MintWrapper].
     #[account(mut)]
-    pub mint_wrapper: ProgramAccount<'info, MintWrapper>,
+    pub mint_wrapper: Account<'info, MintWrapper>,
 
     /// [Minter]'s authority.
+    /// This does not use [Signer] to allow the Rust CPI client to work properly.
     #[account(signer)]
     pub minter_authority: AccountInfo<'info>,
 
     /// Token [Mint].
     #[account(mut)]
-    pub token_mint: CpiAccount<'info, Mint>,
+    pub token_mint: Account<'info, Mint>,
 
     /// Destination [TokenAccount] for minted tokens.
     #[account(mut)]
-    pub destination: CpiAccount<'info, TokenAccount>,
+    pub destination: Account<'info, TokenAccount>,
 
     /// [Minter] information.
     #[account(mut)]
-    pub minter: ProgramAccount<'info, Minter>,
+    pub minter: Account<'info, Minter>,
 
     /// SPL Token program.
-    pub token_program: AccountInfo<'info>,
+    pub token_program: Program<'info, Token>,
 }
 
 /// --------------------------------
@@ -314,9 +313,8 @@ pub struct PerformMint<'info> {
 pub struct OnlyAdmin<'info> {
     /// The mint wrapper.
     #[account(mut)]
-    pub mint_wrapper: ProgramAccount<'info, MintWrapper>,
-    #[account(signer)]
-    pub admin: AccountInfo<'info>,
+    pub mint_wrapper: Account<'info, MintWrapper>,
+    pub admin: Signer<'info>,
 }
 
 /// --------------------------------

@@ -4,7 +4,7 @@ import type { TokenAmount } from "@saberhq/token-utils";
 import { getOrCreateATA } from "@saberhq/token-utils";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
-import { SystemProgram, SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
+import { Keypair, SystemProgram } from "@solana/web3.js";
 
 import type { MineProgram, MinerData } from "../../programs/mine";
 import type { QuarrySDK } from "../../sdk";
@@ -13,6 +13,10 @@ import type { QuarryWrapper } from "./quarry";
 import type { PendingMiner } from "./types";
 
 type MineUserStakeAccounts = Parameters<
+  MineProgram["instruction"]["stakeTokens"]["accounts"]
+>[0];
+
+type MineUserClaimAccounts = Parameters<
   MineProgram["instruction"]["claimRewards"]["accounts"]
 >[0]["stake"];
 
@@ -83,18 +87,33 @@ export class MinerWrapper {
    * @returns
    */
   get userStakeAccounts(): MineUserStakeAccounts {
+    const minerVault = this.tokenVaultKey;
+    return {
+      ...this.userClaimAccounts,
+      tokenAccount: this.stakedTokenATA,
+      minerVault,
+    };
+  }
+
+  /**
+   * Generates stake accounts for the user.
+   * @returns
+   */
+  get userClaimAccounts(): MineUserClaimAccounts {
     const authority = this.authority;
     const miner = this.minerKey;
-    const minerVault = this.tokenVaultKey;
+    const randomMut = Keypair.generate().publicKey;
     return {
       authority,
       miner,
       quarry: this.quarry.key,
-      tokenAccount: this.stakedTokenATA,
       tokenProgram: TOKEN_PROGRAM_ID,
       rewarder: this.quarry.quarryData.rewarderKey,
-      clock: SYSVAR_CLOCK_PUBKEY,
-      minerVault,
+
+      // dummies for backwards compatibility
+      unusedClock: SystemProgram.programId,
+      unusedMinerVault: randomMut,
+      unusedTokenAccount: randomMut,
     };
   }
 
@@ -182,7 +201,7 @@ export class MinerWrapper {
         minter,
         rewardsTokenMint: this.quarry.rewarderData.rewardsTokenMint,
         rewardsTokenAccount,
-        stake: this.userStakeAccounts,
+        stake: this.userClaimAccounts,
         mintWrapperProgram: this.sdk.programs.MintWrapper.programId,
         claimFeeTokenAccount: this.quarry.rewarderData.claimFeeTokenAccount,
       },

@@ -39,10 +39,11 @@ export class QuarrySDK {
    * Creates a new instance of the SDK with the given keypair.
    */
   public withSigner(signer: Signer): QuarrySDK {
+    const wallet = new SignerWallet(signer);
     const provider = new SolanaProvider(
       this.provider.connection,
       this.provider.broadcaster,
-      new SignerWallet(signer),
+      wallet,
       this.provider.opts
     );
     return QuarrySDK.load({

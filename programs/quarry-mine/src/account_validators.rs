@@ -2,16 +2,15 @@
 
 use anchor_lang::prelude::*;
 use anchor_lang::Key;
-use anchor_spl::token;
 use vipers::validate::Validate;
-use vipers::{assert_ata, assert_keys, assert_owner, assert_program};
+use vipers::{assert_ata, assert_keys};
 
 use crate::addresses;
 use crate::{
     AcceptAuthority, ClaimRewards, CreateMiner, CreateQuarry, ExtractFees,
     MutableRewarderWithAuthority, MutableRewarderWithPauseAuthority, NewRewarder,
     ReadOnlyRewarderWithAuthority, SetAnnualRewards, SetFamine, SetPauseAuthority, SetRewardsShare,
-    TransferAuthority, UpdateQuarryRewards, UserStake,
+    TransferAuthority, UpdateQuarryRewards, UserClaim, UserStake,
 };
 
 /// --------------------------------
@@ -28,19 +27,10 @@ impl<'info> Validate<'info> for NewRewarder<'info> {
             self.rewards_token_mint
         );
 
-        assert_program!(self.system_program, SYSTEM_PROGRAM_ID);
         assert_keys!(
             self.mint_wrapper.token_mint,
             self.rewards_token_mint,
             "rewards token mint"
-        );
-
-        assert_owner!(self.mint_wrapper, quarry_mint_wrapper::ID, "mint_wrapper");
-        assert_owner!(self.rewards_token_mint, token::ID, "rewards_token_mint");
-        assert_owner!(
-            self.claim_fee_token_account,
-            token::ID,
-            "claim_fee_token_account"
         );
 
         Ok(())
@@ -107,8 +97,6 @@ impl<'info> Validate<'info> for CreateQuarry<'info> {
     fn validate(&self) -> ProgramResult {
         self.auth.validate()?;
         require!(!self.auth.rewarder.is_paused, Paused);
-        assert_program!(self.system_program, SYSTEM_PROGRAM_ID);
-        assert_owner!(self.token_mint, token::ID, "token_mint");
         Ok(())
     }
 }
@@ -151,12 +139,6 @@ impl<'info> Validate<'info> for CreateMiner<'info> {
         assert_keys!(self.miner_vault.mint, self.token_mint, "miner vault mint");
         assert_keys!(self.quarry.rewarder_key, self.rewarder, "rewarder");
 
-        assert_program!(self.system_program, SYSTEM_PROGRAM_ID);
-        assert_program!(self.token_program, TOKEN_PROGRAM_ID);
-
-        assert_owner!(self.token_mint, token::ID, "token_mint");
-        assert_owner!(self.miner_vault, token::ID, "miner_vault");
-
         Ok(())
     }
 }
@@ -167,18 +149,15 @@ impl<'info> Validate<'info> for ClaimRewards<'info> {
         self.stake.validate()?;
         require!(!self.stake.rewarder.is_paused, Paused);
 
-        // mint_wrapper_program validate
         assert_keys!(
-            self.mint_wrapper_program,
-            quarry_mint_wrapper::ID,
-            "mint wrapper program"
+            self.mint_wrapper.token_mint,
+            self.rewards_token_mint,
+            "mint_wrapper.token_mint",
         );
-
-        // minter validate
         assert_keys!(
             self.minter.minter_authority,
             self.stake.rewarder,
-            "rewarder"
+            "minter.minter_authority"
         );
 
         // rewards_token_mint validate
@@ -188,36 +167,46 @@ impl<'info> Validate<'info> for ClaimRewards<'info> {
             "rewards token mint",
         );
         assert_keys!(
-            self.rewards_token_mint,
-            self.rewards_token_account.mint,
-            "rewards token account mint",
-        );
-        assert_keys!(
-            self.rewards_token_mint,
-            self.mint_wrapper.token_mint,
-            "mint wrapper mint",
-        );
-        assert_keys!(
             self.rewards_token_mint.mint_authority.unwrap(),
-            self.mint_wrapper,
+            *self.mint_wrapper,
             "mint wrapper",
+        );
+
+        // rewards_token_account validate
+        assert_keys!(
+            self.rewards_token_account.mint,
+            self.rewards_token_mint,
+            "rewards_token_account.mint",
         );
 
         // claim_fee_token_account validate
         assert_keys!(
-            self.claim_fee_token_account,
+            *self.claim_fee_token_account,
             self.stake.rewarder.claim_fee_token_account,
             "claim_fee_token_account"
         );
-
-        assert_owner!(self.mint_wrapper, quarry_mint_wrapper::ID, "mint_wrapper");
-        assert_owner!(self.minter, quarry_mint_wrapper::ID, "minter");
-        assert_owner!(self.rewards_token_mint, token::ID, "rewards_token_mint");
-        assert_owner!(
-            self.rewards_token_account,
-            token::ID,
-            "rewards_token_account"
+        assert_keys!(
+            self.claim_fee_token_account.mint,
+            self.rewards_token_mint,
+            "rewards_token_account.mint",
         );
+
+        Ok(())
+    }
+}
+
+impl<'info> Validate<'info> for UserClaim<'info> {
+    fn validate(&self) -> ProgramResult {
+        require!(!self.rewarder.is_paused, Paused);
+        // authority
+        require!(self.authority.is_signer, Unauthorized);
+        assert_keys!(self.authority, self.miner.authority, "miner authority");
+
+        // quarry
+        assert_keys!(self.miner.quarry_key, self.quarry.key(), "quarry");
+
+        // rewarder
+        assert_keys!(self.quarry.rewarder_key, self.rewarder, "rewarder");
 
         Ok(())
     }
@@ -253,11 +242,6 @@ impl<'info> Validate<'info> for UserStake<'info> {
         // rewarder
         assert_keys!(self.quarry.rewarder_key, self.rewarder, "rewarder");
 
-        assert_program!(self.token_program, TOKEN_PROGRAM_ID);
-
-        assert_owner!(self.miner_vault, token::ID, "miner_vault");
-        assert_owner!(self.token_account, token::ID, "token_account");
-
         Ok(())
     }
 }
@@ -270,8 +254,6 @@ impl<'info> Validate<'info> for ExtractFees<'info> {
             self.rewarder,
             self.rewarder.rewards_token_mint
         );
-
-        assert_program!(self.token_program, TOKEN_PROGRAM_ID);
 
         assert_keys!(
             self.claim_fee_token_account.mint,
@@ -294,13 +276,6 @@ impl<'info> Validate<'info> for ExtractFees<'info> {
             self.rewarder.rewards_token_mint,
             "fee ata"
         );
-
-        assert_owner!(
-            self.claim_fee_token_account,
-            token::ID,
-            "claim_fee_token_account"
-        );
-        assert_owner!(self.fee_to_token_account, token::ID, "fee_to_token_account");
 
         Ok(())
     }
