@@ -1,6 +1,6 @@
 {
   "name": "@quarryprotocol/quarry-sdk",
-  "version": "1.6.6",
+  "version": "1.7.0",
   "description": "Quarry Protocol SDK",
   "main": "dist/index.js",
   "repository": "git@github.com:QuarryProtocol/quarry.git",
