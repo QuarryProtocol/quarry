@@ -1104,7 +1104,7 @@ dependencies = [
 
 [[package]]
 name = "quarry-mine"
-version = "1.7.0"
+version = "1.8.0"
 dependencies = [
  "anchor-lang 0.17.0",
  "anchor-spl 0.17.0",
@@ -1120,7 +1120,7 @@ dependencies = [
 
 [[package]]
 name = "quarry-mint-wrapper"
-version = "1.7.0"
+version = "1.8.0"
 dependencies = [
  "anchor-lang 0.17.0",
  "anchor-spl 0.17.0",
@@ -1130,7 +1130,7 @@ dependencies = [
 
 [[package]]
 name = "quarry-registry"
-version = "1.7.0"
+version = "1.8.0"
 dependencies = [
  "anchor-lang 0.17.0",
  "quarry-mine",
