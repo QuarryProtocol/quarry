@@ -9,7 +9,7 @@ import {
 } from "@saberhq/token-utils";
 import type { PublicKey } from "@solana/web3.js";
 import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import BN = require("bn.js");
+import { BN } from "bn.js";
 
 import type {
   MineWrapper,

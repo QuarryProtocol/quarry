@@ -15,7 +15,7 @@ import {
 import type { PublicKey } from "@solana/web3.js";
 import { Keypair } from "@solana/web3.js";
 import * as assert from "assert";
-import BN = require("bn.js");
+import { BN } from "bn.js";
 import { expect } from "chai";
 import invariant from "tiny-invariant";
 
