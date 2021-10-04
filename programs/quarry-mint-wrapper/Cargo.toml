@@ -20,7 +20,7 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = "0.16.2"
-anchor-spl = "0.16.2"
+anchor-lang = "0.17.0"
+anchor-spl = "0.17.0"
 vipers = "1.1.0"
 solana-program = "1.7.11"

@@ -91,16 +91,14 @@ impl<'info> ClaimRewards<'info> {
     fn create_perform_mint_accounts(
         &self,
         destination: Account<'info, TokenAccount>,
-    ) -> quarry_mint_wrapper::PerformMint<'info> {
-        let token_mint = self.rewards_token_mint.clone();
-        let token_program = self.stake.token_program.clone();
-        quarry_mint_wrapper::PerformMint {
-            mint_wrapper: (*self.mint_wrapper).clone(),
+    ) -> quarry_mint_wrapper::cpi::accounts::PerformMint<'info> {
+        quarry_mint_wrapper::cpi::accounts::PerformMint {
+            mint_wrapper: self.mint_wrapper.to_account_info(),
             minter_authority: self.stake.rewarder.to_account_info(),
-            token_mint,
-            destination,
-            minter: (*self.minter).clone(),
-            token_program,
+            token_mint: self.rewards_token_mint.to_account_info(),
+            destination: destination.to_account_info(),
+            minter: self.minter.to_account_info(),
+            token_program: self.stake.token_program.to_account_info(),
         }
     }
 
@@ -109,7 +107,6 @@ impl<'info> ClaimRewards<'info> {
         destination: Account<'info, TokenAccount>,
         amount: u64,
     ) -> ProgramResult {
-        let mint_wrapper_program = self.mint_wrapper_program.clone();
         let claim_mint_accounts = self.create_perform_mint_accounts(destination);
 
         // Create the signer seeds.
@@ -118,7 +115,7 @@ impl<'info> ClaimRewards<'info> {
 
         quarry_mint_wrapper::cpi::perform_mint(
             CpiContext::new_with_signer(
-                mint_wrapper_program.to_account_info(),
+                self.mint_wrapper_program.to_account_info(),
                 claim_mint_accounts,
                 signer_seeds,
             ),
