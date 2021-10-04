@@ -2,16 +2,22 @@
   "name": "@quarryprotocol/quarry-sdk",
   "version": "1.7.0",
   "description": "Quarry Protocol SDK",
-  "main": "dist/index.js",
+  "keywords": [
+    "solana",
+    "quarry"
+  ],
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
   "repository": "git@github.com:QuarryProtocol/quarry.git",
   "author": "Quarry Protocol <team@quarry.so>",
   "bugs": {
     "url": "https://github.com/QuarryProtocol/quarry/issues",
     "email": "team@quarry.so"
   },
+  "homepage": "https://quarry.so",
   "license": "AGPL-3.0",
   "scripts": {
-    "build": "tsc -P tsconfig.build.json",
+    "build": "rm -fr dist/ && tsc -P tsconfig.build.json && tsc -P tsconfig.esm.json",
     "clean": "rm -fr dist/",
     "idl:generate": "./scripts/parse-idls.sh && ./scripts/generate-idl-types.sh",
     "idl:generate:nolint": "./scripts/parse-idls.sh && RUN_ESLINT=none ./scripts/generate-idl-types.sh",
@@ -22,12 +28,12 @@
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@project-serum/anchor": "^0.16.2",
-    "@saberhq/anchor-contrib": "^1.3.5",
-    "@saberhq/chai-solana": "^1.3.5",
-    "@saberhq/eslint-config": "^1.3.5",
-    "@saberhq/solana-contrib": "^1.3.5",
-    "@saberhq/token-utils": "^1.3.5",
+    "@project-serum/anchor": "^0.17.0",
+    "@saberhq/anchor-contrib": "^1.3.14",
+    "@saberhq/chai-solana": "^1.3.14",
+    "@saberhq/eslint-config": "^1.3.14",
+    "@saberhq/solana-contrib": "^1.3.14",
+    "@saberhq/token-utils": "^1.3.14",
     "@solana/web3.js": "^1.29.2",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.10.2",
@@ -37,7 +43,7 @@
     "lint-staged": "^11.1.2",
     "mocha": "^9.1.0",
     "ts-mocha": "^8.0.0",
-    "typedoc": "^0.22.3",
+    "typedoc": "^0.22.5",
     "typescript": "^4.3.5"
   },
   "peerDependencies": {
@@ -62,5 +68,8 @@
   "lint-staged": {
     "*.{ts,tsx}": "eslint --cache --fix",
     "*.{js,json,jsx,html,css,md}": "prettier --write"
+  },
+  "dependencies": {
+    "tslib": "^2.3.1"
   }
 }

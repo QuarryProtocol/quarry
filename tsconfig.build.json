@@ -1,12 +1,13 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "module": "CommonJS",
     "noEmit": false,
     "declaration": true,
-    "removeComments": false,
     "declarationMap": true,
     "sourceMap": true,
-    "outDir": "dist/"
+    "inlineSources": true,
+    "outDir": "dist/cjs/"
   },
   "include": ["src/"]
 }
