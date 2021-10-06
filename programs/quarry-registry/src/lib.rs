@@ -20,7 +20,6 @@ pub mod quarry_registry {
     /// # Arguments
     ///
     /// * `max_quarries` - The maximum number of quarries that can be held in the registry.
-    /// * `space` - The amount of space to provision for the [Registry], in bytes. Since a [Pubkey] is 32 bytes, this should be about `8 + 1 + 32 + 32 * max_quarries`.
     /// * `bump` - Bump seed.
     pub fn new_registry(ctx: Context<NewRegistry>, max_quarries: u16, bump: u8) -> ProgramResult {
         ctx.accounts.validate()?;
