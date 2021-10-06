@@ -23,4 +23,4 @@ default = []
 anchor-lang = "0.17.0"
 quarry-mine = { version = "1.7.0", path = "../quarry-mine", features = ["cpi"] }
 solana-program = "1.7.11"
-vipers = "1.1.0"
+vipers = "1.2.1"
