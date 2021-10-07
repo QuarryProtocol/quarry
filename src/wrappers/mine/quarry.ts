@@ -1,8 +1,7 @@
 import type { Provider } from "@saberhq/solana-contrib";
 import { TransactionEnvelope } from "@saberhq/solana-contrib";
 import type { Token } from "@saberhq/token-utils";
-import { getATAAddress, getOrCreateATA } from "@saberhq/token-utils";
-import { u64 } from "@solana/spl-token";
+import { getATAAddress, getOrCreateATA, u64 } from "@saberhq/token-utils";
 import type { PublicKey } from "@solana/web3.js";
 import { SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
 

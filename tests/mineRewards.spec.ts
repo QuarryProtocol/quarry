@@ -1,3 +1,5 @@
+import "chai-bn";
+
 import * as anchor from "@project-serum/anchor";
 import { expectTX } from "@saberhq/chai-solana";
 import type { Provider } from "@saberhq/solana-contrib";
@@ -8,8 +10,8 @@ import {
   getTokenAccount,
   Token,
   TokenAmount,
+  u64,
 } from "@saberhq/token-utils";
-import { u64 } from "@solana/spl-token";
 import type { PublicKey } from "@solana/web3.js";
 import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import * as assert from "assert";

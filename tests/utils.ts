@@ -1,11 +1,11 @@
 import { getProvider } from "@project-serum/anchor";
 import { expectTX } from "@saberhq/chai-solana";
 import type { Token } from "@saberhq/token-utils";
-import { SPLToken } from "@saberhq/token-utils";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
+  SPLToken,
   TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
+} from "@saberhq/token-utils";
 import type { Keypair, PublicKey, Signer } from "@solana/web3.js";
 import { Transaction } from "@solana/web3.js";
 

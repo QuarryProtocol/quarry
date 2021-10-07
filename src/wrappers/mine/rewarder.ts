@@ -1,6 +1,5 @@
 import { TransactionEnvelope } from "@saberhq/solana-contrib";
-import type { Token } from "@saberhq/token-utils";
-import type { u64 } from "@solana/spl-token";
+import type { Token, u64 } from "@saberhq/token-utils";
 import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { SystemProgram, SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
 

@@ -1,4 +1,3 @@
-import "chai-as-promised";
 import "chai-bn";
 
 import type { Idl } from "@project-serum/anchor";

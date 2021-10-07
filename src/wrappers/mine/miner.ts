@@ -1,8 +1,7 @@
 import type { Provider } from "@saberhq/solana-contrib";
 import { TransactionEnvelope } from "@saberhq/solana-contrib";
 import type { TokenAmount } from "@saberhq/token-utils";
-import { getOrCreateATA } from "@saberhq/token-utils";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { getOrCreateATA, TOKEN_PROGRAM_ID } from "@saberhq/token-utils";
 import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { Keypair, SystemProgram } from "@solana/web3.js";
 

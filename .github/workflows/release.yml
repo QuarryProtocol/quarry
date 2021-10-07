@@ -36,38 +36,26 @@ jobs:
         with:
           always-auth: true
           node-version: 14.x
-      - name: Cache Node modules
+      - name: Yarn Cache
         uses: actions/cache@v2
-        id: cache-node-modules
         with:
-          path: ./node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          path: ./.yarn
+          key: ${{ runner.os }}-${{ hashFiles('./.yarn/**/*.js') }}
       - name: Install Yarn dependencies
         run: yarn install
       - name: Parse IDLs
         run: nix shell .#ci --command yarn idl:generate
       - run: yarn build
+      - run: |
+          echo 'npmAuthToken: "${NPM_AUTH_TOKEN}"' >> .yarnrc.yml
       - name: Publish
-        run: yarn publish
+        run: yarn npm publish
 
   release-crate:
     runs-on: ubuntu-latest
     name: Release crate on crates.io
     steps:
       - uses: actions/checkout@v2
-
-      - uses: cachix/install-nix-action@v14
-        with:
-          install_url: https://nixos-nix-install-tests.cachix.org/serve/i6laym9jw3wg9mw6ncyrk6gjx4l34vvx/install
-          install_options: "--tarball-url-prefix https://nixos-nix-install-tests.cachix.org/serve"
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-      - name: Setup Cachix
-        uses: cachix/cachix-action@v10
-        with:
-          name: quarry
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-
       - name: Install Rust nightly
         uses: actions-rs/toolchain@v1
         with:

@@ -13,7 +13,7 @@ import type {
   Signer,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { mapValues } from "lodash";
+import mapValues from "lodash.mapvalues";
 import invariant from "tiny-invariant";
 
 import type { Programs } from "./constants";
@@ -108,7 +108,7 @@ export class QuarrySDK {
           provider.wallet,
           confirmOptions ?? DEFAULT_PROVIDER_OPTIONS
         );
-        return new Program(idl, address, anchorProvider);
+        return new Program(idl, address, anchorProvider) as Program;
       }
     ) as unknown as Programs;
     return new QuarrySDK(provider, programs);
