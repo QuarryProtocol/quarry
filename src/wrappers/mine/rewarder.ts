@@ -86,7 +86,7 @@ export class RewarderWrapper {
         },
         tokenMint: token.mintAccount,
         payer: this.program.provider.wallet.publicKey,
-        clock: SYSVAR_CLOCK_PUBKEY,
+        unusedClock: SYSVAR_CLOCK_PUBKEY,
         systemProgram: SystemProgram.programId,
       },
     });
@@ -117,7 +117,6 @@ export class RewarderWrapper {
             rewarder: this.rewarderKey,
             authority,
           },
-          clock: SYSVAR_CLOCK_PUBKEY,
         },
       }),
     ]);
@@ -152,7 +151,6 @@ export class RewarderWrapper {
             accounts: {
               rewarder: this.rewarderKey,
               quarry,
-              clock: SYSVAR_CLOCK_PUBKEY,
             },
           })
         );

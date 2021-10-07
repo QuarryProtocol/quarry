@@ -217,7 +217,6 @@ describe("Mine", () => {
               authority: provider.wallet.publicKey,
               rewarder: rewarderKey,
             },
-            clock: web3.SYSVAR_CLOCK_PUBKEY,
           },
         });
       });
@@ -353,7 +352,6 @@ describe("Mine", () => {
                 rewarder: rewarderKey,
               },
               quarry: quarryKey,
-              clock: web3.SYSVAR_CLOCK_PUBKEY,
             },
           });
         });
@@ -440,7 +438,7 @@ describe("Mine", () => {
                 },
                 tokenMint: nextMint,
                 payer: fakeAuthority.publicKey,
-                clock: web3.SYSVAR_CLOCK_PUBKEY,
+                unusedClock: web3.SYSVAR_CLOCK_PUBKEY,
                 systemProgram: web3.SystemProgram.programId,
               },
               signers: [fakeAuthority],
@@ -469,7 +467,7 @@ describe("Mine", () => {
               },
               tokenMint: stakeTokenMint,
               payer: provider.wallet.publicKey,
-              clock: web3.SYSVAR_CLOCK_PUBKEY,
+              unusedClock: web3.SYSVAR_CLOCK_PUBKEY,
               systemProgram: web3.SystemProgram.programId,
             },
           });

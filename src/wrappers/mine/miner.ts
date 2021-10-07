@@ -110,7 +110,6 @@ export class MinerWrapper {
       rewarder: this.quarry.quarryData.rewarderKey,
 
       // dummies for backwards compatibility
-      unusedClock: SystemProgram.programId,
       unusedMinerVault: randomMut,
       unusedTokenAccount: randomMut,
     };

@@ -69,7 +69,7 @@ export class MineWrapper {
               rewarder: rewarderKey,
               payer: this.program.provider.wallet.publicKey,
               systemProgram: SystemProgram.programId,
-              clock: SYSVAR_CLOCK_PUBKEY,
+              unusedClock: SYSVAR_CLOCK_PUBKEY,
               mintWrapper,
               rewardsTokenMint: mintWrapperData.tokenMint,
               claimFeeTokenAccount,

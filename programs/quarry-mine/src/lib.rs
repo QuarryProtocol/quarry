@@ -71,9 +71,10 @@ pub mod quarry_mine {
         rewarder.pause_authority = Pubkey::default();
         rewarder.is_paused = false;
 
+        let current_ts = Clock::get()?.unix_timestamp;
         emit!(NewRewarderEvent {
             authority: rewarder.authority,
-            timestamp: ctx.accounts.clock.unix_timestamp,
+            timestamp: current_ts,
         });
 
         Ok(())
@@ -136,10 +137,11 @@ pub mod quarry_mine {
         let previous_rate = rewarder.annual_rewards_rate;
         rewarder.annual_rewards_rate = new_rate;
 
+        let current_ts = Clock::get()?.unix_timestamp;
         emit!(RewarderAnnualRewardsUpdateEvent {
             previous_rate,
             new_rate,
-            timestamp: ctx.accounts.clock.unix_timestamp,
+            timestamp: current_ts,
         });
 
         Ok(())
@@ -170,9 +172,10 @@ pub mod quarry_mine {
         quarry.token_mint_decimals = ctx.accounts.token_mint.decimals;
         quarry.token_mint_key = *ctx.accounts.token_mint.to_account_info().key;
 
+        let current_ts = Clock::get()?.unix_timestamp;
         emit!(QuarryCreateEvent {
             token_mint: quarry.token_mint_key,
-            timestamp: ctx.accounts.clock.unix_timestamp,
+            timestamp: current_ts,
         });
 
         Ok(())
@@ -188,7 +191,8 @@ pub mod quarry_mine {
             .checked_add(new_share)
             .and_then(|v| v.checked_sub(quarry.rewards_share)));
 
-        quarry.last_update_ts = cmp::min(ctx.accounts.clock.unix_timestamp, quarry.famine_ts);
+        let now = Clock::get()?.unix_timestamp;
+        quarry.last_update_ts = cmp::min(now, quarry.famine_ts);
         quarry.annual_rewards_rate = rewarder.compute_quarry_annual_rewards_rate(new_share)?;
         quarry.rewards_share = new_share;
 
@@ -196,7 +200,7 @@ pub mod quarry_mine {
             token_mint: quarry.token_mint_key,
             annual_rewards_rate: quarry.annual_rewards_rate,
             rewards_share: quarry.rewards_share,
-            timestamp: ctx.accounts.clock.unix_timestamp,
+            timestamp: now,
         });
 
         Ok(())
@@ -215,7 +219,7 @@ pub mod quarry_mine {
     /// Anyone can call this.
     #[access_control(ctx.accounts.validate())]
     pub fn update_quarry_rewards(ctx: Context<UpdateQuarryRewards>) -> ProgramResult {
-        let current_ts = ctx.accounts.clock.unix_timestamp;
+        let current_ts = Clock::get()?.unix_timestamp;
         let rewarder = &ctx.accounts.rewarder;
         let payroll: Payroll = (*ctx.accounts.quarry).into();
         let quarry = &mut ctx.accounts.quarry;
@@ -544,8 +548,8 @@ pub struct NewRewarder<'info> {
     /// System program.
     pub system_program: Program<'info, System>,
 
-    /// Clock.
-    pub clock: Sysvar<'info, Clock>,
+    /// Unused variable that held the [Clock]. Placeholder.
+    pub unused_clock: UncheckedAccount<'info>,
 
     /// Mint wrapper.
     pub mint_wrapper: Account<'info, quarry_mint_wrapper::MintWrapper>,
@@ -615,9 +619,6 @@ pub struct ReadOnlyRewarderWithAuthority<'info> {
 pub struct SetAnnualRewards<'info> {
     /// [Rewarder],
     pub auth: MutableRewarderWithAuthority<'info>,
-
-    /// [Clock].
-    pub clock: Sysvar<'info, Clock>,
 }
 
 /* Quarry contexts */
@@ -648,8 +649,8 @@ pub struct CreateQuarry<'info> {
     /// Payer of [Quarry] creation.
     pub payer: UncheckedAccount<'info>,
 
-    /// [Clock].
-    pub clock: Sysvar<'info, Clock>,
+    /// Unused variable that held the clock. Placeholder.
+    pub unused_clock: UncheckedAccount<'info>,
 
     /// System program.
     pub system_program: Program<'info, System>,
@@ -675,9 +676,6 @@ pub struct SetRewardsShare<'info> {
     /// [Quarry] updated.
     #[account(mut)]
     pub quarry: Account<'info, Quarry>,
-
-    /// [Clock].
-    pub clock: Sysvar<'info, Clock>,
 }
 
 /// Accounts for [quarry_mine::update_quarry_rewards].
@@ -689,9 +687,6 @@ pub struct UpdateQuarryRewards<'info> {
 
     /// [Rewarder].
     pub rewarder: Account<'info, Rewarder>,
-
-    /// [Clock].
-    pub clock: Sysvar<'info, Clock>,
 }
 
 /* Miner contexts */
@@ -799,9 +794,6 @@ pub struct UserClaim<'info> {
 
     /// Rewarder
     pub rewarder: Account<'info, Rewarder>,
-
-    /// Unused variable that held the clock. Placeholder.
-    pub unused_clock: UncheckedAccount<'info>,
 }
 
 /// Staking accounts
@@ -836,9 +828,6 @@ pub struct UserStake<'info> {
 
     /// Rewarder
     pub rewarder: Account<'info, Rewarder>,
-
-    /// Unused variable that held the clock. Placeholder.
-    pub unused_clock: UncheckedAccount<'info>,
 }
 
 /// Accounts for [quarry_mine::extract_fees].
