@@ -1,6 +1,6 @@
 [package]
 name = "quarry-merge-mine"
-version = "1.8.3"
+version = "1.8.4"
 description = "Mine multiple quarries by staking LP tokens only once."
 homepage = "https://quarry.so"
 repository = "https://github.com/QuarryProtocol/quarry"
