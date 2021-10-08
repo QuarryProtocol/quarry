@@ -14,11 +14,15 @@ import type {
   TransactionInstruction,
 } from "@solana/web3.js";
 import mapValues from "lodash.mapvalues";
-import invariant from "tiny-invariant";
 
 import type { Programs } from "./constants";
 import { QUARRY_ADDRESSES, QUARRY_IDLS } from "./constants";
-import { MineWrapper, MintWrapper, QuarryRegistry } from "./wrappers";
+import {
+  MergeMine,
+  MineWrapper,
+  MintWrapper,
+  QuarryRegistry,
+} from "./wrappers";
 
 export interface Environment {
   rewarder: PublicKey;
@@ -68,6 +72,10 @@ export class QuarrySDK {
     return new QuarryRegistry(this);
   }
 
+  get mergeMine(): MergeMine {
+    return new MergeMine(this);
+  }
+
   /**
    * Constructs a new transaction envelope.
    * @param instructions
@@ -88,7 +96,7 @@ export class QuarrySDK {
   public static load({
     provider,
     addresses = QUARRY_ADDRESSES,
-    confirmOptions,
+    confirmOptions = DEFAULT_PROVIDER_OPTIONS,
   }: {
     // Provider
     provider: Provider;
@@ -102,11 +110,10 @@ export class QuarrySDK {
       (_: Address, programName: keyof Programs): Program => {
         const address = allAddresses[programName];
         const idl = QUARRY_IDLS[programName];
-        invariant(idl, `Unknown IDL: ${programName}`);
         const anchorProvider = new AnchorProvider(
           provider.connection,
           provider.wallet,
-          confirmOptions ?? DEFAULT_PROVIDER_OPTIONS
+          confirmOptions
         );
         return new Program(idl, address, anchorProvider) as Program;
       }

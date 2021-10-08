@@ -6,6 +6,10 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [[test.genesis]]
+address = "QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto"
+program = "./target/deploy/quarry_merge_mine.so"
+
+[[test.genesis]]
 address = "QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB"
 program = "./target/deploy/quarry_mine.so"
 

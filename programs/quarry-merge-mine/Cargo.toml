@@ -1,0 +1,32 @@
+[package]
+name = "quarry-merge-mine"
+version = "1.8.3"
+description = "Mine multiple quarries by staking LP tokens only once."
+homepage = "https://quarry.so"
+repository = "https://github.com/QuarryProtocol/quarry"
+authors = ["Larry Jarry <larry@quarry.so>"]
+license = "AGPL-3.0"
+keywords = ["solana", "quarry"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "quarry_merge_mine"
+
+[features]
+no-entrypoint = []
+no-idl = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.17.0"
+anchor-spl = "0.17.0"
+quarry-mine = { path = "../quarry-mine", features = ["cpi"], version = "1.8.0" }
+quarry-mint-wrapper = { path = "../quarry-mint-wrapper", features = [
+    "cpi"
+], version = "1.3.0" }
+num-traits = "0.2"
+vipers = "1.2.1"
+solana-program = "1.7.11"
+spl-associated-token-account = "1.0.3"

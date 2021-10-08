@@ -22,7 +22,8 @@
     "idl:generate": "./scripts/parse-idls.sh && ./scripts/generate-idl-types.sh",
     "idl:generate:nolint": "./scripts/parse-idls.sh && RUN_ESLINT=none ./scripts/generate-idl-types.sh",
     "typecheck": "tsc",
-    "lint": "eslint .",
+    "lint": "eslint . --cache",
+    "lint:ci": "eslint . --max-warnings=0",
     "test:e2e": "ANCHOR_WALLET=~/.config/solana/id.json anchor test --skip-build 'tests/**/*.ts'",
     "docs:generate": "typedoc --excludePrivate --includeVersion --out site/ts/ src/index.ts",
     "prepare": "husky install"
@@ -41,7 +42,7 @@
     "@types/chai": "^4",
     "@types/lodash.mapvalues": "^4",
     "@types/mocha": "^9.0.0",
-    "@types/node": "^16.10.2",
+    "@types/node": "^16.10.3",
     "@types/prettier": "^2",
     "bn.js": "^5.2.0",
     "chai": "^4.3.4",

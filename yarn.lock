@@ -190,7 +190,7 @@ __metadata:
     "@types/chai": ^4
     "@types/lodash.mapvalues": ^4
     "@types/mocha": ^9.0.0
-    "@types/node": ^16.10.2
+    "@types/node": ^16.10.3
     "@types/prettier": ^2
     bn.js: ^5.2.0
     chai: ^4.3.4
@@ -461,7 +461,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^16.10.2":
+"@types/node@npm:*":
   version: 16.10.2
   resolution: "@types/node@npm:16.10.2"
   checksum: 83c1c3c68e7500103908c3f16094e458879c840a719c15b6ea577f81fe1f24a1b3473bb6c8e8091fe79a82543ca7639c6b1088fcf80292ec091d1d1c9504a87e
@@ -472,6 +472,13 @@ __metadata:
   version: 12.20.26
   resolution: "@types/node@npm:12.20.26"
   checksum: 81e0933b52a51e3adf4111ac0fd0f78da9e03f0e0b56ac7eaafe3805e099cf2ac8309a76056db166a93478a04374d10bdd1060b76842bd41bc22c6514e40fbc3
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^16.10.3":
+  version: 16.10.3
+  resolution: "@types/node@npm:16.10.3"
+  checksum: 3fd429bce8a4acb497dcc62b536782a5e87ccf7cd91d64a78b263ae5d66cb72bf84be9eeeff6f84ae0567b065a40b267caa66d311f9e094990a5847bbd168a29
   languageName: node
   linkType: hard
 

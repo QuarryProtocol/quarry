@@ -446,7 +446,7 @@ describe("Mine", () => {
           },
           (err: Error) => {
             console.error(err);
-            expect(err.message).to.include("unauthorized");
+            expect(err.message).to.include("custom program error: 0x1"); // mut constraint
             return true;
           }
         );

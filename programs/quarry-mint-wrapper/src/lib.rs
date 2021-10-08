@@ -285,9 +285,7 @@ pub struct PerformMint<'info> {
     pub mint_wrapper: Account<'info, MintWrapper>,
 
     /// [Minter]'s authority.
-    /// This does not use [Signer] to allow the Rust CPI client to work properly.
-    #[account(signer)]
-    pub minter_authority: AccountInfo<'info>,
+    pub minter_authority: Signer<'info>,
 
     /// Token [Mint].
     #[account(mut)]

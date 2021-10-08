@@ -406,7 +406,7 @@ pub mod quarry_mine {
 /// Controls token rewards distribution to all [Quarry]s.
 /// The [Rewarder] is also the [Minter] registered to the [MintWrapper].
 #[account]
-#[derive(Default, Debug)]
+#[derive(Copy, Default, Debug)]
 pub struct Rewarder {
     /// Random pubkey used for generating the program address.
     pub base: Pubkey,
@@ -479,7 +479,7 @@ pub struct Quarry {
 
 /// An account that has staked tokens into a [Quarry].
 #[account]
-#[derive(Default, Debug)]
+#[derive(Copy, Default, Debug)]
 pub struct Miner {
     /// Key of the [Quarry] this [Miner] works on.
     pub quarry_key: Pubkey,
@@ -542,7 +542,8 @@ pub struct NewRewarder<'info> {
     /// Initial authority of the rewarder.
     pub authority: UncheckedAccount<'info>,
 
-    /// Payer of the rewarder initialization.
+    /// Payer of the [Rewarder] initialization.
+    #[account(mut)]
     pub payer: Signer<'info>,
 
     /// System program.
@@ -647,7 +648,8 @@ pub struct CreateQuarry<'info> {
     pub token_mint: Account<'info, Mint>,
 
     /// Payer of [Quarry] creation.
-    pub payer: UncheckedAccount<'info>,
+    #[account(mut)]
+    pub payer: Signer<'info>,
 
     /// Unused variable that held the clock. Placeholder.
     pub unused_clock: UncheckedAccount<'info>,
@@ -722,6 +724,7 @@ pub struct CreateMiner<'info> {
     pub system_program: Program<'info, System>,
 
     /// Payer of [Miner] creation.
+    #[account(mut)]
     pub payer: Signer<'info>,
 
     /// [Mint] of the token to create a [Quarry] for.

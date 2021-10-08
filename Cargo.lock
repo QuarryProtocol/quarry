@@ -942,6 +942,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "quarry-merge-mine"
+version = "1.8.3"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "num-traits",
+ "quarry-mine",
+ "quarry-mint-wrapper",
+ "solana-program",
+ "spl-associated-token-account",
+ "vipers",
+]
+
+[[package]]
 name = "quarry-mine"
 version = "1.8.3"
 dependencies = [
