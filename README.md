@@ -25,6 +25,7 @@ Quarry was built with the intention of helping more Solana projects launch on-ch
 
 | Package                      | Description                                           | Version                                                                                                                         | Docs                                                                                             |
 | :--------------------------- | :---------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------- |
+| `quarry-merge-mine`          | Mines multiple quarries at the same time              | [![Crates.io](https://img.shields.io/crates/v/quarry-merge-mine)](https://crates.io/crates/quarry-merge-mine)                   | [![Docs.rs](https://docs.rs/quarry-merge-mine/badge.svg)](https://docs.rs/quarry-merge-mine)     |
 | `quarry-mint-wrapper`        | Mints tokens to authorized accounts                   | [![Crates.io](https://img.shields.io/crates/v/quarry-mint-wrapper)](https://crates.io/crates/quarry-mint-wrapper)               | [![Docs.rs](https://docs.rs/quarry-mint-wrapper/badge.svg)](https://docs.rs/quarry-mint-wrapper) |
 | `quarry-mine`                | Distributes liquidity mining rewards to token stakers | [![crates](https://img.shields.io/crates/v/quarry-mine)](https://crates.io/crates/quarry-mine)                                  | [![Docs.rs](https://docs.rs/quarry-mine/badge.svg)](https://docs.rs/quarry-mine)                 |
 | `quarry-registry`            | Registry to index all quarries of a rewarder.         | [![crates](https://img.shields.io/crates/v/quarry-registry)](https://crates.io/crates/quarry-registry)                          | [![Docs.rs](https://docs.rs/quarry-registry/badge.svg)](https://docs.rs/quarry-registry)         |
@@ -34,6 +35,7 @@ Quarry was built with the intention of helping more Solana projects launch on-ch
 
 Program addresses are the same on devnet and mainnet-beta.
 
+- MergeMine: [`QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto](https://explorer.solana.com/address/QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto)
 - MintWrapper: [`QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV`](https://explorer.solana.com/address/QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV)
 - Mine: [`QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB`](https://explorer.solana.com/address/QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB)
 - Registry: [`QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc`](https://explorer.solana.com/address/QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc)
