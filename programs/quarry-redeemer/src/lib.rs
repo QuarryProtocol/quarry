@@ -46,7 +46,7 @@ pub mod quarry_redeemer {
         );
 
         ctx.accounts.burn_iou_tokens(amount)?;
-        ctx.accounts.transfer_iou_tokens(amount)?;
+        ctx.accounts.transfer_redemption_tokens(amount)?;
 
         let redeemer = &mut ctx.accounts.redeemer;
         redeemer.total_tokens_redeemed =
