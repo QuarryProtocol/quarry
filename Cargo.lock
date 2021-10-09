@@ -943,7 +943,7 @@ dependencies = [
 
 [[package]]
 name = "quarry-merge-mine"
-version = "1.8.4"
+version = "1.9.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -957,7 +957,7 @@ dependencies = [
 
 [[package]]
 name = "quarry-mine"
-version = "1.8.4"
+version = "1.9.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -973,7 +973,7 @@ dependencies = [
 
 [[package]]
 name = "quarry-mint-wrapper"
-version = "1.8.4"
+version = "1.9.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -983,7 +983,7 @@ dependencies = [
 
 [[package]]
 name = "quarry-redeemer"
-version = "1.8.4"
+version = "1.9.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -994,7 +994,7 @@ dependencies = [
 
 [[package]]
 name = "quarry-registry"
-version = "1.8.4"
+version = "1.9.0"
 dependencies = [
  "anchor-lang",
  "quarry-mine",
