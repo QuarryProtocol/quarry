@@ -17,31 +17,36 @@ import BN from "bn.js";
 import { expect } from "chai";
 
 import { findMinerAddress, QuarrySDK } from "../src";
+import { QuarryMergeMineErrors } from "../src/idls/quarry_merge_mine";
 import { createRewarderAndQuarry } from "./quarryUtils";
 import { DEFAULT_DECIMALS } from "./utils";
 import { makeSDK } from "./workspace";
 
 describe("Quarry Merge Mine", () => {
   let provider: Provider;
+  let adminKP: Keypair;
+  let minterKP: Keypair;
+  let ownerKP: Keypair;
 
-  beforeEach("Initialize", () => {
+  beforeEach("Initialize", async () => {
     const sdk = makeSDK();
     provider = sdk.provider;
-  });
 
-  it("happy path", async () => {
+    ownerKP = Keypair.generate();
+    minterKP = Keypair.generate();
+    adminKP = Keypair.generate();
+
     const { connection } = provider;
-
-    const ownerKP = Keypair.generate();
-    const minterKP = Keypair.generate();
-    const adminKP = Keypair.generate();
-
     await connection.confirmTransaction(
       await connection.requestAirdrop(adminKP.publicKey, 10 * LAMPORTS_PER_SOL)
     );
     await connection.confirmTransaction(
       await connection.requestAirdrop(ownerKP.publicKey, 10 * LAMPORTS_PER_SOL)
     );
+  });
+
+  it("happy path", async () => {
+    const { connection } = provider;
 
     const stakedTokenMint = await createMint(
       provider,
@@ -284,5 +289,115 @@ describe("Quarry Merge Mine", () => {
       },
       "after withdraw"
     );
+  });
+
+  it("Unstake primary with replica balance should error", async () => {
+    const { connection } = provider;
+
+    const stakedTokenMint = await createMint(
+      provider,
+      minterKP.publicKey,
+      DEFAULT_DECIMALS
+    );
+    const stakedToken = Token.fromMint(stakedTokenMint, DEFAULT_DECIMALS);
+
+    // primary pool
+    const primary = await createRewarderAndQuarry({
+      connection,
+      stakedToken,
+      annualRate: new u64(1_000_000000),
+    });
+
+    const ownerSDK = QuarrySDK.load({
+      provider,
+    }).withSigner(ownerKP);
+    const {
+      tx: initPoolTX,
+      key: poolKey,
+      replicaToken,
+    } = await ownerSDK.mergeMine.newPool({
+      primaryMint: stakedTokenMint,
+    });
+    await expectTX(initPoolTX, "Init pool").to.be.fulfilled;
+
+    // init replica rewarders
+    const replicaA = await createRewarderAndQuarry({
+      connection,
+      stakedToken: replicaToken,
+      adminKP: ownerKP,
+      annualRate: new u64(1_000_000000),
+    });
+
+    // init merge miner
+    const poolData = await ownerSDK.mergeMine.program.account.mergePool.fetch(
+      poolKey
+    );
+    const { tx: initMMTX, key: mmKey } = await ownerSDK.mergeMine.newMM({
+      pool: {
+        key: poolKey,
+        data: poolData,
+      },
+      rewarder: primary.rewarder,
+      rewardsMint: primary.rewardsToken.mintAccount,
+    });
+    await expectTX(initMMTX, "Init merge miner").to.be.fulfilled;
+
+    // set up user token accounts
+    const { accounts: ownerAccounts, instructions: createUserATAs } =
+      await getOrCreateATAs({
+        provider,
+        mints: {
+          staked: stakedTokenMint,
+          primaryRewards: primary.rewardsToken.mintAccount,
+          replicaARewards: replicaA.rewardsToken.mintAccount,
+        },
+        owner: ownerKP.publicKey,
+      });
+    await expectTX(
+      new TransactionEnvelope(
+        provider,
+        [
+          ...createUserATAs,
+          SPLToken.createMintToInstruction(
+            TOKEN_PROGRAM_ID,
+            stakedTokenMint,
+            ownerAccounts.staked,
+            minterKP.publicKey,
+            [],
+            1_000_000_000000
+          ),
+        ],
+        [minterKP]
+      ),
+      "Mint staked token to owner"
+    ).to.be.fulfilled;
+
+    const stakedAmount = TokenAmount.parse(stakedToken, "100");
+    // deposit into pool
+    const mm = await ownerSDK.mergeMine.loadMM({
+      mmKey,
+    });
+    const depositTX = await mm.deposit({
+      amount: stakedAmount,
+      rewarder: primary.rewarder,
+    });
+    await expectTX(depositTX, "Deposit into rewarder").to.be.fulfilled;
+
+    const replicaAStakeTX = await mm.stakeReplicaMiner(replicaA.rewarder);
+    await expectTX(replicaAStakeTX, "Stake into replica A").to.be.fulfilled;
+
+    const withdrawTX = await mm.withdraw({
+      amount: stakedAmount,
+      rewarder: primary.rewarder,
+    });
+
+    try {
+      await withdrawTX.confirm();
+    } catch (e) {
+      const err = e as Error;
+      expect(err.message).to.include(
+        `0x${QuarryMergeMineErrors.OutstandingReplicaTokens.code.toString(16)}`
+      );
+    }
   });
 });
