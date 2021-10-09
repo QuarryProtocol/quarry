@@ -1,0 +1,29 @@
+[package]
+name = "quarry-redeemer"
+version = "1.8.4"
+description = "Redeems one token for another"
+edition = "2018"
+homepage = "https://quarry.so"
+repository = "https://github.com/QuarryProtocol/quarry"
+authors = ["Quarry Protocol <team@quarry.so>"]
+license = "AGPL-3.0"
+keywords = ["solana", "quarry"]
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "quarry_redeemer"
+
+[features]
+no-entrypoint = []
+no-idl = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.17.0"
+anchor-spl = "0.17.0"
+solana-program = "1.7.11"
+spl-associated-token-account = { version = "1.0.3", features = [
+  "no-entrypoint"
+] }
+vipers = "1.2.1"

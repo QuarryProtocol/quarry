@@ -17,12 +17,14 @@ import mapValues from "lodash.mapvalues";
 
 import type { Programs } from "./constants";
 import { QUARRY_ADDRESSES, QUARRY_IDLS } from "./constants";
+import type { PendingRedeemer } from "./programs/redeemer";
 import {
   MergeMine,
   MineWrapper,
   MintWrapper,
   QuarryRegistry,
 } from "./wrappers";
+import { RedeemerWrapper } from "./wrappers/redeemer";
 
 export interface Environment {
   rewarder: PublicKey;
@@ -119,5 +121,29 @@ export class QuarrySDK {
       }
     ) as unknown as Programs;
     return new QuarrySDK(provider, programs);
+  }
+
+  public async loadRedeemer({
+    iouMint,
+    redemptionMint,
+  }: {
+    iouMint: PublicKey;
+    redemptionMint: PublicKey;
+  }): Promise<RedeemerWrapper> {
+    return await RedeemerWrapper.load({ iouMint, redemptionMint, sdk: this });
+  }
+
+  public async createRedeemer({
+    iouMint,
+    redemptionMint,
+  }: {
+    iouMint: PublicKey;
+    redemptionMint: PublicKey;
+  }): Promise<PendingRedeemer> {
+    return await RedeemerWrapper.createRedeemer({
+      iouMint,
+      redemptionMint,
+      sdk: this,
+    });
   }
 }

@@ -2,34 +2,39 @@ import { PublicKey } from "@solana/web3.js";
 
 import { QuarryMineJSON } from "./idls/quarry_mine";
 import { QuarryMintWrapperJSON } from "./idls/quarry_mint_wrapper";
+import { QuarryRedeemerJSON } from "./idls/quarry_redeemer";
 import type {
   MineProgram,
   MintWrapperProgram,
   QuarryMergeMineProgram,
 } from "./programs";
 import { QuarryMergeMineJSON } from "./programs";
+import type { RedeemerProgram } from "./programs/redeemer";
 import type { RegistryProgram } from "./programs/registry";
 import { QuarryRegistryJSON } from "./programs/registry";
 
 export interface Programs {
   MergeMine: QuarryMergeMineProgram;
-  MintWrapper: MintWrapperProgram;
   Mine: MineProgram;
+  MintWrapper: MintWrapperProgram;
+  Redeemer: RedeemerProgram;
   Registry: RegistryProgram;
 }
 
 // See `Anchor.toml` for all addresses.
 export const QUARRY_ADDRESSES = {
-  MintWrapper: new PublicKey("QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV"),
-  Mine: new PublicKey("QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB"),
-  Registry: new PublicKey("QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc"),
   MergeMine: new PublicKey("QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto"),
+  Mine: new PublicKey("QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB"),
+  MintWrapper: new PublicKey("QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV"),
+  Redeemer: new PublicKey("QRDxhMw1P2NEfiw5mYXG79bwfgHTdasY2xNP76XSea9"),
+  Registry: new PublicKey("QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc"),
 };
 
 export const QUARRY_IDLS = {
   MergeMine: QuarryMergeMineJSON,
-  MintWrapper: QuarryMintWrapperJSON,
   Mine: QuarryMineJSON,
+  MintWrapper: QuarryMintWrapperJSON,
+  Redeemer: QuarryRedeemerJSON,
   Registry: QuarryRegistryJSON,
 };
 

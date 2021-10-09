@@ -982,6 +982,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "quarry-redeemer"
+version = "1.8.4"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "solana-program",
+ "spl-associated-token-account",
+ "vipers",
+]
+
+[[package]]
 name = "quarry-registry"
 version = "1.8.4"
 dependencies = [
