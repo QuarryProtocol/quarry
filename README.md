@@ -34,9 +34,9 @@ Quarry was built with the intention of helping more Solana projects launch on-ch
 
 ## Addresses
 
-Program addresses are the same on devnet and mainnet-beta.
+Program addresses are the same on devnet, testnet, and mainnet-beta.
 
-- MintWrapper: [`QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto`](https://explorer.solana.com/address/QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto)
+- MergeMine: [`QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto`](https://explorer.solana.com/address/QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto)
 - Mine: [`QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB`](https://explorer.solana.com/address/QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB)
 - MintWrapper: [`QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV`](https://explorer.solana.com/address/QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV)
 - Redeemer: [`QRDxhMw1P2NEfiw5mYXG79bwfgHTdasY2xNP76XSea9`](https://explorer.solana.com/address/QRDxhMw1P2NEfiw5mYXG79bwfgHTdasY2xNP76XSea9)
