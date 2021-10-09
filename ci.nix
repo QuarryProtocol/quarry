@@ -2,8 +2,9 @@
 pkgs.buildEnv {
   name = "ci";
   paths = with pkgs;
-    (pkgs.lib.optionals pkgs.stdenv.isLinux ([ libudev anchor ])) ++ [
-      # sdk
+    (pkgs.lib.optionals pkgs.stdenv.isLinux [ libudev ]) ++ [
+      anchor
+
       nodejs
       yarn
       python3
