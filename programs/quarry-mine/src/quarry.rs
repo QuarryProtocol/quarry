@@ -33,7 +33,7 @@ impl Quarry {
     }
 
     /// Updates the quarry and miner with the latest info.
-    /// https://github.com/Synthetixio/synthetix/blob/aeee6b2c82588681e1f99202663346098d1866ac/contracts/StakingRewards.sol#L158
+    /// <https://github.com/Synthetixio/synthetix/blob/aeee6b2c82588681e1f99202663346098d1866ac/contracts/StakingRewards.sol#L158>
     pub fn update_rewards_and_miner(
         &mut self,
         miner: &mut Miner,

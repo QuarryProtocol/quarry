@@ -116,7 +116,7 @@ impl Payroll {
     }
 
     /// Calculates the amount of rewards earned for the given number of staked tokens, with safety checks.
-    /// https://github.com/Synthetixio/synthetix/blob/4b9b2ee09b38638de6fe1c38dbe4255a11ebed86/contracts/StakingRewards.sol#L72
+    /// <https://github.com/Synthetixio/synthetix/blob/4b9b2ee09b38638de6fe1c38dbe4255a11ebed86/contracts/StakingRewards.sol#L72>
     pub fn calculate_rewards_earned(
         &self,
         current_ts: i64,

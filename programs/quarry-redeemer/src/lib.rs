@@ -1,6 +1,7 @@
 //! Program for redeeming IOU tokens for an underlying token.
+#![deny(rustdoc::all)]
+#![allow(rustdoc::missing_doc_code_examples)]
 
-#![allow(clippy::nonstandard_macro_braces)]
 use anchor_lang::prelude::*;
 use anchor_lang::Key;
 use anchor_spl::token::Token;
@@ -142,7 +143,7 @@ pub struct RedeemTokens<'info> {
     #[account(mut)]
     pub redemption_destination: Account<'info, TokenAccount>,
 
-    /// The spl_token program corresponding to [token::ID].
+    /// The spl_token program corresponding to [Token].
     pub token_program: Program<'info, Token>,
 }
 

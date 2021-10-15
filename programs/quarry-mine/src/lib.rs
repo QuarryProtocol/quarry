@@ -7,6 +7,8 @@
 //! - [Miner], which stake tokens into [Quarry]s to receive rewards.
 //!
 //! This program is modeled after [Synthetix's StakingRewards.sol](https://github.com/Synthetixio/synthetix/blob/4b9b2ee09b38638de6fe1c38dbe4255a11ebed86/contracts/StakingRewards.sol).
+#![deny(rustdoc::all)]
+#![allow(rustdoc::missing_doc_code_examples)]
 
 #[macro_use]
 mod macros;
@@ -399,12 +401,12 @@ pub mod quarry_mine {
     }
 }
 
-/// --------------------------------
-/// PDA Structs
-/// --------------------------------
+// --------------------------------
+// PDA Structs
+// --------------------------------
 
 /// Controls token rewards distribution to all [Quarry]s.
-/// The [Rewarder] is also the [Minter] registered to the [MintWrapper].
+/// The [Rewarder] is also the [quarry_mint_wrapper::Minter] registered to the [quarry_mint_wrapper::MintWrapper].
 #[account]
 #[derive(Copy, Default, Debug)]
 pub struct Rewarder {
@@ -843,7 +845,7 @@ pub struct ExtractFees<'info> {
     #[account(mut)]
     pub claim_fee_token_account: Account<'info, TokenAccount>,
 
-    /// [TokenAccount] owned by the [addresses::FEE_TO_ADDRESS].
+    /// [TokenAccount] owned by the [addresses::FEE_TO].
     /// Holds DAO claim fees.
     #[account(mut)]
     pub fee_to_token_account: Account<'info, TokenAccount>,

@@ -1,4 +1,6 @@
 //! Proxy program for interacting with the token mint.
+#![deny(rustdoc::all)]
+#![allow(rustdoc::missing_doc_code_examples)]
 
 #[macro_use]
 mod macros;

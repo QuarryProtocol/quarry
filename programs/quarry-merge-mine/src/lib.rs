@@ -1,5 +1,6 @@
 //! Holds tokens to allow one depositor to mine multiple quarries at the same time.
 #![deny(rustdoc::all)]
+#![allow(rustdoc::missing_doc_code_examples)]
 
 #[macro_use]
 mod macros;
@@ -237,7 +238,7 @@ pub struct WithdrawTokens<'info> {
     /// The [Mint] being withdrawn from the [MergeMiner].
     pub withdraw_mint: Account<'info, Mint>,
     /// A [TokenAccount] owned by the [MergeMiner] to withdraw from.
-    /// Must be the [Pool::primary_mint] or a replica mint.
+    /// Must be the [MergePool::primary_mint] or the [MergePool::replica_mint].
     #[account(mut)]
     pub mm_token_account: Account<'info, TokenAccount>,
     /// Account to send tokens to.

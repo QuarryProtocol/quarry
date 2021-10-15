@@ -1,4 +1,6 @@
 //! Registry to help the frontend quickly locate all active quarries.
+#![deny(rustdoc::all)]
+#![allow(rustdoc::missing_doc_code_examples)]
 
 use anchor_lang::prelude::*;
 use anchor_lang::Key;

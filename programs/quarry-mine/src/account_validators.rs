@@ -13,9 +13,9 @@ use crate::{
     TransferAuthority, UpdateQuarryRewards, UserClaim, UserStake,
 };
 
-/// --------------------------------
-/// Rewarder Functions
-/// --------------------------------
+// --------------------------------
+// Rewarder Functions
+// --------------------------------
 
 impl<'info> Validate<'info> for NewRewarder<'info> {
     fn validate(&self) -> ProgramResult {
@@ -38,7 +38,6 @@ impl<'info> Validate<'info> for NewRewarder<'info> {
 }
 
 impl<'info> Validate<'info> for SetPauseAuthority<'info> {
-    /// Validates the [Rewarder] is correct.
     fn validate(&self) -> ProgramResult {
         self.auth.validate()?;
         require!(!self.auth.rewarder.is_paused, Paused);
@@ -59,7 +58,6 @@ impl<'info> Validate<'info> for MutableRewarderWithPauseAuthority<'info> {
 }
 
 impl<'info> Validate<'info> for TransferAuthority<'info> {
-    /// Validates the [Rewarder] is correct.
     fn validate(&self) -> ProgramResult {
         require!(!self.rewarder.is_paused, Paused);
         require!(self.authority.is_signer, Unauthorized);
@@ -69,7 +67,6 @@ impl<'info> Validate<'info> for TransferAuthority<'info> {
 }
 
 impl<'info> Validate<'info> for AcceptAuthority<'info> {
-    /// Validates the [Rewarder] is correct.
     fn validate(&self) -> ProgramResult {
         require!(!self.rewarder.is_paused, Paused);
         require!(
@@ -81,7 +78,6 @@ impl<'info> Validate<'info> for AcceptAuthority<'info> {
 }
 
 impl<'info> Validate<'info> for SetAnnualRewards<'info> {
-    /// Validates the [Rewarder] is correct.
     fn validate(&self) -> ProgramResult {
         self.auth.validate()?;
         require!(!self.auth.rewarder.is_paused, Paused);
@@ -89,9 +85,9 @@ impl<'info> Validate<'info> for SetAnnualRewards<'info> {
     }
 }
 
-/// --------------------------------
-/// Quarry functions
-/// --------------------------------
+// --------------------------------
+// Quarry functions
+// --------------------------------
 
 impl<'info> Validate<'info> for CreateQuarry<'info> {
     fn validate(&self) -> ProgramResult {
@@ -290,7 +286,7 @@ impl<'info> Validate<'info> for MutableRewarderWithAuthority<'info> {
 }
 
 impl<'info> Validate<'info> for ReadOnlyRewarderWithAuthority<'info> {
-    /// Validates the [Rewarder] is correct.
+    /// Validates the [crate::Rewarder] is correct.
     fn validate(&self) -> ProgramResult {
         require!(self.authority.is_signer, Unauthorized);
         assert_keys!(self.authority, self.rewarder.authority);
