@@ -18,6 +18,10 @@ address = "QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV"
 program = "./target/deploy/quarry_mint_wrapper.so"
 
 [[test.genesis]]
+address = "QoPWR6ZuHgbSbGraEgnYz55Ypsn68tBb7Y6Hn1e1RNX"
+program = "./target/deploy/quarry_operator.so"
+
+[[test.genesis]]
 address = "QRDxhMw1P2NEfiw5mYXG79bwfgHTdasY2xNP76XSea9"
 program = "./target/deploy/quarry_redeemer.so"
 
