@@ -1,0 +1,26 @@
+[package]
+name = "quarry-operator"
+version = "1.9.0"
+description = "Operates a Quarry Rewarder to split up sub-roles."
+edition = "2018"
+homepage = "https://quarry.so"
+repository = "https://github.com/QuarryProtocol/quarry"
+authors = ["Quarry Protocol <team@quarry.so>"]
+license = "AGPL-3.0"
+keywords = ["solana", "quarry"]
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "quarry_operator"
+
+[features]
+no-entrypoint = []
+no-idl = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.17.0"
+anchor-spl = "0.17.0"
+quarry-mine = { path = "../quarry-mine", version = "1.9.0", features = ["cpi"] }
+vipers = "1.2.1"

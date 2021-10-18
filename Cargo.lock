@@ -982,6 +982,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "quarry-operator"
+version = "1.9.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "quarry-mine",
+ "vipers",
+]
+
+[[package]]
 name = "quarry-redeemer"
 version = "1.9.0"
 dependencies = [
