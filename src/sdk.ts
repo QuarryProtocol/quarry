@@ -9,6 +9,7 @@ import {
 } from "@saberhq/solana-contrib";
 import type {
   ConfirmOptions,
+  Keypair,
   PublicKey,
   Signer,
   TransactionInstruction,
@@ -24,13 +25,8 @@ import {
   MintWrapper,
   QuarryRegistry,
 } from "./wrappers";
+import { Operator } from "./wrappers/operator";
 import { RedeemerWrapper } from "./wrappers/redeemer";
-
-export interface Environment {
-  rewarder: PublicKey;
-  landlord: PublicKey;
-  creator: PublicKey;
-}
 
 /**
  * Quarry SDK.
@@ -144,6 +140,38 @@ export class QuarrySDK {
       iouMint,
       redemptionMint,
       sdk: this,
+    });
+  }
+
+  /**
+   * Loads an operator.
+   * @param key
+   * @returns
+   */
+  public async loadOperator(key: PublicKey): Promise<Operator | null> {
+    return await Operator.load({
+      sdk: this,
+      key,
+    });
+  }
+
+  public async createOperator({
+    rewarder,
+    baseKP,
+    admin,
+    payer,
+  }: {
+    rewarder: PublicKey;
+    admin?: PublicKey;
+    baseKP?: Keypair;
+    payer?: PublicKey;
+  }): Promise<{ key: PublicKey; tx: TransactionEnvelope }> {
+    return await Operator.createOperator({
+      sdk: this,
+      rewarder,
+      baseKP,
+      admin,
+      payer,
     });
   }
 }

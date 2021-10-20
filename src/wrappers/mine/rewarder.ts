@@ -158,4 +158,25 @@ export class RewarderWrapper {
     );
     return this.sdk.newTx(instructions);
   }
+
+  /**
+   * Transfers the authority to a different account.
+   * @param param0
+   */
+  transferAuthority({
+    authority = this.sdk.provider.wallet.publicKey,
+    nextAuthority,
+  }: {
+    authority?: PublicKey;
+    nextAuthority: PublicKey;
+  }): TransactionEnvelope {
+    return new TransactionEnvelope(this.sdk.provider, [
+      this.program.instruction.transferAuthority(nextAuthority, {
+        accounts: {
+          authority,
+          rewarder: this.rewarderKey,
+        },
+      }),
+    ]);
+  }
 }

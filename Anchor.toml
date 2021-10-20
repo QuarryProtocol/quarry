@@ -18,7 +18,7 @@ address = "QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV"
 program = "./target/deploy/quarry_mint_wrapper.so"
 
 [[test.genesis]]
-address = "QoPWR6ZuHgbSbGraEgnYz55Ypsn68tBb7Y6Hn1e1RNX"
+address = "QoP6NfrQbaGnccXQrMLUkog2tQZ4C1RFgJcwDnT8Kmz"
 program = "./target/deploy/quarry_operator.so"
 
 [[test.genesis]]

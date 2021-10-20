@@ -1,7 +1,7 @@
 [package]
 name = "quarry-operator"
 version = "1.9.0"
-description = "Operates a Quarry Rewarder to split up sub-roles."
+description = "Delegates Quarry Rewarder authority roles."
 edition = "2018"
 homepage = "https://quarry.so"
 repository = "https://github.com/QuarryProtocol/quarry"

@@ -1,4 +1,4 @@
-//! Delegation program for managing quarries.
+//! Delegates Quarry Rewarder authority roles.
 #![deny(rustdoc::all)]
 #![allow(rustdoc::missing_doc_code_examples)]
 
@@ -10,8 +10,7 @@ use vipers::validate::Validate;
 mod account_validators;
 mod macros;
 
-// TODO: update this with the correct program ID
-declare_id!("QoPWR6ZuHgbSbGraEgnYz55Ypsn68tBb7Y6Hn1e1RNX");
+declare_id!("QoP6NfrQbaGnccXQrMLUkog2tQZ4C1RFgJcwDnT8Kmz");
 
 /// Quarry Operator program.
 #[program]
@@ -32,6 +31,16 @@ pub mod quarry_operator {
         operator.quarry_creator = operator.admin;
         operator.share_allocator = operator.admin;
         operator.record_update()?;
+
+        let signer_seeds: &[&[&[u8]]] = &[gen_operator_signer_seeds!(operator)];
+        quarry_mine::cpi::accept_authority(CpiContext::new_with_signer(
+            ctx.accounts.quarry_mine_program.to_account_info(),
+            quarry_mine::cpi::accounts::AcceptAuthority {
+                authority: ctx.accounts.operator.to_account_info(),
+                rewarder: ctx.accounts.rewarder.to_account_info(),
+            },
+            signer_seeds,
+        ))?;
 
         Ok(())
     }
@@ -210,6 +219,7 @@ pub struct CreateOperator<'info> {
     )]
     pub operator: Account<'info, Operator>,
     /// [Rewarder] of the token.
+    #[account(mut)]
     pub rewarder: Box<Account<'info, Rewarder>>,
     /// The admin to set.
     pub admin: UncheckedAccount<'info>,
@@ -218,6 +228,8 @@ pub struct CreateOperator<'info> {
     pub payer: Signer<'info>,
     /// [System] program.
     pub system_program: Program<'info, System>,
+    /// Quarry mine
+    pub quarry_mine_program: Program<'info, quarry_mine::program::QuarryMine>,
 }
 
 /// Accounts for setting roles.
@@ -242,7 +254,8 @@ pub struct DelegateSetAnnualRewards<'info> {
 #[derive(Accounts)]
 pub struct DelegateCreateQuarry<'info> {
     pub with_delegate: WithDelegate<'info>,
-    pub quarry: Box<Account<'info, Quarry>>,
+    #[account(mut)]
+    pub quarry: UncheckedAccount<'info>,
     pub token_mint: Box<Account<'info, anchor_spl::token::Mint>>,
 
     /// Payer of [Quarry] creation.

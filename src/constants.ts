@@ -7,8 +7,9 @@ import type {
   MineProgram,
   MintWrapperProgram,
   QuarryMergeMineProgram,
+  QuarryOperatorProgram,
 } from "./programs";
-import { QuarryMergeMineJSON } from "./programs";
+import { QuarryMergeMineJSON, QuarryOperatorJSON } from "./programs";
 import type { RedeemerProgram } from "./programs/redeemer";
 import type { RegistryProgram } from "./programs/registry";
 import { QuarryRegistryJSON } from "./programs/registry";
@@ -17,6 +18,7 @@ export interface Programs {
   MergeMine: QuarryMergeMineProgram;
   Mine: MineProgram;
   MintWrapper: MintWrapperProgram;
+  Operator: QuarryOperatorProgram;
   Redeemer: RedeemerProgram;
   Registry: RegistryProgram;
 }
@@ -26,6 +28,7 @@ export const QUARRY_ADDRESSES = {
   MergeMine: new PublicKey("QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto"),
   Mine: new PublicKey("QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB"),
   MintWrapper: new PublicKey("QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV"),
+  Operator: new PublicKey("QoP6NfrQbaGnccXQrMLUkog2tQZ4C1RFgJcwDnT8Kmz"),
   Redeemer: new PublicKey("QRDxhMw1P2NEfiw5mYXG79bwfgHTdasY2xNP76XSea9"),
   Registry: new PublicKey("QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc"),
 };
@@ -34,6 +37,7 @@ export const QUARRY_IDLS = {
   MergeMine: QuarryMergeMineJSON,
   Mine: QuarryMineJSON,
   MintWrapper: QuarryMintWrapperJSON,
+  Operator: QuarryOperatorJSON,
   Redeemer: QuarryRedeemerJSON,
   Registry: QuarryRegistryJSON,
 };
