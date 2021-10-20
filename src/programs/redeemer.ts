@@ -5,6 +5,8 @@ import type { PublicKey } from "@solana/web3.js";
 
 import type { QuarryRedeemerIDL } from "../idls/quarry_redeemer";
 
+export * from "../idls/quarry_redeemer";
+
 export type RedeemerTypes = AnchorTypes<
   QuarryRedeemerIDL,
   {
