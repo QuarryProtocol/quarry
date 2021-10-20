@@ -1,6 +1,6 @@
 [package]
 name = "quarry-operator"
-version = "1.9.0"
+version = "1.9.1"
 description = "Delegates Quarry Rewarder authority roles."
 edition = "2018"
 homepage = "https://quarry.so"
