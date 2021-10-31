@@ -3,13 +3,12 @@
 #![allow(rustdoc::missing_doc_code_examples)]
 
 use anchor_lang::prelude::*;
-use anchor_lang::Key;
 use quarry_mine::Quarry;
 use quarry_mine::Rewarder;
 
 mod account_validators;
 
-solana_program::declare_id!("QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc");
+declare_id!("QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc");
 
 #[program]
 pub mod quarry_registry {

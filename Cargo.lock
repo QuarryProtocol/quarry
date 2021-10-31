@@ -950,7 +950,6 @@ dependencies = [
  "num-traits",
  "quarry-mine",
  "quarry-mint-wrapper",
- "solana-program",
  "spl-associated-token-account",
  "vipers",
 ]
@@ -965,7 +964,6 @@ dependencies = [
  "proptest",
  "quarry-mint-wrapper",
  "rand 0.8.4",
- "solana-program",
  "spl-associated-token-account",
  "spl-math",
  "vipers",
@@ -977,7 +975,6 @@ version = "1.9.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
- "solana-program",
  "vipers",
 ]
 
@@ -997,7 +994,6 @@ version = "1.9.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
- "solana-program",
  "spl-associated-token-account",
  "vipers",
 ]
@@ -1008,7 +1004,6 @@ version = "1.9.0"
 dependencies = [
  "anchor-lang",
  "quarry-mine",
- "solana-program",
  "vipers",
 ]
 
@@ -1583,13 +1578,12 @@ checksum = "5fecdca9a5291cc2b8dcf7dc02453fee791a280f3743cb0905f8822ae463b3fe"
 
 [[package]]
 name = "vipers"
-version = "1.2.1"
+version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8960b053a136ee9be9620d0e57c386803db236fa041255b3c6bf135bd7fae4d7"
+checksum = "bea75cc284e29a67b15c7f509d4eb535f87182233700e25489e4db04bf9c1dbf"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
- "solana-program",
  "spl-associated-token-account",
 ]
 
