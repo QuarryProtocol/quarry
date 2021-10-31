@@ -113,7 +113,7 @@ export class QuarrySDK {
           provider.wallet,
           confirmOptions
         );
-        return new Program(idl, address, anchorProvider) as Program;
+        return new Program(idl, address, anchorProvider) as unknown as Program;
       }
     ) as unknown as Programs;
     return new QuarrySDK(provider, programs);
