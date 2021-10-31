@@ -3,10 +3,8 @@
 #![allow(rustdoc::missing_doc_code_examples)]
 
 use anchor_lang::prelude::*;
-use anchor_lang::Key;
 use anchor_spl::token::Token;
 use anchor_spl::token::{Mint, TokenAccount};
-use solana_program::declare_id;
 use vipers::invariant;
 use vipers::unwrap_int;
 use vipers::validate::Validate;
