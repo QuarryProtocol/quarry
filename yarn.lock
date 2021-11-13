@@ -226,6 +226,7 @@ __metadata:
     eslint-import-resolver-node: ^0.3.6
     eslint-plugin-import: ^2.25.2
     husky: ^7.0.4
+    jsbi: ^4.1.0
     lint-staged: ^11.2.6
     lodash.mapvalues: ^4.6.0
     mocha: ^8.4.0
@@ -242,6 +243,7 @@ __metadata:
     "@saberhq/token-utils": ">=1.3.15"
     "@solana/web3.js": ">=1.29.2"
     bn.js: ^5.2.0
+    jsbi: ^3 || ^4
   languageName: unknown
   linkType: soft
 
@@ -2866,6 +2868,13 @@ __metadata:
   version: 3.2.4
   resolution: "jsbi@npm:3.2.4"
   checksum: 323d61ef091df839213d2fb7f02e6ec20ac65ac6f7f1dafd6f1a50739ef14a17b6f8c9af14fb1691885b452afbb09e891544e04eda99847481f8018a8a8f0011
+  languageName: node
+  linkType: hard
+
+"jsbi@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "jsbi@npm:4.1.0"
+  checksum: 3d7e86956482e0e3c31e796af40accfb246c64e246e4d69a8b6aef182a02fdbae8c53b09bb476b4936cd47e4d95b60b8b0f8d1e9a69070c9a118f32f2c9584b6
   languageName: node
   linkType: hard
 

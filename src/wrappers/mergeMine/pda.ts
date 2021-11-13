@@ -11,7 +11,7 @@ export const findPoolAddress = async ({
   programId = QUARRY_ADDRESSES.MergeMine,
   primaryMint,
 }: {
-  programId: PublicKey;
+  programId?: PublicKey;
   primaryMint: PublicKey;
 }): Promise<[PublicKey, number]> => {
   return await PublicKey.findProgramAddress(
@@ -28,7 +28,7 @@ export const findReplicaMintAddress = async ({
   programId = QUARRY_ADDRESSES.MergeMine,
   primaryMint,
 }: {
-  programId: PublicKey;
+  programId?: PublicKey;
   primaryMint: PublicKey;
 }): Promise<[PublicKey, number]> => {
   const [pool] = await findPoolAddress({ programId, primaryMint });
@@ -47,7 +47,7 @@ export const findMergeMinerAddress = async ({
   pool,
   owner,
 }: {
-  programId: PublicKey;
+  programId?: PublicKey;
   pool: PublicKey;
   owner: PublicKey;
 }): Promise<[PublicKey, number]> => {
