@@ -1,3 +1,5 @@
+anchor_version = "0.18.0"
+
 [scripts]
 test = "yarn ts-mocha -t 30000"
 
@@ -5,26 +7,34 @@ test = "yarn ts-mocha -t 30000"
 cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
-[[test.genesis]]
-address = "QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto"
-program = "./target/deploy/quarry_merge_mine.so"
+[programs.mainnet]
+quarry_merge_mine = "QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto"
+quarry_mine = "QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB"
+quarry_mint_wrapper = "QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV"
+quarry_operator = "QoP6NfrQbaGnccXQrMLUkog2tQZ4C1RFgJcwDnT8Kmz"
+quarry_redeemer = "QRDxhMw1P2NEfiw5mYXG79bwfgHTdasY2xNP76XSea9"
+quarry_registry = "QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc"
 
-[[test.genesis]]
-address = "QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB"
-program = "./target/deploy/quarry_mine.so"
+[programs.devnet]
+quarry_merge_mine = "QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto"
+quarry_mine = "QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB"
+quarry_mint_wrapper = "QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV"
+quarry_operator = "QoP6NfrQbaGnccXQrMLUkog2tQZ4C1RFgJcwDnT8Kmz"
+quarry_redeemer = "QRDxhMw1P2NEfiw5mYXG79bwfgHTdasY2xNP76XSea9"
+quarry_registry = "QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc"
 
-[[test.genesis]]
-address = "QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV"
-program = "./target/deploy/quarry_mint_wrapper.so"
+[programs.testnet]
+quarry_merge_mine = "QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto"
+quarry_mine = "QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB"
+quarry_mint_wrapper = "QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV"
+quarry_operator = "QoP6NfrQbaGnccXQrMLUkog2tQZ4C1RFgJcwDnT8Kmz"
+quarry_redeemer = "QRDxhMw1P2NEfiw5mYXG79bwfgHTdasY2xNP76XSea9"
+quarry_registry = "QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc"
 
-[[test.genesis]]
-address = "QoP6NfrQbaGnccXQrMLUkog2tQZ4C1RFgJcwDnT8Kmz"
-program = "./target/deploy/quarry_operator.so"
-
-[[test.genesis]]
-address = "QRDxhMw1P2NEfiw5mYXG79bwfgHTdasY2xNP76XSea9"
-program = "./target/deploy/quarry_redeemer.so"
-
-[[test.genesis]]
-address = "QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc"
-program = "./target/deploy/quarry_registry.so"
+[programs.localnet]
+quarry_merge_mine = "QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto"
+quarry_mine = "QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB"
+quarry_mint_wrapper = "QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV"
+quarry_operator = "QoP6NfrQbaGnccXQrMLUkog2tQZ4C1RFgJcwDnT8Kmz"
+quarry_redeemer = "QRDxhMw1P2NEfiw5mYXG79bwfgHTdasY2xNP76XSea9"
+quarry_registry = "QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc"
