@@ -35,9 +35,9 @@ declare_id!("QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB");
 /// Maximum number of tokens that can be rewarded by a [Rewarder] per year.
 pub const MAX_ANNUAL_REWARDS_RATE: u64 = u64::MAX >> 3;
 
-/// The fees of new [Rewarder]s-- 1,000 KBPS = 1 BP or 0.01%.
+/// The fees of new [Rewarder]s: 1,000 milliBPS = 1 BP or 0.01%.
 /// This may be changed by governance in the future via program upgrade.
-pub const DEFAULT_CLAIM_FEE_KBPS: u64 = 1_000;
+pub const DEFAULT_CLAIM_FEE_MILLIBPS: u64 = 1_000;
 
 /// Program for [quarry_mine].
 #[program]
@@ -67,7 +67,7 @@ pub mod quarry_mine {
         rewarder.rewards_token_mint = ctx.accounts.rewards_token_mint.key();
 
         rewarder.claim_fee_token_account = ctx.accounts.claim_fee_token_account.key();
-        rewarder.max_claim_fee_kbps = DEFAULT_CLAIM_FEE_KBPS;
+        rewarder.max_claim_fee_millibps = DEFAULT_CLAIM_FEE_MILLIBPS;
 
         rewarder.pause_authority = Pubkey::default();
         rewarder.is_paused = false;
@@ -435,10 +435,10 @@ pub struct Rewarder {
     /// Claim fees are placed in this account.
     pub claim_fee_token_account: Pubkey,
     /// Maximum amount of tokens to send to the Quarry DAO on each claim,
-    /// in terms of thousands of BPS.
+    /// in terms of milliBPS. 1,000 milliBPS = 1 BPS = 0.01%
     /// This is stored on the [Rewarder] to ensure that the fee will
     /// not exceed this in the future.
-    pub max_claim_fee_kbps: u64,
+    pub max_claim_fee_millibps: u64,
 
     /// Authority allowed to pause a [Rewarder].
     pub pause_authority: Pubkey,
