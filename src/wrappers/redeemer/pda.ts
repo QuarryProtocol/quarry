@@ -16,6 +16,6 @@ export const findRedeemerKey = async ({
       iouMint.toBytes(),
       redemptionMint.toBytes(),
     ],
-    new PublicKey(QUARRY_ADDRESSES.Redeemer)
+    QUARRY_ADDRESSES.Redeemer
   );
 };

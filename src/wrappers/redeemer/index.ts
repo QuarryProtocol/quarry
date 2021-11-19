@@ -16,6 +16,8 @@ import type {
 } from "../../programs/redeemer";
 import { findRedeemerKey } from "./pda";
 
+export * from "./pda";
+
 export class RedeemerWrapper {
   constructor(
     public readonly sdk: QuarrySDK,
