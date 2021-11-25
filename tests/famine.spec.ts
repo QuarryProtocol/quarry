@@ -92,14 +92,24 @@ describe("Famine", () => {
   });
 
   let rewarderWrapper: RewarderWrapper;
+  const dailyRewardsRate = new BN(1_000_000 * DEFAULT_DECIMALS);
+  const annualRewardsRate = dailyRewardsRate.mul(new BN(365));
 
   beforeEach("Set up rewarder and minter", async () => {
-    const { tx: tx1, key: rewarder } = await mine.createRewarder({
+    const { tx, key: rewarder } = await mine.createRewarder({
       mintWrapper: mintWrapperKey,
       authority: provider.wallet.publicKey,
     });
-    await expectTX(tx1, "Create new rewarder").to.be.fulfilled;
+    await expectTX(tx, "Create new rewarder").to.be.fulfilled;
     rewarderWrapper = await mine.loadRewarderWrapper(rewarder);
+
+    // Set annual rewards rate
+    await expectTX(
+      rewarderWrapper.setAnnualRewards({
+        newAnnualRate: annualRewardsRate,
+      }),
+      "Set annual rewards rate"
+    ).to.be.fulfilled;
 
     // whitelist rewarder
     await expectTX(
@@ -134,25 +144,32 @@ describe("Famine", () => {
       token: stakeToken,
       key: quarry,
     });
+    await expectTX(
+      quarryWrapper.setRewardsShare(new u64(100)),
+      "Set rewards share"
+    ).to.be.fulfilled;
+
     const { tx: tx2 } = await quarryWrapper.createMiner();
     await expectTX(tx2, "Create new miner").to.be.fulfilled;
   });
 
   it("Stake and claim after famine", async () => {
-    const now = new BN(Date.now());
-    await expectTX(quarryWrapper.setFamine(now), "Set famine");
+    const famine = new BN(Date.now() / 1000 - 5); // Rewards stopped 5 seconds ago
+    await expectTX(quarryWrapper.setFamine(famine), "Set famine");
 
     const minerActions = await quarryWrapper.getMinerActions(
       provider.wallet.publicKey
     );
-    const tx1 = minerActions.stake(new TokenAmount(stakeToken, stakeAmount));
-    await expectTX(tx1, "Stake into the quarry").to.be.fulfilled;
+    await expectTX(
+      minerActions.stake(new TokenAmount(stakeToken, stakeAmount)),
+      "Stake into the quarry"
+    ).to.be.fulfilled;
 
     // Sleep for 5 seconds
     await sleep(5000);
 
-    const tx2 = await minerActions.claim();
-    await expectTX(tx2, "Claim from the quarry").to.be.fulfilled;
+    const tx = await minerActions.claim();
+    await expectTX(tx, "Claim from the quarry").to.be.fulfilled;
 
     const rewardsTokenAccount = await getATAAddress({
       mint: rewardsMint,
@@ -163,5 +180,56 @@ describe("Famine", () => {
       rewardsTokenAccount
     );
     expect(rewardsTokenAccountInfo.amount.toString()).to.equal(ZERO.toString());
+  });
+
+  it("Stake before famine and claim after famine", async () => {
+    const minerActions = await quarryWrapper.getMinerActions(
+      provider.wallet.publicKey
+    );
+
+    const rewardsDuration = 5; // 5 seconds
+    const famine = new BN(Date.now() / 1000 + rewardsDuration);
+    await expectTX(
+      minerActions
+        .stake(new TokenAmount(stakeToken, stakeAmount))
+        .combine(quarryWrapper.setFamine(famine)),
+      "Set famine then stake tokens"
+    );
+
+    // Sleep for 5 seconds
+    await sleep(5000);
+
+    let tx = await minerActions.claim();
+    await expectTX(tx, "Claim from the quarry").to.be.fulfilled;
+
+    const rewardsTokenAccount = await getATAAddress({
+      mint: rewardsMint,
+      owner: provider.wallet.publicKey,
+    });
+    let rewardsTokenAccountInfo = await getTokenAccount(
+      provider,
+      rewardsTokenAccount
+    );
+    const expectedRewards = dailyRewardsRate
+      .div(new BN(86400))
+      .mul(new BN(rewardsDuration))
+      .add(new BN(2)); // error epsilon
+    expect(rewardsTokenAccountInfo.amount.toString()).to.equal(
+      expectedRewards.toString()
+    );
+
+    // Sleep for 5 seconds
+    await sleep(5000);
+
+    tx = await minerActions.claim();
+    await expectTX(tx, "Claim again from the quarry").to.be.fulfilled;
+
+    rewardsTokenAccountInfo = await getTokenAccount(
+      provider,
+      rewardsTokenAccount
+    );
+    expect(rewardsTokenAccountInfo.amount.toString()).to.equal(
+      expectedRewards.toString()
+    ); // Balance did not change
   });
 });
