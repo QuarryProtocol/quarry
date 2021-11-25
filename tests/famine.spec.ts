@@ -4,11 +4,16 @@ import type { Provider } from "@saberhq/solana-contrib";
 import {
   createInitMintInstructions,
   createMint,
+  getATAAddress,
+  getTokenAccount,
+  sleep,
   Token,
   TokenAmount,
   u64,
+  ZERO,
 } from "@saberhq/token-utils";
 import { doesNotReject } from "assert";
+import { expect } from "chai";
 
 import type {
   MineWrapper,
@@ -17,10 +22,15 @@ import type {
   RewarderWrapper,
 } from "../src";
 import { QuarryWrapper } from "../src";
-import { DEFAULT_DECIMALS, DEFAULT_HARD_CAP } from "./utils";
+import {
+  DEFAULT_DECIMALS,
+  DEFAULT_HARD_CAP,
+  newUserStakeTokenAccount,
+} from "./utils";
 import { makeSDK } from "./workspace";
 
 describe("Famine", () => {
+  const stakeAmount = 1_000_000000;
   let stakedMintAuthority: web3.Keypair;
   let stakeTokenMint: web3.PublicKey;
   let stakeToken: Token;
@@ -37,7 +47,7 @@ describe("Famine", () => {
     mine = sdk.mine;
   });
 
-  before(async () => {
+  before("Initialize stake mint", async () => {
     await doesNotReject(async () => {
       stakedMintAuthority = web3.Keypair.generate();
       stakeTokenMint = await createMint(
@@ -57,7 +67,7 @@ describe("Famine", () => {
   let mintWrapperKey: web3.PublicKey;
   let hardCap: TokenAmount;
 
-  beforeEach("Initialize mint", async () => {
+  beforeEach("Initialize rewards mint", async () => {
     const rewardsMintKP = web3.Keypair.generate();
     rewardsMint = rewardsMintKP.publicKey;
     token = Token.fromMint(rewardsMint, DEFAULT_DECIMALS);
@@ -103,7 +113,6 @@ describe("Famine", () => {
   });
 
   let quarryWrapper: QuarryWrapper;
-  let minerKey: web3.PublicKey;
 
   beforeEach("Set up quarry and miner", async () => {
     const { quarry, tx: tx1 } = await rewarderWrapper.createQuarry({
@@ -111,19 +120,48 @@ describe("Famine", () => {
     });
     await expectTX(tx1, "Create new quarry").to.be.fulfilled;
 
+    // mint test tokens
+    await newUserStakeTokenAccount(
+      sdk,
+      await rewarderWrapper.getQuarry(stakeToken),
+      stakeToken,
+      stakedMintAuthority,
+      stakeAmount
+    );
+
     quarryWrapper = await QuarryWrapper.load({
       sdk,
       token: stakeToken,
       key: quarry,
     });
-    const { miner, tx: tx2 } = await quarryWrapper.createMiner();
+    const { tx: tx2 } = await quarryWrapper.createMiner();
     await expectTX(tx2, "Create new miner").to.be.fulfilled;
-
-    minerKey = miner;
   });
 
   it("Stake and claim after famine", async () => {
     const now = new BN(Date.now());
     await expectTX(quarryWrapper.setFamine(now), "Set famine");
+
+    const minerActions = await quarryWrapper.getMinerActions(
+      provider.wallet.publicKey
+    );
+    const tx1 = minerActions.stake(new TokenAmount(stakeToken, stakeAmount));
+    await expectTX(tx1, "Stake into the quarry").to.be.fulfilled;
+
+    // Sleep for 5 seconds
+    await sleep(5000);
+
+    const tx2 = await minerActions.claim();
+    await expectTX(tx2, "Claim from the quarry").to.be.fulfilled;
+
+    const rewardsTokenAccount = await getATAAddress({
+      mint: rewardsMint,
+      owner: provider.wallet.publicKey,
+    });
+    const rewardsTokenAccountInfo = await getTokenAccount(
+      provider,
+      rewardsTokenAccount
+    );
+    expect(rewardsTokenAccountInfo.amount.toString()).to.equal(ZERO.toString());
   });
 });
