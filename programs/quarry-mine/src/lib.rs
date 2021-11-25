@@ -275,8 +275,6 @@ pub mod quarry_mine {
 
         let now = Clock::get()?.unix_timestamp;
         let quarry = &mut ctx.accounts.stake.quarry;
-        msg!("now: {}", now);
-        msg!("famine: {}", quarry.famine_ts);
         quarry.update_rewards_and_miner(miner, &ctx.accounts.stake.rewarder, now)?;
 
         ctx.accounts.calculate_and_claim_rewards()?;
