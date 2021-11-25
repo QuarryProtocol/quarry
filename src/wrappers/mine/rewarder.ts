@@ -179,4 +179,29 @@ export class RewarderWrapper {
       }),
     ]);
   }
+
+  /**
+   * Sets timestamp on when rewards will cease
+   */
+  setFamine({
+    newFamineTs,
+    quarry,
+    authority = this.sdk.provider.wallet.publicKey,
+  }: {
+    newFamineTs: u64;
+    quarry: PublicKey;
+    authority?: PublicKey;
+  }): TransactionEnvelope {
+    return new TransactionEnvelope(this.sdk.provider, [
+      this.program.instruction.setFamine(newFamineTs, {
+        accounts: {
+          auth: {
+            authority,
+            rewarder: this.rewarderKey,
+          },
+          quarry,
+        },
+      }),
+    ]);
+  }
 }
