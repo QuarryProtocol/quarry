@@ -39,8 +39,6 @@ import { makeSDK } from "./workspace";
 const ZERO = new BN(0);
 
 describe("Mine", () => {
-  // Read the provider from the configured environment.
-
   const { web3, BN } = anchor;
 
   const DAILY_REWARDS_RATE = new BN(1_000 * web3.LAMPORTS_PER_SOL);
