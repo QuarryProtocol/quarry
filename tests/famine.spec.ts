@@ -124,12 +124,6 @@ describe("Famine", () => {
 
   it("Stake and claim after famine", async () => {
     const now = new BN(Date.now());
-    await expectTX(
-      rewarderWrapper.setFamine({
-        newFamineTs: now,
-        quarry: quarryWrapper.key,
-      }),
-      "Set famine"
-    );
+    await expectTX(quarryWrapper.setFamine(now), "Set famine");
   });
 });

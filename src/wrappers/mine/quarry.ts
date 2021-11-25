@@ -177,15 +177,27 @@ export class QuarryWrapper {
 
   /**
    * Sets the rewards share of this mine.
-   * @param authority
-   * @param minerKey
-   * @param tokenVaultKey
-   * @param stakedTokenATA
-   * @returns
    */
   public setRewardsShare(share: u64): TransactionEnvelope {
     return new TransactionEnvelope(this.provider, [
-      this.program.instruction.setRewardsShare(new u64(share), {
+      this.program.instruction.setRewardsShare(share, {
+        accounts: {
+          auth: {
+            authority: this.provider.wallet.publicKey,
+            rewarder: this.quarryData.rewarderKey,
+          },
+          quarry: this.key,
+        },
+      }),
+    ]);
+  }
+
+  /**
+   * Sets the famine timestampe for this mine.
+   */
+  public setFamine(famineTs: u64): TransactionEnvelope {
+    return new TransactionEnvelope(this.provider, [
+      this.program.instruction.setFamine(famineTs, {
         accounts: {
           auth: {
             authority: this.provider.wallet.publicKey,
