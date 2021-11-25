@@ -155,6 +155,28 @@ pub mod quarry_operator {
         )?;
         Ok(())
     }
+
+    /// Calls [quarry_mine::quary_mine::set_famine]
+    #[access_control(ctx.accounts.validate())]
+    pub fn delegate_set_famine(ctx: Context<DelegateSetFamine>, famine_ts: i64) -> ProgramResult {
+        let operator = &ctx.accounts.with_delegate.operator;
+        let signer_seeds: &[&[&[u8]]] = &[gen_operator_signer_seeds!(operator)];
+
+        quarry_mine::cpi::set_famine(
+            CpiContext::new_with_signer(
+                ctx.accounts
+                    .with_delegate
+                    .quarry_mine_program
+                    .to_account_info(),
+                quarry_mine::cpi::accounts::SetFamine {
+                    auth: ctx.accounts.with_delegate.to_readonly_auth_accounts(),
+                    quarry: ctx.accounts.quarry.to_account_info(),
+                },
+                signer_seeds,
+            ),
+            famine_ts,
+        )
+    }
 }
 
 impl Operator {
@@ -279,6 +301,16 @@ pub struct DelegateSetRewardsShare<'info> {
     pub quarry: Box<Account<'info, Quarry>>,
 }
 
+/// Accounts for [crate::quarry_operator::delegate_set_famine].
+#[derive(Accounts)]
+pub struct DelegateSetFamine<'info> {
+    /// Delegate accounts.
+    pub with_delegate: WithDelegate<'info>,
+    /// [Quarry].
+    #[account(mut)]
+    pub quarry: Box<Account<'info, Quarry>>,
+}
+
 /// Delegate accounts.
 #[derive(Accounts)]
 pub struct WithDelegate<'info> {
@@ -300,6 +332,16 @@ impl<'info> WithDelegate<'info> {
         &self,
     ) -> quarry_mine::cpi::accounts::MutableRewarderWithAuthority<'info> {
         quarry_mine::cpi::accounts::MutableRewarderWithAuthority {
+            authority: self.operator.to_account_info(),
+            rewarder: self.rewarder.to_account_info(),
+        }
+    }
+
+    /// Creates the [quarry_mine::cpi::accounts::MutableRewarderWithAuthority] accounts.
+    pub fn to_readonly_auth_accounts(
+        &self,
+    ) -> quarry_mine::cpi::accounts::ReadOnlyRewarderWithAuthority<'info> {
+        quarry_mine::cpi::accounts::ReadOnlyRewarderWithAuthority {
             authority: self.operator.to_account_info(),
             rewarder: self.rewarder.to_account_info(),
         }
