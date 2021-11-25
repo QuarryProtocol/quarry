@@ -162,6 +162,17 @@ export class Operator {
     ]);
   }
 
+  delegateSetFamine(newFamineTs: u64, quarry: PublicKey): TransactionEnvelope {
+    return new TransactionEnvelope(this.sdk.provider, [
+      this.program.instruction.delegateSetFamine(newFamineTs, {
+        accounts: {
+          withDelegate: this.withDelegateAccounts,
+          quarry,
+        },
+      }),
+    ]);
+  }
+
   async delegateCreateQuarry({
     tokenMint,
     payer = this.sdk.provider.wallet.publicKey,
