@@ -1,6 +1,6 @@
 use crate::{
-    CreateOperator, DelegateCreateQuarry, DelegateSetAnnualRewards, DelegateSetRewardsShare,
-    SetRole, WithDelegate,
+    CreateOperator, DelegateCreateQuarry, DelegateSetAnnualRewards, DelegateSetFamine,
+    DelegateSetRewardsShare, SetRole, WithDelegate,
 };
 use anchor_lang::prelude::*;
 use vipers::{assert_keys, validate::Validate};
@@ -52,6 +52,17 @@ impl<'info> Validate<'info> for DelegateSetRewardsShare<'info> {
         self.with_delegate.validate()?;
         require!(
             self.with_delegate.operator.share_allocator == self.with_delegate.delegate.key(),
+            Unauthorized
+        );
+        Ok(())
+    }
+}
+
+impl<'info> Validate<'info> for DelegateSetFamine<'info> {
+    fn validate(&self) -> ProgramResult {
+        self.with_delegate.validate()?;
+        require!(
+            self.with_delegate.operator.rate_setter == self.with_delegate.delegate.key(),
             Unauthorized
         );
         Ok(())

@@ -297,6 +297,31 @@ describe("Operator", () => {
       });
       await expectTX(tx).to.be.fulfilled;
     });
+
+    it("set famine", async () => {
+      const rateSetterKP = Keypair.generate();
+      await expectTX(operator.setRateSetter(rateSetterKP.publicKey)).to
+        .fulfilled;
+
+      const rateSetterOperator = await sdk
+        .withSigner(rateSetterKP)
+        .loadOperator(operator.key);
+      invariant(rateSetterOperator, "operator must exist");
+
+      await new PendingTransaction(
+        sdk.provider.connection,
+        await sdk.provider.connection.requestAirdrop(
+          rateSetterKP.publicKey,
+          LAMPORTS_PER_SOL
+        )
+      ).wait();
+
+      const tx = rateSetterOperator.delegateSetFamine(
+        new u64("9000000000000000000"),
+        quarryKey
+      );
+      await expectTX(tx).to.be.fulfilled;
+    });
   });
 
   describe("set annual rewards", () => {
