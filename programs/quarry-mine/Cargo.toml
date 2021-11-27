@@ -1,6 +1,6 @@
 [package]
 name = "quarry-mine"
-version = "1.10.0"
+version = "1.10.5"
 description = "Distributes liquidity mining rewards to token stakers"
 edition = "2018"
 homepage = "https://quarry.so"
@@ -25,7 +25,7 @@ anchor-spl = ">=0.17.0"
 num-traits = "0.2.14"
 quarry-mint-wrapper = { path = "../quarry-mint-wrapper", features = [
   "cpi"
-], version = "1.10.0" }
+], version = "1.10" }
 spl-math = { version = "0.1.0", features = ["no-entrypoint"] }
 vipers = "1.5.3"
 

@@ -1,6 +1,6 @@
 [package]
 name = "quarry-merge-mine"
-version = "1.10.0"
+version = "1.10.5"
 description = "Mines multiple quarries at the same time"
 homepage = "https://quarry.so"
 repository = "https://github.com/QuarryProtocol/quarry"
@@ -22,11 +22,9 @@ default = []
 [dependencies]
 anchor-lang = ">=0.17.0"
 anchor-spl = ">=0.17.0"
-quarry-mine = { path = "../quarry-mine", features = [
-    "cpi"
-], version = "1.10.0" }
+quarry-mine = { path = "../quarry-mine", features = ["cpi"], version = "1.10" }
 quarry-mint-wrapper = { path = "../quarry-mint-wrapper", features = [
     "cpi"
-], version = "1.10.0" }
+], version = "1.10" }
 num-traits = "0.2"
 vipers = "1.5.3"

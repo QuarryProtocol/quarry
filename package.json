@@ -1,6 +1,6 @@
 {
   "name": "@quarryprotocol/quarry-sdk",
-  "version": "1.10.3",
+  "version": "1.10.5",
   "description": "Quarry Protocol SDK",
   "keywords": [
     "solana",
