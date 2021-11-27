@@ -156,7 +156,7 @@ pub mod quarry_operator {
         Ok(())
     }
 
-    /// Calls [quarry_mine::quary_mine::set_famine]
+    /// Calls [quarry_mine::quarry_mine::set_famine].
     #[access_control(ctx.accounts.validate())]
     pub fn delegate_set_famine(ctx: Context<DelegateSetFamine>, famine_ts: i64) -> ProgramResult {
         let operator = &ctx.accounts.with_delegate.operator;

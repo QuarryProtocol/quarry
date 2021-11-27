@@ -53,16 +53,16 @@ pub mod quarry_merge_mine {
     // --------------------------------
 
     /// Deposits tokens into the [MergeMiner].
-    /// Before calling this, the owner should call the [token::transfer] instruction
-    /// to transfer to the [MergeMiner]'s [MergeMiner]::primary_token_account.
+    /// Before calling this, the owner should call the [anchor_spl::token::transfer] instruction
+    /// to transfer to the [MergeMiner]'s primary token ATA.
     #[access_control(ctx.accounts.validate())]
     pub fn stake_primary_miner(ctx: Context<QuarryStakePrimary>) -> ProgramResult {
         processor::deposit::stake_primary_miner(ctx)
     }
 
     /// Stakes all possible replica tokens into a [quarry_mine::Quarry].
-    /// Before calling this, the owner should call the [anchor_spl::token::transfer] instruction
-    /// to transfer to the [MergeMiner]'s primary token ATA.
+    /// Before calling this, the owner should call [stake_primary_miner] with the tokens
+    /// they would like to stake.
     #[access_control(ctx.accounts.validate())]
     pub fn stake_replica_miner(ctx: Context<QuarryStakeReplica>) -> ProgramResult {
         processor::deposit::stake_replica_miner(ctx)
