@@ -908,7 +908,6 @@ dependencies = [
  "num-traits",
  "quarry-mine",
  "quarry-mint-wrapper",
- "spl-associated-token-account",
  "vipers",
 ]
 
@@ -922,7 +921,6 @@ dependencies = [
  "proptest",
  "quarry-mint-wrapper",
  "rand 0.8.4",
- "spl-associated-token-account",
  "spl-math",
  "vipers",
 ]
@@ -952,7 +950,6 @@ version = "1.10.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
- "spl-associated-token-account",
  "vipers",
 ]
 

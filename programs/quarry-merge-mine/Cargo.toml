@@ -29,5 +29,4 @@ quarry-mint-wrapper = { path = "../quarry-mint-wrapper", features = [
     "cpi"
 ], version = "1.10.0" }
 num-traits = "0.2"
-vipers = "1.3.0"
-spl-associated-token-account = "1.0.3"
+vipers = "1.5.3"

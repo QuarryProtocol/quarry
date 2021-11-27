@@ -22,7 +22,4 @@ default = []
 [dependencies]
 anchor-lang = ">=0.17.0"
 anchor-spl = ">=0.17.0"
-spl-associated-token-account = { version = "1.0.3", features = [
-  "no-entrypoint"
-] }
-vipers = "1.3.0"
+vipers = "1.5.3"
