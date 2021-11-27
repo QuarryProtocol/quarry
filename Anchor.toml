@@ -1,7 +1,7 @@
 anchor_version = "0.18.0"
 
 [scripts]
-test = "yarn ts-mocha -t 30000"
+test = "yarn mocha"
 
 [provider]
 cluster = "localnet"
