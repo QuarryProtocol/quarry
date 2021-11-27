@@ -3,7 +3,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::Key;
 use vipers::validate::Validate;
-use vipers::{assert_ata, assert_keys};
+use vipers::{assert_ata, assert_keys_eq};
 
 use crate::addresses;
 use crate::{
@@ -27,7 +27,7 @@ impl<'info> Validate<'info> for NewRewarder<'info> {
             self.rewards_token_mint
         );
 
-        assert_keys!(
+        assert_keys_eq!(
             self.mint_wrapper.token_mint,
             self.rewards_token_mint,
             "rewards token mint"
@@ -48,7 +48,7 @@ impl<'info> Validate<'info> for SetPauseAuthority<'info> {
 impl<'info> Validate<'info> for MutableRewarderWithPauseAuthority<'info> {
     fn validate(&self) -> ProgramResult {
         require!(self.pause_authority.is_signer, Unauthorized);
-        assert_keys!(
+        assert_keys_eq!(
             self.rewarder.pause_authority,
             self.pause_authority,
             "pause_authority"
@@ -61,7 +61,7 @@ impl<'info> Validate<'info> for TransferAuthority<'info> {
     fn validate(&self) -> ProgramResult {
         require!(!self.rewarder.is_paused, Paused);
         require!(self.authority.is_signer, Unauthorized);
-        assert_keys!(self.authority, self.rewarder.authority);
+        assert_keys_eq!(self.authority, self.rewarder.authority);
         Ok(())
     }
 }
@@ -101,7 +101,7 @@ impl<'info> Validate<'info> for SetRewardsShare<'info> {
     fn validate(&self) -> ProgramResult {
         self.auth.validate()?;
         require!(!self.auth.rewarder.is_paused, Paused);
-        assert_keys!(self.quarry.rewarder_key, self.auth.rewarder, "rewarder");
+        assert_keys_eq!(self.quarry.rewarder_key, self.auth.rewarder, "rewarder");
         Ok(())
     }
 }
@@ -110,7 +110,7 @@ impl<'info> Validate<'info> for SetFamine<'info> {
     fn validate(&self) -> ProgramResult {
         self.auth.validate()?;
         require!(!self.auth.rewarder.is_paused, Paused);
-        assert_keys!(self.quarry.rewarder_key, self.auth.rewarder, "rewarder");
+        assert_keys_eq!(self.quarry.rewarder_key, self.auth.rewarder, "rewarder");
         Ok(())
     }
 }
@@ -118,7 +118,7 @@ impl<'info> Validate<'info> for SetFamine<'info> {
 impl<'info> Validate<'info> for UpdateQuarryRewards<'info> {
     fn validate(&self) -> ProgramResult {
         require!(!self.rewarder.is_paused, Paused);
-        assert_keys!(self.quarry.rewarder_key, self.rewarder, "rewarder");
+        assert_keys_eq!(self.quarry.rewarder_key, self.rewarder, "rewarder");
         Ok(())
     }
 }
@@ -131,9 +131,9 @@ impl<'info> Validate<'info> for CreateMiner<'info> {
     fn validate(&self) -> ProgramResult {
         require!(!self.rewarder.is_paused, Paused);
         assert_ata!(self.miner_vault, self.miner, self.token_mint, "miner vault");
-        assert_keys!(self.miner_vault.owner, self.miner, "miner vault owner");
-        assert_keys!(self.miner_vault.mint, self.token_mint, "miner vault mint");
-        assert_keys!(self.quarry.rewarder_key, self.rewarder, "rewarder");
+        assert_keys_eq!(self.miner_vault.owner, self.miner, "miner vault owner");
+        assert_keys_eq!(self.miner_vault.mint, self.token_mint, "miner vault mint");
+        assert_keys_eq!(self.quarry.rewarder_key, self.rewarder, "rewarder");
 
         Ok(())
     }
@@ -145,43 +145,43 @@ impl<'info> Validate<'info> for ClaimRewards<'info> {
         self.stake.validate()?;
         require!(!self.stake.rewarder.is_paused, Paused);
 
-        assert_keys!(
+        assert_keys_eq!(
             self.mint_wrapper.token_mint,
             self.rewards_token_mint,
             "mint_wrapper.token_mint",
         );
-        assert_keys!(
+        assert_keys_eq!(
             self.minter.minter_authority,
             self.stake.rewarder,
             "minter.minter_authority"
         );
 
         // rewards_token_mint validate
-        assert_keys!(
+        assert_keys_eq!(
             self.rewards_token_mint,
             self.stake.rewarder.rewards_token_mint,
             "rewards token mint",
         );
-        assert_keys!(
+        assert_keys_eq!(
             self.rewards_token_mint.mint_authority.unwrap(),
             *self.mint_wrapper,
             "mint wrapper",
         );
 
         // rewards_token_account validate
-        assert_keys!(
+        assert_keys_eq!(
             self.rewards_token_account.mint,
             self.rewards_token_mint,
             "rewards_token_account.mint",
         );
 
         // claim_fee_token_account validate
-        assert_keys!(
+        assert_keys_eq!(
             *self.claim_fee_token_account,
             self.stake.rewarder.claim_fee_token_account,
             "claim_fee_token_account"
         );
-        assert_keys!(
+        assert_keys_eq!(
             self.claim_fee_token_account.mint,
             self.rewards_token_mint,
             "rewards_token_account.mint",
@@ -196,13 +196,13 @@ impl<'info> Validate<'info> for UserClaim<'info> {
         require!(!self.rewarder.is_paused, Paused);
         // authority
         require!(self.authority.is_signer, Unauthorized);
-        assert_keys!(self.authority, self.miner.authority, "miner authority");
+        assert_keys_eq!(self.authority, self.miner.authority, "miner authority");
 
         // quarry
-        assert_keys!(self.miner.quarry_key, self.quarry.key(), "quarry");
+        assert_keys_eq!(self.miner.quarry_key, self.quarry.key(), "quarry");
 
         // rewarder
-        assert_keys!(self.quarry.rewarder_key, self.rewarder, "rewarder");
+        assert_keys_eq!(self.quarry.rewarder_key, self.rewarder, "rewarder");
 
         Ok(())
     }
@@ -214,29 +214,29 @@ impl<'info> Validate<'info> for UserStake<'info> {
         require!(!self.rewarder.is_paused, Paused);
         // authority
         require!(self.authority.is_signer, Unauthorized);
-        assert_keys!(self.authority, self.miner.authority, "miner authority");
+        assert_keys_eq!(self.authority, self.miner.authority, "miner authority");
 
         // quarry
-        assert_keys!(self.miner.quarry_key, self.quarry.key(), "quarry");
+        assert_keys_eq!(self.miner.quarry_key, self.quarry.key(), "quarry");
 
         // miner_vault
-        assert_keys!(self.miner.token_vault_key, self.miner_vault, "miner vault");
-        assert_keys!(
+        assert_keys_eq!(self.miner.token_vault_key, self.miner_vault, "miner vault");
+        assert_keys_eq!(
             self.miner_vault.mint,
             self.quarry.token_mint_key,
             "vault mint"
         );
-        assert_keys!(self.miner_vault.owner, self.miner, "vault owner");
+        assert_keys_eq!(self.miner_vault.owner, self.miner, "vault owner");
 
         // token_account
-        assert_keys!(
+        assert_keys_eq!(
             self.token_account.mint,
             self.quarry.token_mint_key,
             "token mint"
         );
 
         // rewarder
-        assert_keys!(self.quarry.rewarder_key, self.rewarder, "rewarder");
+        assert_keys_eq!(self.quarry.rewarder_key, self.rewarder, "rewarder");
 
         Ok(())
     }
@@ -251,17 +251,17 @@ impl<'info> Validate<'info> for ExtractFees<'info> {
             self.rewarder.rewards_token_mint
         );
 
-        assert_keys!(
+        assert_keys_eq!(
             self.claim_fee_token_account.mint,
             self.rewarder.rewards_token_mint,
             "claim_fee_token_account.mint"
         );
-        assert_keys!(
+        assert_keys_eq!(
             self.fee_to_token_account.mint,
             self.rewarder.rewards_token_mint,
             "fee_to_token_account.mint"
         );
-        assert_keys!(
+        assert_keys_eq!(
             self.fee_to_token_account.owner,
             addresses::FEE_TO,
             "fee_to_token_account.owner"
@@ -280,7 +280,7 @@ impl<'info> Validate<'info> for ExtractFees<'info> {
 impl<'info> Validate<'info> for MutableRewarderWithAuthority<'info> {
     fn validate(&self) -> ProgramResult {
         require!(self.authority.is_signer, Unauthorized);
-        assert_keys!(self.rewarder.authority, self.authority, "authority");
+        assert_keys_eq!(self.rewarder.authority, self.authority, "authority");
         Ok(())
     }
 }
@@ -289,7 +289,7 @@ impl<'info> Validate<'info> for ReadOnlyRewarderWithAuthority<'info> {
     /// Validates the [crate::Rewarder] is correct.
     fn validate(&self) -> ProgramResult {
         require!(self.authority.is_signer, Unauthorized);
-        assert_keys!(self.authority, self.rewarder.authority);
+        assert_keys_eq!(self.authority, self.rewarder.authority);
         Ok(())
     }
 }

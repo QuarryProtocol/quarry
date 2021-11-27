@@ -1,7 +1,7 @@
 use crate::{CreateRedeemer, RedeemTokens};
 use anchor_lang::prelude::*;
 use vipers::validate::Validate;
-use vipers::{assert_ata, assert_keys, invariant};
+use vipers::{assert_ata, assert_keys_eq, invariant};
 
 impl<'info> Validate<'info> for CreateRedeemer<'info> {
     fn validate(&self) -> ProgramResult {
@@ -16,13 +16,13 @@ impl<'info> Validate<'info> for CreateRedeemer<'info> {
 impl<'info> Validate<'info> for RedeemTokens<'info> {
     fn validate(&self) -> ProgramResult {
         require!(self.source_authority.is_signer, Unauthorized);
-        assert_keys!(self.iou_mint, self.redeemer.iou_mint, "iou_mint");
-        assert_keys!(
+        assert_keys_eq!(self.iou_mint, self.redeemer.iou_mint, "iou_mint");
+        assert_keys_eq!(
             self.iou_source.mint,
             self.redeemer.iou_mint,
             "iou_source.mint"
         );
-        assert_keys!(
+        assert_keys_eq!(
             self.iou_source.owner,
             self.source_authority,
             "iou_source.owner"
@@ -34,12 +34,12 @@ impl<'info> Validate<'info> for RedeemTokens<'info> {
             self.redeemer.redemption_mint,
             "redemption_vault"
         );
-        assert_keys!(
+        assert_keys_eq!(
             self.redemption_destination.mint,
             self.redeemer.redemption_mint,
             "redemption_destination.mint"
         );
-        assert_keys!(
+        assert_keys_eq!(
             self.redemption_destination.owner,
             self.source_authority,
             "redemption_destination.owner"
