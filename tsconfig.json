@@ -5,8 +5,10 @@
 
     "strict": true,
     "noImplicitOverride": true,
-    "esModuleInterop": true,
+    "noUnusedLocals": true,
     "noUncheckedIndexedAccess": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
 
     "skipLibCheck": true,
