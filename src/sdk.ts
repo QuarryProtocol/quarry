@@ -1,14 +1,12 @@
-import type { Address } from "@project-serum/anchor";
-import { Program, Provider as AnchorProvider } from "@project-serum/anchor";
-import type { Provider } from "@saberhq/solana-contrib";
-import {
-  DEFAULT_PROVIDER_OPTIONS,
-  SignerWallet,
-  SolanaProvider,
+import type { Program } from "@project-serum/anchor";
+import { newProgramMap } from "@saberhq/anchor-contrib";
+import type {
+  AugmentedProvider,
+  Provider,
   TransactionEnvelope,
 } from "@saberhq/solana-contrib";
+import { SolanaAugmentedProvider } from "@saberhq/solana-contrib";
 import type {
-  ConfirmOptions,
   Keypair,
   PublicKey,
   Signer,
@@ -33,23 +31,16 @@ import { RedeemerWrapper } from "./wrappers/redeemer";
  */
 export class QuarrySDK {
   constructor(
-    public readonly provider: Provider,
+    public readonly provider: AugmentedProvider,
     public readonly programs: Programs
   ) {}
 
   /**
    * Creates a new instance of the SDK with the given keypair.
    */
-  public withSigner(signer: Signer): QuarrySDK {
-    const wallet = new SignerWallet(signer);
-    const provider = new SolanaProvider(
-      this.provider.connection,
-      this.provider.broadcaster,
-      wallet,
-      this.provider.opts
-    );
+  withSigner(signer: Signer): QuarrySDK {
     return QuarrySDK.load({
-      provider,
+      provider: this.provider.withSigner(signer),
       addresses: mapValues(this.programs, (v) => v.programId),
     });
   }
@@ -80,46 +71,36 @@ export class QuarrySDK {
    * @param signers
    * @returns
    */
-  public newTx(
+  newTx(
     instructions: TransactionInstruction[],
     signers?: Signer[]
   ): TransactionEnvelope {
-    return new TransactionEnvelope(this.provider, instructions, signers);
+    return this.provider.newTX(instructions, signers);
   }
 
   /**
    * Loads the SDK.
    * @returns
    */
-  public static load({
+  static load({
     provider,
     addresses = QUARRY_ADDRESSES,
-    confirmOptions = DEFAULT_PROVIDER_OPTIONS,
   }: {
     // Provider
     provider: Provider;
     // Addresses of each program.
-    addresses?: { [K in keyof Programs]?: Address };
-    confirmOptions?: ConfirmOptions;
+    addresses?: { [K in keyof Programs]?: PublicKey };
   }): QuarrySDK {
     const allAddresses = { ...QUARRY_ADDRESSES, ...addresses };
-    const programs: Programs = mapValues(
-      QUARRY_ADDRESSES,
-      (_: Address, programName: keyof Programs): Program => {
-        const address = allAddresses[programName];
-        const idl = QUARRY_IDLS[programName];
-        const anchorProvider = new AnchorProvider(
-          provider.connection,
-          provider.wallet,
-          confirmOptions
-        );
-        return new Program(idl, address, anchorProvider) as unknown as Program;
-      }
-    ) as unknown as Programs;
-    return new QuarrySDK(provider, programs);
+    const programs = newProgramMap<Programs>(
+      provider,
+      QUARRY_IDLS,
+      allAddresses
+    );
+    return new QuarrySDK(new SolanaAugmentedProvider(provider), programs);
   }
 
-  public async loadRedeemer({
+  async loadRedeemer({
     iouMint,
     redemptionMint,
   }: {
@@ -129,7 +110,7 @@ export class QuarrySDK {
     return await RedeemerWrapper.load({ iouMint, redemptionMint, sdk: this });
   }
 
-  public async createRedeemer({
+  async createRedeemer({
     iouMint,
     redemptionMint,
   }: {
@@ -148,14 +129,14 @@ export class QuarrySDK {
    * @param key
    * @returns
    */
-  public async loadOperator(key: PublicKey): Promise<Operator | null> {
+  async loadOperator(key: PublicKey): Promise<Operator | null> {
     return await Operator.load({
       sdk: this,
       key,
     });
   }
 
-  public async createOperator({
+  async createOperator({
     rewarder,
     baseKP,
     admin,
