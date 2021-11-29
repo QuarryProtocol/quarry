@@ -1,6 +1,6 @@
 [package]
 name = "quarry-registry"
-version = "1.10.5"
+version = "1.10.6"
 description = "Registry of all quarries associated with a rewarder."
 edition = "2018"
 homepage = "https://quarry.so"

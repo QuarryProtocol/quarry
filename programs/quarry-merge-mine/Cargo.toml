@@ -1,6 +1,6 @@
 [package]
 name = "quarry-merge-mine"
-version = "1.10.5"
+version = "1.10.6"
 description = "Mines multiple quarries at the same time"
 homepage = "https://quarry.so"
 repository = "https://github.com/QuarryProtocol/quarry"
