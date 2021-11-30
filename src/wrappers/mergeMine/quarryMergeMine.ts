@@ -7,7 +7,7 @@ import {
   Token,
   TOKEN_PROGRAM_ID,
 } from "@saberhq/token-utils";
-import type { PublicKey } from "@solana/web3.js";
+import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { SystemProgram, SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
 
 import type { Programs } from "../../constants";
@@ -185,30 +185,94 @@ export class MergeMine {
       owner: mm,
     });
 
-    const newMMIX = this.program.instruction.initMergeMiner(bump, {
-      accounts: {
-        pool: poolKey,
-        owner,
-        mm,
-        payer,
-        systemProgram: SystemProgram.programId,
-      },
-    });
+    const allInstructions = [...instructions];
+    const mergeMinerAccountInfo =
+      await this.sdk.provider.connection.getAccountInfo(mm);
+    if (!mergeMinerAccountInfo) {
+      allInstructions.push(
+        this.program.instruction.initMergeMiner(bump, {
+          accounts: {
+            pool: poolKey,
+            owner,
+            mm,
+            payer,
+            systemProgram: SystemProgram.programId,
+          },
+        })
+      );
+    }
 
-    const { tx: initPrimaryMinerTX } = await this.initMiner({
+    const { ixs: initPrimaryIxs } = await this.getOrCreatePrimary({
       mint: primaryMint,
       pool: poolKey,
       mm,
       payer,
       rewarder,
     });
+    allInstructions.push(...initPrimaryIxs);
 
     return {
       key: mm,
-      tx: new TransactionEnvelope(this.provider, [
-        ...instructions,
-        newMMIX,
-      ]).combine(initPrimaryMinerTX),
+      tx: new TransactionEnvelope(this.provider, allInstructions),
+    };
+  }
+
+  async getOrCreatePrimary({
+    mint,
+    pool,
+    mm,
+    payer = this.provider.wallet.publicKey,
+    rewarder,
+  }: {
+    mint: PublicKey;
+    pool: PublicKey;
+    mm: PublicKey;
+    payer?: PublicKey;
+    rewarder: PublicKey;
+  }): Promise<{
+    miner: PublicKey;
+    ixs: TransactionInstruction[];
+  }> {
+    const [quarryKey] = await findQuarryAddress(rewarder, mint);
+    const [minerKey, minerBump] = await findMinerAddress(quarryKey, mm);
+
+    const ixs: TransactionInstruction[] = [];
+    const minerAccountInfo = await this.sdk.provider.connection.getAccountInfo(
+      minerKey
+    );
+    if (minerAccountInfo) {
+      return { miner: minerKey, ixs };
+    }
+
+    const minerATA = await getOrCreateATA({
+      provider: this.provider,
+      mint,
+      owner: minerKey,
+    });
+    if (minerATA.instruction) {
+      ixs.push(minerATA.instruction);
+    }
+    ixs.push(
+      this.program.instruction.initMiner(minerBump, {
+        accounts: {
+          mineProgram: this.sdk.mine.program.programId,
+          pool,
+          mm,
+          systemProgram: SystemProgram.programId,
+          payer,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          rewarder,
+          miner: minerKey,
+          quarry: quarryKey,
+          tokenMint: mint,
+          minerVault: minerATA.address,
+        },
+      })
+    );
+
+    return {
+      miner: minerKey,
+      ixs,
     };
   }
 
