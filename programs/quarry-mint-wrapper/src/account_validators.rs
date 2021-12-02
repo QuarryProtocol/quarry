@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use vipers::assert_keys_eq;
+use vipers::{assert_keys_eq, assert_keys_neq};
 use vipers::validate::Validate;
 
 use crate::AcceptAdmin;
@@ -53,6 +53,8 @@ impl<'info> Validate<'info> for TransferAdmin<'info> {
     fn validate(&self) -> ProgramResult {
         require!(self.admin.is_signer, Unauthorized);
         assert_keys_eq!(self.admin, self.mint_wrapper.admin, "admin");
+        assert_keys_neq!(self.next_admin, self.mint_wrapper.admin, "next_admin");
+
         Ok(())
     }
 }
