@@ -9,6 +9,8 @@ use vipers::unwrap_int;
 use crate::ClaimEvent;
 use crate::ClaimRewards;
 use crate::Rewarder;
+use crate::DEFAULT_CLAIM_FEE_MILLIBPS;
+use crate::MAX_BPS;
 
 impl Rewarder {
     /// Computes the amount of rewards a [crate::Quarry] should receive, annualized.
@@ -60,10 +62,13 @@ impl<'info> ClaimRewards<'info> {
 
         // Calculate rewards
         let max_claim_fee_millibps = self.stake.rewarder.max_claim_fee_millibps;
-        require!(max_claim_fee_millibps < 10_000 * 1_000, InvalidMaxClaimFee);
+        require!(
+            max_claim_fee_millibps < MAX_BPS * DEFAULT_CLAIM_FEE_MILLIBPS,
+            InvalidMaxClaimFee
+        );
         let max_claim_fee = unwrap_int!((amount_claimable as u128)
             .checked_mul(max_claim_fee_millibps.into())
-            .and_then(|f| f.checked_div((10_000 * 1_000) as u128))
+            .and_then(|f| f.checked_div((MAX_BPS * DEFAULT_CLAIM_FEE_MILLIBPS) as u128))
             .and_then(|f| f.to_u64()));
 
         let amount_claimable_minus_fees = unwrap_int!(amount_claimable.checked_sub(max_claim_fee));

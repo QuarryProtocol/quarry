@@ -38,6 +38,9 @@ pub const MAX_ANNUAL_REWARDS_RATE: u64 = u64::MAX >> 3;
 /// This may be changed by governance in the future via program upgrade.
 pub const DEFAULT_CLAIM_FEE_MILLIBPS: u64 = 1_000;
 
+/// The maximum number of basis points possible.
+pub const MAX_BPS: u64 = 10_000;
+
 /// Program for [quarry_mine].
 #[program]
 pub mod quarry_mine {
