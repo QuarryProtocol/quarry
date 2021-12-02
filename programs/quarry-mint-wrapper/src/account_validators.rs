@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
-use vipers::{assert_keys_eq, assert_keys_neq};
 use vipers::validate::Validate;
+use vipers::{assert_keys_eq, assert_keys_neq};
 
 use crate::AcceptAdmin;
 use crate::MinterUpdate;
