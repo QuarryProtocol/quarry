@@ -65,11 +65,11 @@ impl Quarry {
         &mut self,
         action: StakeAction,
         current_ts: i64,
-        lord: &Rewarder,
+        rewarder: &Rewarder,
         miner: &mut Miner,
         amount: u64,
     ) -> ProgramResult {
-        self.update_rewards_and_miner(miner, lord, current_ts)?;
+        self.update_rewards_and_miner(miner, rewarder, current_ts)?;
         match action {
             StakeAction::Stake => {
                 miner.balance = unwrap_int!(miner.balance.checked_add(amount));
