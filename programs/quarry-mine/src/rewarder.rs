@@ -4,6 +4,8 @@ use anchor_lang::prelude::*;
 use anchor_lang::require;
 use anchor_spl::token::TokenAccount;
 use num_traits::ToPrimitive;
+use spl_math::uint::U192;
+use std::convert::TryInto;
 use vipers::unwrap_int;
 
 use crate::ClaimEvent;
@@ -16,11 +18,13 @@ impl Rewarder {
     /// Computes the amount of rewards a [crate::Quarry] should receive, annualized.
     /// This should be run only after `total_rewards_shares` has been set.
     /// Do not call this directly. Use `compute_quarry_annual_rewards_rate`.
-    fn compute_quarry_annual_rewards_rate_unsafe(&self, quarry_rewards_share: u64) -> Option<u64> {
-        (self.annual_rewards_rate as u128)
-            .checked_mul(quarry_rewards_share as u128)?
-            .checked_div(self.total_rewards_shares as u128)?
-            .to_u64()
+    fn compute_quarry_annual_rewards_rate_unsafe(&self, quarry_rewards_share: u64) -> Option<u128> {
+        let quarry_annual_rewards_rate = U192::from(self.annual_rewards_rate)
+            .checked_mul(quarry_rewards_share.into())?
+            .checked_div(self.total_rewards_shares.into())?;
+
+        let precise_annual_rewards_rate: u128 = quarry_annual_rewards_rate.try_into().ok()?;
+        Some(precise_annual_rewards_rate)
     }
 
     /// Computes the amount of rewards a [crate::Quarry] should receive, annualized.
@@ -43,10 +47,9 @@ impl Rewarder {
             return Ok(0);
         }
 
-        let rate: u64 =
+        let raw_rate =
             unwrap_int!(self.compute_quarry_annual_rewards_rate_unsafe(quarry_rewards_share));
-
-        Ok(rate)
+        Ok(unwrap_int!(raw_rate.to_u64()))
     }
 }
 
