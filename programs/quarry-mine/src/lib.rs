@@ -41,7 +41,7 @@ pub const DEFAULT_CLAIM_FEE_MILLIBPS: u64 = 1_000;
 /// Program for [quarry_mine].
 #[program]
 pub mod quarry_mine {
-    use vipers::assert_keys_eq;
+    
 
     use super::*;
 
