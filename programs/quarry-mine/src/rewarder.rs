@@ -23,8 +23,7 @@ impl Rewarder {
             .checked_mul(quarry_rewards_share.into())?
             .checked_div(self.total_rewards_shares.into())?;
 
-        let precise_annual_rewards_rate: u128 = quarry_annual_rewards_rate.try_into().ok()?;
-        Some(precise_annual_rewards_rate)
+        quarry_annual_rewards_rate.try_into().ok()
     }
 
     /// Computes the amount of rewards a [crate::Quarry] should receive, annualized.
