@@ -122,7 +122,6 @@ pub mod quarry_mine {
     pub fn accept_authority(ctx: Context<AcceptAuthority>) -> ProgramResult {
         let rewarder = &mut ctx.accounts.rewarder;
         let next_authority = rewarder.pending_authority;
-        assert_keys_eq!(ctx.accounts.authority, next_authority, "pending authority");
         rewarder.authority = next_authority;
         rewarder.pending_authority = Pubkey::default();
         Ok(())
