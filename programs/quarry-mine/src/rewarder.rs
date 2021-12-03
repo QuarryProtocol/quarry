@@ -4,21 +4,26 @@ use anchor_lang::prelude::*;
 use anchor_lang::require;
 use anchor_spl::token::TokenAccount;
 use num_traits::ToPrimitive;
+use spl_math::uint::U192;
+use std::convert::TryInto;
 use vipers::unwrap_int;
 
 use crate::ClaimEvent;
 use crate::ClaimRewards;
 use crate::Rewarder;
+use crate::DEFAULT_CLAIM_FEE_MILLIBPS;
+use crate::MAX_BPS;
 
 impl Rewarder {
     /// Computes the amount of rewards a [crate::Quarry] should receive, annualized.
     /// This should be run only after `total_rewards_shares` has been set.
     /// Do not call this directly. Use `compute_quarry_annual_rewards_rate`.
-    fn compute_quarry_annual_rewards_rate_unsafe(&self, quarry_rewards_share: u64) -> Option<u64> {
-        (self.annual_rewards_rate as u128)
-            .checked_mul(quarry_rewards_share as u128)?
-            .checked_div(self.total_rewards_shares as u128)?
-            .to_u64()
+    fn compute_quarry_annual_rewards_rate_unsafe(&self, quarry_rewards_share: u64) -> Option<u128> {
+        let quarry_annual_rewards_rate = U192::from(self.annual_rewards_rate)
+            .checked_mul(quarry_rewards_share.into())?
+            .checked_div(self.total_rewards_shares.into())?;
+
+        quarry_annual_rewards_rate.try_into().ok()
     }
 
     /// Computes the amount of rewards a [crate::Quarry] should receive, annualized.
@@ -41,10 +46,9 @@ impl Rewarder {
             return Ok(0);
         }
 
-        let rate: u64 =
+        let raw_rate =
             unwrap_int!(self.compute_quarry_annual_rewards_rate_unsafe(quarry_rewards_share));
-
-        Ok(rate)
+        Ok(unwrap_int!(raw_rate.to_u64()))
     }
 }
 
@@ -60,10 +64,13 @@ impl<'info> ClaimRewards<'info> {
 
         // Calculate rewards
         let max_claim_fee_millibps = self.stake.rewarder.max_claim_fee_millibps;
-        require!(max_claim_fee_millibps < 10_000 * 1_000, InvalidMaxClaimFee);
+        require!(
+            max_claim_fee_millibps < MAX_BPS * DEFAULT_CLAIM_FEE_MILLIBPS,
+            InvalidMaxClaimFee
+        );
         let max_claim_fee = unwrap_int!((amount_claimable as u128)
             .checked_mul(max_claim_fee_millibps.into())
-            .and_then(|f| f.checked_div((10_000 * 1_000) as u128))
+            .and_then(|f| f.checked_div((MAX_BPS * DEFAULT_CLAIM_FEE_MILLIBPS) as u128))
             .and_then(|f| f.to_u64()));
 
         let amount_claimable_minus_fees = unwrap_int!(amount_claimable.checked_sub(max_claim_fee));

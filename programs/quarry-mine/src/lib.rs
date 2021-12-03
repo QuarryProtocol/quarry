@@ -38,6 +38,9 @@ pub const MAX_ANNUAL_REWARDS_RATE: u64 = u64::MAX >> 3;
 /// This may be changed by governance in the future via program upgrade.
 pub const DEFAULT_CLAIM_FEE_MILLIBPS: u64 = 1_000;
 
+/// The maximum number of basis points possible.
+pub const MAX_BPS: u64 = 10_000;
+
 /// Program for [quarry_mine].
 #[program]
 pub mod quarry_mine {
@@ -461,7 +464,7 @@ pub struct Quarry {
     /// Index of the [Quarry].
     pub index: u16,
     /// Decimals on the token [Mint].
-    pub token_mint_decimals: u8,
+    pub token_mint_decimals: u8, // This field is never used.
     /// Timestamp when quarry rewards cease
     pub famine_ts: i64,
     /// Timestamp of last checkpoint
