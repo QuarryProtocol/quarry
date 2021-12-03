@@ -41,6 +41,7 @@ pub fn init_merge_miner(ctx: Context<InitMergeMiner>, bump: u8) -> ProgramResult
     pool.mm_count = unwrap_int!(pool.mm_count.checked_add(1));
 
     mm.primary_balance = 0;
+    mm.replica_balance = 0;
 
     let primary_mint = ctx.accounts.pool.primary_mint;
 

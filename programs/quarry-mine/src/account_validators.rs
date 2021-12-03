@@ -73,6 +73,11 @@ impl<'info> Validate<'info> for AcceptAuthority<'info> {
             self.rewarder.pending_authority != Pubkey::default(),
             PendingAuthorityNotSet
         );
+        assert_keys_eq!(
+            self.rewarder.pending_authority,
+            self.authority,
+            "pending authority"
+        );
         Ok(())
     }
 }
