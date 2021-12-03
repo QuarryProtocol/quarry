@@ -133,6 +133,11 @@ impl<'info> Validate<'info> for CreateMiner<'info> {
         assert_ata!(self.miner_vault, self.miner, self.token_mint, "miner vault");
         assert_keys_eq!(self.miner_vault.owner, self.miner, "miner vault owner");
         assert_keys_eq!(self.miner_vault.mint, self.token_mint, "miner vault mint");
+        assert_keys_eq!(
+            self.miner_vault.mint,
+            self.quarry.token_mint_key,
+            "miner vault mint must match quarry mint"
+        );
         assert_keys_eq!(self.quarry.rewarder_key, self.rewarder, "rewarder");
 
         Ok(())
