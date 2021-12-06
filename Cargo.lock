@@ -1472,9 +1472,9 @@ checksum = "5fecdca9a5291cc2b8dcf7dc02453fee791a280f3743cb0905f8822ae463b3fe"
 
 [[package]]
 name = "vipers"
-version = "1.5.3"
+version = "1.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2090384475398270737d19816fbb1a935dd0fcf0a9ece92f7d486f312050ffc0"
+checksum = "344716a0a37af7570a1402541e48b42a09def1d453c031aefcd05944d2c4488c"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
