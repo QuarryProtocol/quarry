@@ -18,7 +18,7 @@ Quarry was built with the intention of helping more Solana projects launch on-ch
 
 ## Audit
 
-Quarry protocol was audited by [Quantstamp](https://quantstamp.com/), view the audit report
+Quarry Protocol has been audited by [Quantstamp](https://quantstamp.com/). View the audit report
 [here](https://github.com/QuarryProtocol/quarry/blob/master/audit/quantstamp.pdf).
 
 ## Packages
