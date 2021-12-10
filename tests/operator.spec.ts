@@ -20,6 +20,7 @@ import type {
   QuarrySDK,
   RewarderWrapper,
 } from "../src";
+import { QuarryOperatorErrors } from "../src";
 import type { Operator } from "../src/wrappers/operator";
 import { DEFAULT_DECIMALS, DEFAULT_HARD_CAP } from "./utils";
 import { makeSDK } from "./workspace";
@@ -195,7 +196,9 @@ describe("Operator", () => {
       const { tx } = await randomOperator.delegateCreateQuarry({
         tokenMint: stakeMint,
       });
-      await expectTX(tx).to.be.rejected.and.to.match(/0x12c/); // unauthorized
+      await expectTX(tx).to.be.rejected.and.to.match(
+        new RegExp(`0x${QuarryOperatorErrors.Unauthorized.code.toString(16)}`)
+      ); // unauthorized
     });
 
     it("create quarry", async () => {
@@ -270,7 +273,9 @@ describe("Operator", () => {
           quarry: quarryKey,
           share: 1,
         })
-      ).to.be.rejected.and.to.include(/0x12c/); // unauthorized
+      ).to.be.rejected.and.to.match(
+        new RegExp(`0x${QuarryOperatorErrors.Unauthorized.code.toString(16)}`)
+      ); // unauthorized
     });
 
     it("allocate share", async () => {
@@ -359,7 +364,9 @@ describe("Operator", () => {
 
       await expectTX(
         randomOperator.delegateSetAnnualRewards(new u64(1_000000))
-      ).to.be.rejected.and.to.match(/0x12c/); // unauthorized
+      ).to.be.rejected.and.to.match(
+        new RegExp(`0x${QuarryOperatorErrors.Unauthorized.code.toString(16)}`)
+      );
     });
 
     it("set annual rewards", async () => {

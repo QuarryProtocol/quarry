@@ -1,9 +1,14 @@
-{ pkgs }:
+{ pkgs, saber-pkgs }:
+
+with saber-pkgs;
+
 pkgs.buildEnv {
   name = "ci";
   paths = with pkgs;
     (pkgs.lib.optionals pkgs.stdenv.isLinux [ libudev ]) ++ [
-      anchor-0_17_0
+      anchor-0_19_0
+      cargo-workspaces
+      solana-install
 
       nodejs
       yarn
