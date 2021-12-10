@@ -28,6 +28,7 @@ jobs:
         uses: cachix/cachix-action@v10
         with:
           name: quarry
+          extraPullNames: saber
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
       - name: Parse IDLs
         run: nix shell .#ci --command ./scripts/parse-idls.sh
@@ -91,6 +92,7 @@ jobs:
         uses: cachix/cachix-action@v10
         with:
           name: quarry
+          extraPullNames: saber
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
       - name: Build program
         run: nix shell .#ci --command anchor build
