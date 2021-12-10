@@ -8,8 +8,8 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  SOLANA_VERSION: "1.7.11"
-  RUST_TOOLCHAIN: nightly-2021-09-01
+  SOLANA_VERSION: "1.7.15"
+  RUST_TOOLCHAIN: nightly-2021-12-10
 
 jobs:
   sdk:
@@ -32,23 +32,20 @@ jobs:
       - name: Parse IDLs
         run: nix shell .#ci --command ./scripts/parse-idls.sh
 
-      - name: Setup Node
-        uses: actions/setup-node@v2
-        with:
-          always-auth: true
-          node-version: "16"
       - name: Yarn Cache
         uses: actions/cache@v2
         with:
           path: ./.yarn
-          key: ${{ runner.os }}-${{ hashFiles('./.yarn/**/*.js') }}
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-modules-
       - name: Install Yarn dependencies
-        run: yarn install
-      - run: ./scripts/generate-idl-types.sh
-      - run: yarn build
-      - run: yarn typecheck
-      - run: yarn lint
-      - run: yarn dlx @yarnpkg/doctor
+        run: nix shell .#ci --command yarn install
+      - run: nix shell .#ci --command ./scripts/generate-idl-types.sh
+      - run: nix shell .#ci --command yarn build
+      - run: nix shell .#ci --command yarn typecheck
+      - run: nix shell .#ci --command yarn lint
+      - run: nix shell .#ci --command yarn dlx @yarnpkg/doctor
 
   integration-tests:
     runs-on: ubuntu-latest
@@ -72,7 +69,9 @@ jobs:
       - name: Cache Solana binaries
         uses: actions/cache@v2
         with:
-          path: ~/.cache/solana
+          path: |
+            ~/.cache/solana
+            ~/.local/share/solana/install
           key: ${{ runner.os }}-${{ env.SOLANA_VERSION }}
       - name: Install Solana
         run: |
@@ -102,14 +101,12 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./.yarn
-          key: ${{ runner.os }}-${{ hashFiles('./.yarn/**/*.js') }}
-      - name: Setup Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: "16"
-      - run: yarn install
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-modules-
+      - run: nix shell .#ci --command yarn install
       - name: Generate IDL types
         run: nix shell .#ci --command yarn idl:generate:nolint
-      - run: yarn build
+      - run: nix shell .#ci --command yarn build
       - name: Run e2e tests
         run: nix shell .#ci --command yarn test:e2e
