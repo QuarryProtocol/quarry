@@ -914,7 +914,7 @@ dependencies = [
 
 [[package]]
 name = "quarry-merge-mine"
-version = "1.10.6"
+version = "1.11.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -926,7 +926,7 @@ dependencies = [
 
 [[package]]
 name = "quarry-mine"
-version = "1.10.6"
+version = "1.11.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -940,7 +940,7 @@ dependencies = [
 
 [[package]]
 name = "quarry-mint-wrapper"
-version = "1.10.6"
+version = "1.11.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -949,7 +949,7 @@ dependencies = [
 
 [[package]]
 name = "quarry-operator"
-version = "1.10.6"
+version = "1.11.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -959,7 +959,7 @@ dependencies = [
 
 [[package]]
 name = "quarry-redeemer"
-version = "1.10.6"
+version = "1.11.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -968,7 +968,7 @@ dependencies = [
 
 [[package]]
 name = "quarry-registry"
-version = "1.10.6"
+version = "1.11.0"
 dependencies = [
  "anchor-lang",
  "quarry-mine",
@@ -1242,9 +1242,9 @@ dependencies = [
 
 [[package]]
 name = "solana-frozen-abi"
-version = "1.8.8"
+version = "1.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "521fb90696b52cb84d75dedd4466ab2130b48b9c07cb2808072139d624d1f11f"
+checksum = "5167a26c3c44cbaf07324c63cdbe10ceedfcfd8882e5bf79d81962a44c1413e2"
 dependencies = [
  "bs58 0.3.1",
  "bv",
@@ -1262,9 +1262,9 @@ dependencies = [
 
 [[package]]
 name = "solana-frozen-abi-macro"
-version = "1.8.8"
+version = "1.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0327460a3d884adffb251ba1072c0895e319f21d53b63d9e558469ac233ee102"
+checksum = "ee9fb266b5dfaf82035f20c04bada9111d4ce7e992d3ad5900aad0e996844016"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1274,9 +1274,9 @@ dependencies = [
 
 [[package]]
 name = "solana-logger"
-version = "1.8.8"
+version = "1.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0854f2a8aa61ca495be93e97187cdd0261882c339bbb1aea1a8069a9e93ae584"
+checksum = "8f135e5c531178489cd0aca73891bca88f4f67df17cf2b14c06c2eeb10dc943d"
 dependencies = [
  "env_logger",
  "lazy_static",
@@ -1285,9 +1285,9 @@ dependencies = [
 
 [[package]]
 name = "solana-program"
-version = "1.8.8"
+version = "1.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "040a14c47f7b24a1400da799246478efbbd6713ff9bff175d8f08756bdb1bd01"
+checksum = "8d1902428fc148d796ced475e430dc789ac8eaf003d59b7f85dc37d8e98c51cc"
 dependencies = [
  "base64 0.13.0",
  "bincode",
@@ -1322,9 +1322,9 @@ dependencies = [
 
 [[package]]
 name = "solana-sdk-macro"
-version = "1.8.8"
+version = "1.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88c07d538e85aeb469c045517a113fec3379c6c13d11ceafb7ccbed3e0aa2548"
+checksum = "2682062c3104949e1a5486d6d2fb81da91685ed57ad36f0b4657d111d1f623dd"
 dependencies = [
  "bs58 0.3.1",
  "proc-macro2",

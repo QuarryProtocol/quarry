@@ -1,6 +1,6 @@
 [package]
 name = "quarry-registry"
-version = "1.10.6"
+version = "1.11.0"
 description = "Registry of all quarries associated with a rewarder."
 edition = "2018"
 homepage = "https://quarry.so"
@@ -21,5 +21,5 @@ default = []
 
 [dependencies]
 anchor-lang = ">=0.17.0"
-quarry-mine = { version = "1.10", path = "../quarry-mine", features = ["cpi"] }
-vipers = "1.5.3"
+quarry-mine = { version = "^1.11", path = "../quarry-mine", features = ["cpi"] }
+vipers = "1.5.5"
