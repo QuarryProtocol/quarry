@@ -5,7 +5,7 @@ test = "yarn mocha"
 
 [provider]
 cluster = "localnet"
-wallet = "~/.config/solana/id.json"
+wallet = "./tests/test-key.json"
 
 [programs.mainnet]
 quarry_merge_mine = "QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto"

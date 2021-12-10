@@ -8,6 +8,7 @@ pkgs.buildEnv {
     (pkgs.lib.optionals pkgs.stdenv.isLinux [ libudev ]) ++ [
       anchor-0_19_0
       cargo-workspaces
+      solana-install
 
       nodejs
       yarn
