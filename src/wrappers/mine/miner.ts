@@ -115,7 +115,7 @@ export class MinerWrapper {
     };
   }
 
-  private performStakeAction(
+  private _performStakeAction(
     amount: TokenAmount,
     action: "stakeTokens" | "withdrawTokens"
   ): TransactionEnvelope {
@@ -125,7 +125,7 @@ export class MinerWrapper {
     return new TransactionEnvelope(this.provider, [instruction]);
   }
 
-  private async getOrCreateStakedAssociatedTokenAccountInternal() {
+  private async _getOrCreateStakedAssociatedTokenAccountInternal() {
     return await getOrCreateATA({
       provider: this.provider,
       mint: this.quarry.token.mintAccount,
@@ -138,7 +138,7 @@ export class MinerWrapper {
    */
   public async createATAIfNotExists(): Promise<TransactionEnvelope | null> {
     const { instruction } =
-      await this.getOrCreateStakedAssociatedTokenAccountInternal();
+      await this._getOrCreateStakedAssociatedTokenAccountInternal();
     if (!instruction) {
       return null;
     }
@@ -151,7 +151,7 @@ export class MinerWrapper {
    * @returns
    */
   public stake(amount: TokenAmount): TransactionEnvelope {
-    return this.performStakeAction(amount, "stakeTokens");
+    return this._performStakeAction(amount, "stakeTokens");
   }
 
   /**
@@ -160,7 +160,7 @@ export class MinerWrapper {
    * @returns
    */
   public withdraw(amount: TokenAmount): TransactionEnvelope {
-    return this.performStakeAction(amount, "withdrawTokens");
+    return this._performStakeAction(amount, "withdrawTokens");
   }
 
   /**
