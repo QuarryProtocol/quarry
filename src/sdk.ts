@@ -7,11 +7,11 @@ import type {
 } from "@saberhq/solana-contrib";
 import { SolanaAugmentedProvider } from "@saberhq/solana-contrib";
 import type {
-  Keypair,
   PublicKey,
   Signer,
   TransactionInstruction,
 } from "@solana/web3.js";
+import { Keypair } from "@solana/web3.js";
 import mapValues from "lodash.mapvalues";
 
 import type { Programs } from "./constants";
@@ -136,11 +136,15 @@ export class QuarrySDK {
     });
   }
 
+  /**
+   * Creates an Operator.
+   * @returns
+   */
   async createOperator({
     rewarder,
-    baseKP,
-    admin,
-    payer,
+    baseKP = Keypair.generate(),
+    admin = this.provider.wallet.publicKey,
+    payer = this.provider.wallet.publicKey,
   }: {
     rewarder: PublicKey;
     admin?: PublicKey;
