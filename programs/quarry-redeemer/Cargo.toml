@@ -2,7 +2,7 @@
 name = "quarry-redeemer"
 version = "1.11.0"
 description = "Redeems one token for another"
-edition = "2018"
+edition = "2021"
 homepage = "https://quarry.so"
 repository = "https://github.com/QuarryProtocol/quarry"
 authors = ["Quarry Protocol <team@quarry.so>"]

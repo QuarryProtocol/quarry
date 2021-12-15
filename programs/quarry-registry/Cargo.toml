@@ -2,7 +2,7 @@
 name = "quarry-registry"
 version = "1.11.0"
 description = "Registry of all quarries associated with a rewarder."
-edition = "2018"
+edition = "2021"
 homepage = "https://quarry.so"
 repository = "https://github.com/QuarryProtocol/quarry"
 authors = ["Quarry Protocol <team@quarry.so>"]
