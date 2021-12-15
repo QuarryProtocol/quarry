@@ -9,6 +9,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   RUST_TOOLCHAIN: nightly-2021-12-10
+  SOLANA_VERSION: "1.9.0"
   NPM_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
 
 jobs:
@@ -99,7 +100,7 @@ jobs:
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
       - name: Build programs
-        run: nix shell .#ci --command anchor build -v
+        run: nix shell .#ci --command anchor build --verifiable --solana-version ${{ env.SOLANA_VERSION }}
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
