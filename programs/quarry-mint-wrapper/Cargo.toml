@@ -2,7 +2,7 @@
 name = "quarry-mint-wrapper"
 version = "1.11.0"
 description = "Mints tokens to authorized accounts"
-edition = "2018"
+edition = "2021"
 homepage = "https://quarry.so"
 repository = "https://github.com/QuarryProtocol/quarry"
 authors = ["Quarry Protocol <team@quarry.so>"]
