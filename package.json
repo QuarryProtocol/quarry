@@ -41,7 +41,7 @@
     "@types/chai": "^4.3.0",
     "@types/lodash.mapvalues": "^4.6.6",
     "@types/mocha": "^9.0.0",
-    "@types/node": "^16.11.13",
+    "@types/node": "^17.0.1",
     "@types/prettier": "^2.4.2",
     "bn.js": "^5.2.0",
     "chai": "^4.3.4",
