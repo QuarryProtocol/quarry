@@ -1,5 +1,3 @@
-import "chai-bn";
-
 import * as anchor from "@project-serum/anchor";
 import { expectTX } from "@saberhq/chai-solana";
 import type { Provider } from "@saberhq/solana-contrib";
@@ -20,13 +18,13 @@ import { expect } from "chai";
 import invariant from "tiny-invariant";
 
 import type {
-  ClaimEvent,
   MineWrapper,
   MintWrapper,
   QuarrySDK,
   RewarderWrapper,
   StakeEvent,
 } from "../src";
+import { QUARRY_CODERS } from "../src";
 import {
   DEFAULT_DECIMALS,
   DEFAULT_HARD_CAP,
@@ -211,24 +209,16 @@ describe("Mine Rewards", () => {
     ).to.be.fulfilled;
 
     const tx = await minerActions.claim();
-    const claimSent = tx.send();
+    const claimSent = await tx.send();
     await expectTX(tx, "Claim").to.be.fulfilled;
-    const receipt = await (await claimSent).wait();
+    const receipt = await claimSent.wait();
     receipt.printLogs();
 
-    const parser = new anchor.EventParser(
-      sdk.programs.Mine.programId,
-      sdk.programs.Mine.coder
-    );
-    const theParser = (logs: string[]) => {
-      const events: ClaimEvent[] = [];
-      parser.parseLogs(logs, (event) => {
-        events.push(event as ClaimEvent);
-      });
-      return events;
-    };
-    const event = receipt.getEvents(theParser)[0];
-    assert.ok(event, "claim event not found");
+    const claimEvent = QUARRY_CODERS.Mine.parseProgramLogEvents(
+      receipt.response.meta?.logMessages ?? []
+    )[0];
+    invariant(claimEvent?.name === "ClaimEvent", "claim event not found");
+    assert.ok(claimEvent, "claim event not found");
 
     quarry = await rewarderWrapper.getQuarry(stakeToken);
     miner = await quarry.getMiner(provider.wallet.publicKey);
@@ -237,7 +227,7 @@ describe("Mine Rewards", () => {
     // Checks
     const payroll = quarry.payroll;
     const expectedWagesEarned = payroll.calculateRewardsEarned(
-      event.data.timestamp,
+      claimEvent.data.timestamp,
       new BN(stakeAmount),
       wagesPerTokenPaid,
       ZERO
@@ -246,9 +236,9 @@ describe("Mine Rewards", () => {
     const fees = expectedWagesEarned.mul(new BN(1)).div(new BN(10_000));
     const rewardsAfterFees = expectedWagesEarned.sub(fees);
 
-    expect(event.data.amount.isZero()).to.be.false;
-    expect(event.data.amount).to.bignumber.eq(rewardsAfterFees);
-    expect(event.data.fees).to.bignumber.eq(fees);
+    expect(claimEvent.data.amount.isZero()).to.be.false;
+    expect(claimEvent.data.amount).to.bignumber.eq(rewardsAfterFees);
+    expect(claimEvent.data.fees).to.bignumber.eq(fees);
     expect(miner.rewardsEarned.toString()).to.equal(ZERO.toString());
     const rewardsTokenAccount = await getATAAddress({
       mint: rewardsMint,
@@ -259,7 +249,7 @@ describe("Mine Rewards", () => {
       rewardsTokenAccount
     );
     expect(rewardsTokenAccountInfo.amount.toString()).to.equal(
-      event.data.amount.toString()
+      claimEvent.data.amount.toString()
     );
   });
 });

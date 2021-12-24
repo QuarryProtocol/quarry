@@ -200,7 +200,6 @@ __metadata:
     "@types/prettier": ^2.4.2
     bn.js: ^5.2.0
     chai: ^4.3.4
-    chai-bn: ^0.3.0
     eslint: ^8.5.0
     eslint-import-resolver-node: ^0.3.6
     eslint-plugin-import: ^2.25.3
