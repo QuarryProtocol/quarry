@@ -224,7 +224,7 @@ describe("Famine", () => {
     const claim2 = await minerActions.claim();
     const claim2Sent = await claim2.send();
     await expectTX(claim2Sent, "Claim again from the quarry").to.be.fulfilled;
-    const claim2Receipt = await claimSent.wait();
+    const claim2Receipt = await claim2Sent.wait();
     claim2Receipt.printLogs();
 
     const claim2Event = QUARRY_CODERS.Mine.parseProgramLogEvents(
