@@ -1,5 +1,3 @@
-import "chai-bn";
-
 import * as anchor from "@project-serum/anchor";
 import { expectTX } from "@saberhq/chai-solana";
 import type { Provider } from "@saberhq/solana-contrib";
