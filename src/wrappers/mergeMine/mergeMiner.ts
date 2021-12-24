@@ -23,12 +23,12 @@ import type { MergeMine } from "./quarryMergeMine";
 
 export class MergeMiner {
   constructor(
-    public readonly mergeMine: MergeMine,
-    public readonly pool: {
+    readonly mergeMine: MergeMine,
+    readonly pool: {
       key: PublicKey;
       data: MergePoolData;
     },
-    public readonly mm: {
+    readonly mm: {
       key: PublicKey;
       data: MergeMinerData;
     }

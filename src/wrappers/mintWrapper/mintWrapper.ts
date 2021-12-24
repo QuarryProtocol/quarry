@@ -19,9 +19,9 @@ import { findMinterAddress, findMintWrapperAddress } from "./pda";
 import type { PendingMintAndWrapper, PendingMintWrapper } from "./types";
 
 export class MintWrapper {
-  public readonly program: MintWrapperProgram;
+  readonly program: MintWrapperProgram;
 
-  constructor(public readonly sdk: QuarrySDK) {
+  constructor(readonly sdk: QuarrySDK) {
     this.program = sdk.programs.MintWrapper;
   }
 
@@ -29,7 +29,7 @@ export class MintWrapper {
     return this.sdk.provider;
   }
 
-  public async newWrapper({
+  async newWrapper({
     hardcap,
     tokenMint,
     baseKP = Keypair.generate(),
@@ -70,7 +70,7 @@ export class MintWrapper {
     };
   }
 
-  public async newWrapperAndMint({
+  async newWrapperAndMint({
     mintKP = Keypair.generate(),
     decimals = 6,
     ...newWrapperArgs
@@ -108,9 +108,7 @@ export class MintWrapper {
    * @param minter
    * @returns
    */
-  public async fetchMintWrapper(
-    wrapper: PublicKey
-  ): Promise<MintWrapperData | null> {
+  async fetchMintWrapper(wrapper: PublicKey): Promise<MintWrapperData | null> {
     const accountInfo = await this.program.provider.connection.getAccountInfo(
       wrapper
     );
@@ -128,7 +126,7 @@ export class MintWrapper {
    * @param minter
    * @returns
    */
-  public async fetchMinter(
+  async fetchMinter(
     wrapper: PublicKey,
     authority: PublicKey
   ): Promise<MinterData | null> {
@@ -149,7 +147,7 @@ export class MintWrapper {
     );
   }
 
-  public async newMinter(
+  async newMinter(
     wrapper: PublicKey,
     authority: PublicKey
   ): Promise<TransactionEnvelope> {
@@ -180,7 +178,7 @@ export class MintWrapper {
    * @param allowance
    * @returns
    */
-  public async minterUpdate(
+  async minterUpdate(
     wrapper: PublicKey,
     authority: PublicKey,
     allowance: u64
@@ -210,7 +208,7 @@ export class MintWrapper {
    * @param allowance
    * @returns
    */
-  public async newMinterWithAllowance(
+  async newMinterWithAllowance(
     wrapper: PublicKey,
     authority: PublicKey,
     allowance: u64
@@ -224,10 +222,7 @@ export class MintWrapper {
     return newMinter.combine(updateAllowance);
   }
 
-  public transferAdmin(
-    wrapper: PublicKey,
-    nextAdmin: PublicKey
-  ): TransactionEnvelope {
+  transferAdmin(wrapper: PublicKey, nextAdmin: PublicKey): TransactionEnvelope {
     return this.sdk.newTx([
       this.program.instruction.transferAdmin({
         accounts: {
@@ -239,7 +234,7 @@ export class MintWrapper {
     ]);
   }
 
-  public acceptAdmin(wrapper: PublicKey): TransactionEnvelope {
+  acceptAdmin(wrapper: PublicKey): TransactionEnvelope {
     return this.sdk.newTx([
       this.program.instruction.acceptAdmin({
         accounts: {
@@ -254,7 +249,7 @@ export class MintWrapper {
    * Performs a mint of tokens to an account.
    * @returns
    */
-  public performMint = async ({
+  performMint = async ({
     amount,
     minter,
   }: {

@@ -12,9 +12,9 @@ import { findOperatorAddress } from "./pda";
  */
 export class Operator {
   constructor(
-    public readonly sdk: QuarrySDK,
-    public readonly key: PublicKey,
-    public readonly data: OperatorData
+    readonly sdk: QuarrySDK,
+    readonly key: PublicKey,
+    readonly data: OperatorData
   ) {}
 
   get program(): QuarryOperatorProgram {
@@ -30,7 +30,7 @@ export class Operator {
     return new Operator(this.sdk, this.key, data);
   }
 
-  public static async load({
+  static async load({
     sdk,
     key,
   }: {
@@ -47,7 +47,7 @@ export class Operator {
     return new Operator(sdk, key, data);
   }
 
-  public static async createOperator({
+  static async createOperator({
     sdk,
     rewarder,
     baseKP = Keypair.generate(),
@@ -90,7 +90,7 @@ export class Operator {
     };
   }
 
-  public setAdmin(delegate: PublicKey): TransactionEnvelope {
+  setAdmin(delegate: PublicKey): TransactionEnvelope {
     return new TransactionEnvelope(this.sdk.provider, [
       this.program.instruction.setAdmin({
         accounts: {
@@ -102,7 +102,7 @@ export class Operator {
     ]);
   }
 
-  public setRateSetter(delegate: PublicKey): TransactionEnvelope {
+  setRateSetter(delegate: PublicKey): TransactionEnvelope {
     return new TransactionEnvelope(this.sdk.provider, [
       this.program.instruction.setRateSetter({
         accounts: {
@@ -114,7 +114,7 @@ export class Operator {
     ]);
   }
 
-  public setQuarryCreator(delegate: PublicKey): TransactionEnvelope {
+  setQuarryCreator(delegate: PublicKey): TransactionEnvelope {
     return new TransactionEnvelope(this.sdk.provider, [
       this.program.instruction.setQuarryCreator({
         accounts: {
@@ -126,7 +126,7 @@ export class Operator {
     ]);
   }
 
-  public setShareAllocator(delegate: PublicKey): TransactionEnvelope {
+  setShareAllocator(delegate: PublicKey): TransactionEnvelope {
     return new TransactionEnvelope(this.sdk.provider, [
       this.program.instruction.setShareAllocator({
         accounts: {

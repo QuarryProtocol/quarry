@@ -31,8 +31,8 @@ import { RedeemerWrapper } from "./wrappers/redeemer";
  */
 export class QuarrySDK {
   constructor(
-    public readonly provider: AugmentedProvider,
-    public readonly programs: Programs
+    readonly provider: AugmentedProvider,
+    readonly programs: Programs
   ) {}
 
   /**

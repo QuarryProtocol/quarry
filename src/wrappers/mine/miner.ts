@@ -29,11 +29,11 @@ export class MinerWrapper {
    * @param stakedTokenATA Staked token ATA (associated w/ authority)
    */
   constructor(
-    public readonly quarry: QuarryWrapper,
-    public readonly authority: PublicKey,
-    public readonly minerKey: PublicKey,
-    public readonly tokenVaultKey: PublicKey,
-    public readonly stakedTokenATA: PublicKey
+    readonly quarry: QuarryWrapper,
+    readonly authority: PublicKey,
+    readonly minerKey: PublicKey,
+    readonly tokenVaultKey: PublicKey,
+    readonly stakedTokenATA: PublicKey
   ) {}
 
   /**
@@ -60,7 +60,7 @@ export class MinerWrapper {
   /**
    * Creates the miner of the provided wallet.
    */
-  public initialize(bump: number): PendingMiner {
+  initialize(bump: number): PendingMiner {
     const instruction = this.program.instruction.createMiner(bump, {
       accounts: {
         authority: this.authority,
@@ -136,7 +136,7 @@ export class MinerWrapper {
   /**
    * Creates the ATA of the user's staked token if it doesn't exist.
    */
-  public async createATAIfNotExists(): Promise<TransactionEnvelope | null> {
+  async createATAIfNotExists(): Promise<TransactionEnvelope | null> {
     const { instruction } =
       await this._getOrCreateStakedAssociatedTokenAccountInternal();
     if (!instruction) {
@@ -150,7 +150,7 @@ export class MinerWrapper {
    * @param amount
    * @returns
    */
-  public stake(amount: TokenAmount): TransactionEnvelope {
+  stake(amount: TokenAmount): TransactionEnvelope {
     return this._performStakeAction(amount, "stakeTokens");
   }
 
@@ -159,7 +159,7 @@ export class MinerWrapper {
    * @param amount
    * @returns
    */
-  public withdraw(amount: TokenAmount): TransactionEnvelope {
+  withdraw(amount: TokenAmount): TransactionEnvelope {
     return this._performStakeAction(amount, "withdrawTokens");
   }
 
@@ -167,7 +167,7 @@ export class MinerWrapper {
    * Fetches the data associated with the miner.
    * @returns
    */
-  public async fetchData(): Promise<MinerData> {
+  async fetchData(): Promise<MinerData> {
     return await this.program.account.miner.fetch(this.minerKey);
   }
 
@@ -175,7 +175,7 @@ export class MinerWrapper {
    * Claims an amount of tokens.
    * @returns
    */
-  public async claim(): Promise<TransactionEnvelope> {
+  async claim(): Promise<TransactionEnvelope> {
     const instructions: TransactionInstruction[] = [];
     const { address: rewardsTokenAccount, instruction: ataInstruction } =
       await getOrCreateATA({

@@ -23,7 +23,7 @@ import { MergeMiner } from "./mergeMiner";
 import { findMergeMinerAddress, findPoolAddress } from "./pda";
 
 export class MergeMine {
-  constructor(public readonly sdk: QuarrySDK) {}
+  constructor(readonly sdk: QuarrySDK) {}
 
   get programs(): Programs {
     return this.sdk.programs;

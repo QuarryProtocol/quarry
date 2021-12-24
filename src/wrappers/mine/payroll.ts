@@ -6,11 +6,11 @@ export const BASE_TEN = new BN(10);
 
 export class Payroll {
   constructor(
-    public readonly famineTs: BN,
-    public readonly lastCheckpointTs: BN,
-    public readonly annualRewardsRate: BN,
-    public readonly rewardsPerTokenStored: BN,
-    public readonly totalTokensDeposited: BN
+    readonly famineTs: BN,
+    readonly lastCheckpointTs: BN,
+    readonly annualRewardsRate: BN,
+    readonly rewardsPerTokenStored: BN,
+    readonly totalTokensDeposited: BN
   ) {}
 
   /**
@@ -18,7 +18,7 @@ export class Payroll {
    * @param current_ts
    * @returns
    */
-  public calculateRewardPerToken(current_ts: BN): BN {
+  calculateRewardPerToken(current_ts: BN): BN {
     if (this.totalTokensDeposited.isZero()) {
       return this.rewardsPerTokenStored;
     }
@@ -44,7 +44,7 @@ export class Payroll {
    * @param rewardsEarned
    * @returns
    */
-  public calculateRewardsEarned(
+  calculateRewardsEarned(
     currentTs: BN,
     tokensDeposited: BN,
     rewardsPerTokenPaid: BN,
