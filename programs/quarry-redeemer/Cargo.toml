@@ -1,6 +1,6 @@
 [package]
 name = "quarry-redeemer"
-version = "1.11.1"
+version = "1.11.3"
 description = "Redeems one token for another"
 edition = "2021"
 homepage = "https://quarry.so"
