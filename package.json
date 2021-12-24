@@ -41,7 +41,6 @@
     "@solana/web3.js": "^1.31.0",
     "@types/bn.js": "^5.1.0",
     "@types/chai": "^4.3.0",
-    "@types/lodash.mapvalues": "^4.6.6",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.11.17",
     "@types/prettier": "^2.4.2",
@@ -85,7 +84,6 @@
     "*.{js,json,jsx,html,css,md}": "prettier --write"
   },
   "dependencies": {
-    "lodash.mapvalues": "^4.6.0",
     "tiny-invariant": "^1.2.0",
     "tslib": "^2.3.1"
   },
