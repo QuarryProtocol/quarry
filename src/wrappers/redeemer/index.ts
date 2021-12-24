@@ -20,18 +20,18 @@ export * from "./pda";
 
 export class RedeemerWrapper {
   constructor(
-    public readonly sdk: QuarrySDK,
-    public readonly iouMint: PublicKey,
-    public readonly redemptionMint: PublicKey,
-    public readonly key: PublicKey,
-    public readonly data: RedeemerData
+    readonly sdk: QuarrySDK,
+    readonly iouMint: PublicKey,
+    readonly redemptionMint: PublicKey,
+    readonly key: PublicKey,
+    readonly data: RedeemerData
   ) {}
 
   get program(): RedeemerProgram {
     return this.sdk.programs.Redeemer;
   }
 
-  public static async load({
+  static async load({
     sdk,
     iouMint,
     redemptionMint,
@@ -46,7 +46,7 @@ export class RedeemerWrapper {
     return new RedeemerWrapper(sdk, iouMint, redemptionMint, redeemer, data);
   }
 
-  public static async createRedeemer({
+  static async createRedeemer({
     sdk,
     iouMint,
     redemptionMint,
@@ -83,17 +83,13 @@ export class RedeemerWrapper {
   /**
    * redeemTokensIx
    */
-  public async redeemTokensIx(
-    args: RedeemTokenArgs
-  ): Promise<TransactionInstruction> {
+  async redeemTokensIx(args: RedeemTokenArgs): Promise<TransactionInstruction> {
     return this.program.instruction.redeemTokens(args.tokenAmount, {
       accounts: await this.getRedeemTokenAccounts(args),
     });
   }
 
-  public async redeemTokens(
-    args: RedeemTokenArgs
-  ): Promise<TransactionEnvelope> {
+  async redeemTokens(args: RedeemTokenArgs): Promise<TransactionEnvelope> {
     return new TransactionEnvelope(this.sdk.provider, [
       await this.redeemTokensIx(args),
     ]);

@@ -1,4 +1,4 @@
-import { BN, EventParser, web3 } from "@project-serum/anchor";
+import { BN, web3 } from "@project-serum/anchor";
 import { expectTX } from "@saberhq/chai-solana";
 import type { Provider } from "@saberhq/solana-contrib";
 import {
@@ -17,13 +17,12 @@ import { expect } from "chai";
 import invariant from "tiny-invariant";
 
 import type {
-  ClaimEvent,
   MineWrapper,
   MintWrapper,
   QuarrySDK,
   RewarderWrapper,
 } from "../src";
-import { QuarryWrapper } from "../src";
+import { QUARRY_CODERS, QuarryWrapper } from "../src";
 import {
   DEFAULT_DECIMALS,
   DEFAULT_HARD_CAP,
@@ -198,46 +197,39 @@ describe("Famine", () => {
     // Sleep for 8 seconds
     await sleep(8000);
 
-    let tx = await minerActions.claim();
-    let claimSent = tx.send();
-    await expectTX(tx, "Claim from the quarry").to.be.fulfilled;
-    let receipt = await (await claimSent).wait();
+    const tx = await minerActions.claim();
+    const claimSent = await tx.send();
+    await expectTX(claimSent, "Claim from the quarry").to.be.fulfilled;
+    const receipt = await claimSent.wait();
     receipt.printLogs();
 
-    const parser = new EventParser(
-      sdk.programs.Mine.programId,
-      sdk.programs.Mine.coder
-    );
-    const theParser = (logs: string[]) => {
-      const events: ClaimEvent[] = [];
-      parser.parseLogs(logs, (event) => {
-        events.push(event as ClaimEvent);
-      });
-      return events;
-    };
-    let event = receipt.getEvents(theParser)[0];
-    invariant(event, "claim event not found");
+    const claimEvent = QUARRY_CODERS.Mine.parseProgramLogEvents(
+      receipt.response.meta?.logMessages ?? []
+    )[0];
+    invariant(claimEvent?.name === "ClaimEvent", "claim event not found");
 
     const expectedRewards = dailyRewardsRate
       .div(new BN(86400))
       .mul(new BN(rewardsDuration))
       .add(new BN(2)); // error epsilon
-    expect(event.data.amount.toString()).to.be.oneOf([
+    expect(claimEvent.data.amount.toString()).to.be.oneOf([
       expectedRewards.toString(),
       "416", // XXX: Figure out this flaky case
     ]);
 
     console.log("Claiming again after 5 seconds ...");
     // Sleep for 5 seconds
-    await sleep(5000);
+    await sleep(5_000);
 
-    tx = await minerActions.claim();
-    claimSent = tx.send();
-    await expectTX(tx, "Claim again from the quarry").to.be.fulfilled;
-    receipt = await (await claimSent).wait();
-    receipt.printLogs();
+    const claim2 = await minerActions.claim();
+    const claim2Sent = await claim2.send();
+    await expectTX(claim2Sent, "Claim again from the quarry").to.be.fulfilled;
+    const claim2Receipt = await claim2Sent.wait();
+    claim2Receipt.printLogs();
 
-    event = receipt.getEvents(theParser)[0];
-    expect(event).to.be.undefined; // No claim event
+    const claim2Event = QUARRY_CODERS.Mine.parseProgramLogEvents(
+      claim2Receipt.response.meta?.logMessages ?? []
+    )[0];
+    expect(claim2Event).to.be.undefined; // No claim event
   });
 });

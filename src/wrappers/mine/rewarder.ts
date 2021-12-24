@@ -11,13 +11,13 @@ import { QuarryWrapper } from "./quarry";
 import type { PendingQuarry } from "./types";
 
 export class RewarderWrapper {
-  public readonly sdk: QuarrySDK;
-  public readonly program: MineProgram;
+  readonly sdk: QuarrySDK;
+  readonly program: MineProgram;
 
   constructor(
-    public readonly mineWrapper: MineWrapper,
-    public readonly rewarderKey: PublicKey,
-    public readonly rewarderData: RewarderData
+    readonly mineWrapper: MineWrapper,
+    readonly rewarderKey: PublicKey,
+    readonly rewarderData: RewarderData
   ) {
     this.sdk = mineWrapper.sdk;
     this.program = mineWrapper.program;
@@ -28,7 +28,7 @@ export class RewarderWrapper {
    * @param token
    * @returns
    */
-  public async getQuarry(token: Token): Promise<QuarryWrapper> {
+  async getQuarry(token: Token): Promise<QuarryWrapper> {
     const quarryKey = await this.getQuarryKey(token);
     return await QuarryWrapper.load({
       sdk: this.sdk,
@@ -65,7 +65,7 @@ export class RewarderWrapper {
    * @param param0
    * @returns
    */
-  public async createQuarry({
+  async createQuarry({
     token,
     authority = this.program.provider.wallet.publicKey,
   }: {
@@ -103,7 +103,7 @@ export class RewarderWrapper {
    * One must sync after this.
    * @param param0
    */
-  public setAnnualRewards({
+  setAnnualRewards({
     newAnnualRate,
     authority = this.program.provider.wallet.publicKey,
   }: {
@@ -126,7 +126,7 @@ export class RewarderWrapper {
    * Updates to annual rewards rate on the quarry, and update rewards on quarries assocated with each mint provided.
    * @param param0
    */
-  public async setAndSyncAnnualRewards(
+  async setAndSyncAnnualRewards(
     newAnnualRate: u64,
     mints: PublicKey[]
   ): Promise<TransactionEnvelope> {
@@ -139,9 +139,7 @@ export class RewarderWrapper {
    * @param mints
    * @returns
    */
-  public async syncQuarryRewards(
-    mints: PublicKey[]
-  ): Promise<TransactionEnvelope> {
+  async syncQuarryRewards(mints: PublicKey[]): Promise<TransactionEnvelope> {
     const instructions: TransactionInstruction[] = [];
     await Promise.all(
       mints.map(async (m) => {

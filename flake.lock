@@ -47,11 +47,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1639118782,
-        "narHash": "sha256-NwStPk1m8gWVhZkWpLYVsD/3EmLk+qRDxpxpEvAyBx8=",
+        "lastModified": 1640269308,
+        "narHash": "sha256-vBVwv3+kPrxbNyfo48cB5cc5/4tq5zlJGas/qw8XNBE=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "47f45c8440e2ef1e967aa5aec3528dd976c4a488",
+        "rev": "0c408a087b4751c887e463e3848512c12017be25",
         "type": "github"
       },
       "original": {
@@ -112,11 +112,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1639131544,
-        "narHash": "sha256-uKq0pwgPfIaQuS/6qPFXpHV8ErvNfjq50uxx0PO7cAU=",
+        "lastModified": 1639170944,
+        "narHash": "sha256-W36s9Ry26tT25nsfyXbgGGzgPZPFQ/K1j3uclYjEw4A=",
         "owner": "saber-hq",
         "repo": "saber-overlay",
-        "rev": "0d741a08466ee16bdb9c4a832cb19c1b8be13997",
+        "rev": "baae305a1c9bbfaf6b7757d40d693466945aa56b",
         "type": "github"
       },
       "original": {

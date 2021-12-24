@@ -18,23 +18,23 @@ import type { PendingMiner } from "./types";
 
 export class QuarryWrapper {
   constructor(
-    public readonly sdk: QuarrySDK,
+    readonly sdk: QuarrySDK,
     /**
      * The token being staked.
      */
-    public readonly token: Token,
+    readonly token: Token,
     /**
      * The data of the rewarder.
      */
-    public readonly rewarderData: RewarderData,
+    readonly rewarderData: RewarderData,
     /**
      * The data of the quarry.
      */
-    public readonly quarryData: QuarryData,
+    readonly quarryData: QuarryData,
     /**
      * The key of the quarry.
      */
-    public readonly key: PublicKey
+    readonly key: PublicKey
   ) {}
 
   /**
@@ -55,7 +55,7 @@ export class QuarryWrapper {
    * Loads a quarry
    * @returns
    */
-  public static async load({
+  static async load({
     sdk,
     token,
     key,
@@ -86,7 +86,7 @@ export class QuarryWrapper {
    *
    * @returns annualRewardsRate
    */
-  public computeAnnualRewardsRate(): u64 {
+  computeAnnualRewardsRate(): u64 {
     const rewarder = this.rewarderData;
     const totalRewardsShares = rewarder.totalRewardsShares;
     if (totalRewardsShares.isZero()) {
@@ -103,7 +103,7 @@ export class QuarryWrapper {
    * @param authority who owns the miner
    * @returns miner public key
    */
-  public async getMinerAddress(authority: PublicKey): Promise<PublicKey> {
+  async getMinerAddress(authority: PublicKey): Promise<PublicKey> {
     const [key] = await findMinerAddress(
       this.key,
       authority,
@@ -117,7 +117,7 @@ export class QuarryWrapper {
    * @param authority
    * @returns
    */
-  public async getMiner(authority: PublicKey): Promise<MinerData | null> {
+  async getMiner(authority: PublicKey): Promise<MinerData | null> {
     try {
       return await this.program.account.miner.fetch(
         await this.getMinerAddress(authority)
@@ -132,7 +132,7 @@ export class QuarryWrapper {
    * @param authority
    * @returns
    */
-  public async getMinerActions(
+  async getMinerActions(
     authority: PublicKey = this.program.provider.wallet.publicKey
   ): Promise<MinerWrapper> {
     const miner = await this.getMinerAddress(authority);
@@ -160,7 +160,7 @@ export class QuarryWrapper {
    * @param stakedTokenATA
    * @returns
    */
-  public createMinerWrapper(
+  createMinerWrapper(
     authority: PublicKey,
     minerKey: PublicKey,
     tokenVaultKey: PublicKey,
@@ -178,7 +178,7 @@ export class QuarryWrapper {
   /**
    * Sets the rewards share of this mine.
    */
-  public setRewardsShare(share: u64): TransactionEnvelope {
+  setRewardsShare(share: u64): TransactionEnvelope {
     return new TransactionEnvelope(this.provider, [
       this.program.instruction.setRewardsShare(share, {
         accounts: {
@@ -195,7 +195,7 @@ export class QuarryWrapper {
   /**
    * Sets the famine timestampe for this mine.
    */
-  public setFamine(famineTs: u64): TransactionEnvelope {
+  setFamine(famineTs: u64): TransactionEnvelope {
     return new TransactionEnvelope(this.provider, [
       this.program.instruction.setFamine(famineTs, {
         accounts: {
@@ -212,7 +212,7 @@ export class QuarryWrapper {
   /**
    * Creates the miner of the provided wallet.
    */
-  public async createMiner({
+  async createMiner({
     authority = this.program.provider.wallet.publicKey,
   }: {
     authority?: PublicKey;

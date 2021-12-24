@@ -9,8 +9,8 @@ import { findQuarryAddress } from "../mine";
 import { findRegistryAddress } from "./pda";
 
 export class QuarryRegistry {
-  public readonly program: RegistryProgram;
-  constructor(public readonly sdk: QuarrySDK) {
+  readonly program: RegistryProgram;
+  constructor(readonly sdk: QuarrySDK) {
     this.program = sdk.programs.Registry;
   }
 
@@ -22,7 +22,7 @@ export class QuarryRegistry {
    * Creates a new Registry.
    * @returns
    */
-  public async newRegistry({
+  async newRegistry({
     numQuarries,
     rewarderKey,
     payer = this.provider.wallet.publicKey,
@@ -51,7 +51,7 @@ export class QuarryRegistry {
     };
   }
 
-  public async syncQuarry({
+  async syncQuarry({
     tokenMint,
     rewarderKey,
   }: {

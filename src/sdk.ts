@@ -12,7 +12,6 @@ import type {
   TransactionInstruction,
 } from "@solana/web3.js";
 import { Keypair } from "@solana/web3.js";
-import mapValues from "lodash.mapvalues";
 
 import type { Programs } from "./constants";
 import { QUARRY_ADDRESSES, QUARRY_IDLS } from "./constants";
@@ -31,8 +30,8 @@ import { RedeemerWrapper } from "./wrappers/redeemer";
  */
 export class QuarrySDK {
   constructor(
-    public readonly provider: AugmentedProvider,
-    public readonly programs: Programs
+    readonly provider: AugmentedProvider,
+    readonly programs: Programs
   ) {}
 
   /**
@@ -41,7 +40,6 @@ export class QuarrySDK {
   withSigner(signer: Signer): QuarrySDK {
     return QuarrySDK.load({
       provider: this.provider.withSigner(signer),
-      addresses: mapValues(this.programs, (v) => v.programId),
     });
   }
 

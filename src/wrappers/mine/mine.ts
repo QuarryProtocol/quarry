@@ -10,7 +10,7 @@ import { findRewarderAddress } from "./pda";
 import { RewarderWrapper } from "./rewarder";
 
 export class MineWrapper {
-  constructor(public readonly sdk: QuarrySDK) {}
+  constructor(readonly sdk: QuarrySDK) {}
 
   get provider(): Provider {
     return this.sdk.provider;
@@ -20,7 +20,7 @@ export class MineWrapper {
     return this.sdk.programs.Mine;
   }
 
-  public async createRewarder({
+  async createRewarder({
     mintWrapper,
     baseKP = Keypair.generate(),
     authority = this.program.provider.wallet.publicKey,
@@ -86,9 +86,7 @@ export class MineWrapper {
    * @param rewarder
    * @returns
    */
-  public async loadRewarderWrapper(
-    rewarder: PublicKey
-  ): Promise<RewarderWrapper> {
+  async loadRewarderWrapper(rewarder: PublicKey): Promise<RewarderWrapper> {
     const rewarderData = await this.program.account.rewarder.fetch(rewarder);
     return new RewarderWrapper(this, rewarder, rewarderData);
   }

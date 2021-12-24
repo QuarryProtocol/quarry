@@ -33,13 +33,17 @@ jobs:
       - name: Parse IDLs
         run: nix shell .#ci --command ./scripts/parse-idls.sh
 
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
       - name: Yarn Cache
         uses: actions/cache@v2
         with:
-          path: ./.yarn
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-modules-
+
       - name: Install Yarn dependencies
         run: nix shell .#ci --command yarn install
       - run: nix shell .#ci --command ./scripts/generate-idl-types.sh
@@ -82,6 +86,7 @@ jobs:
 
       # Install Solana
       - name: Cache Solana binaries
+        id: solana-cache
         uses: actions/cache@v2
         with:
           path: |
@@ -89,8 +94,11 @@ jobs:
             ~/.local/share/solana/install
           key: ${{ runner.os }}-${{ env.SOLANA_VERSION }}
       - name: Install Solana
+        if: steps.solana-cache.outputs.cache-hit != 'true'
         run: |
           nix shell .#ci --command solana-install init ${{ env.SOLANA_VERSION }}
+      - name: Setup Solana Path
+        run: |
           echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           solana --version
@@ -99,13 +107,17 @@ jobs:
       - name: Build program
         run: nix shell .#ci --command anchor build
 
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
       - name: Yarn Cache
         uses: actions/cache@v2
         with:
-          path: ./.yarn
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-modules-
+
       - run: nix shell .#ci --command yarn install
       - name: Generate IDL types
         run: nix shell .#ci --command yarn idl:generate:nolint
