@@ -33,13 +33,17 @@ jobs:
       - name: Parse IDLs
         run: nix shell .#ci --command ./scripts/parse-idls.sh
 
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
       - name: Yarn Cache
         uses: actions/cache@v2
         with:
-          path: ./.yarn
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-modules-
+
       - name: Install Yarn dependencies
         run: nix shell .#ci --command yarn install
       - run: nix shell .#ci --command ./scripts/generate-idl-types.sh
@@ -99,13 +103,17 @@ jobs:
       - name: Build program
         run: nix shell .#ci --command anchor build
 
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
       - name: Yarn Cache
         uses: actions/cache@v2
         with:
-          path: ./.yarn
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-modules-
+
       - run: nix shell .#ci --command yarn install
       - name: Generate IDL types
         run: nix shell .#ci --command yarn idl:generate:nolint
