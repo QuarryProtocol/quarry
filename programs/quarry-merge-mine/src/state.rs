@@ -46,6 +46,13 @@ pub struct MergePool {
 ///   &[$mm.bump],
 /// ]
 /// ```
+///
+/// Deposits and withdrawals happen in token accounts owned by the [MergeMiner].
+/// These accounts do not need to be ATAs; however, ATAs make the accounts easier to
+/// locate on the frontend.
+///
+/// The accounts serve as intermediate staging accounts for the merge miner: they are not staked
+/// and only exist to facilitate the merge miner's operations.
 #[account]
 #[derive(Copy, Debug, Default)]
 pub struct MergeMiner {
