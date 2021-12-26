@@ -250,6 +250,10 @@ impl<'info> Validate<'info> for ExtractFees<'info> {
             self.claim_fee_token_account,
             self.rewarder.claim_fee_token_account
         );
+        assert_keys_eq!(
+            self.claim_fee_token_account.mint,
+            self.rewarder.rewards_token_mint
+        );
 
         assert_keys_eq!(
             self.fee_to_token_account.mint,
