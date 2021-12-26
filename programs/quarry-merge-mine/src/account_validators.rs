@@ -171,12 +171,9 @@ impl<'info> Validate<'info> for QuarryStakeReplica<'info> {
             self.replica_mint,
             "stake.quarry.token_mint_key"
         );
-        assert_ata!(
-            self.replica_mint_token_account,
-            self.stake.mm,
-            self.replica_mint,
-            "replica_mint_token_account"
-        );
+
+        assert_keys_eq!(self.replica_mint_token_account.mint, self.replica_mint);
+        assert_keys_eq!(self.replica_mint_token_account.owner, self.stake.mm);
 
         Ok(())
     }
