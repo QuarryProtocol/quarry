@@ -48,7 +48,7 @@ Program addresses are the same on devnet, testnet, and mainnet-beta.
 
 Documentation is a work in progress. For now, one should read [the end-to-end tests of the SDK](/tests/mintWrapper.spec.ts).
 
-We soon plan on releasing a React library to makes it easy to integrate Quarry with your frontend.
+We soon plan on releasing a React library to make it easy to integrate Quarry with your frontend.
 
 ## License
 
