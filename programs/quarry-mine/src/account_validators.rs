@@ -2,8 +2,8 @@
 
 use anchor_lang::prelude::*;
 use anchor_lang::Key;
+use vipers::assert_keys_eq;
 use vipers::validate::Validate;
-use vipers::{assert_ata, assert_keys_eq};
 
 use crate::addresses;
 use crate::{
@@ -21,17 +21,10 @@ impl<'info> Validate<'info> for NewRewarder<'info> {
     fn validate(&self) -> ProgramResult {
         require!(self.base.is_signer, Unauthorized);
 
-        assert_ata!(
-            self.claim_fee_token_account,
-            self.rewarder,
-            self.rewards_token_mint
-        );
+        assert_keys_eq!(self.claim_fee_token_account.owner, self.rewarder);
+        assert_keys_eq!(self.claim_fee_token_account.mint, self.rewards_token_mint);
 
-        assert_keys_eq!(
-            self.mint_wrapper.token_mint,
-            self.rewards_token_mint,
-            "rewards token mint"
-        );
+        assert_keys_eq!(self.mint_wrapper.token_mint, self.rewards_token_mint);
 
         Ok(())
     }
@@ -135,9 +128,8 @@ impl<'info> Validate<'info> for UpdateQuarryRewards<'info> {
 impl<'info> Validate<'info> for CreateMiner<'info> {
     fn validate(&self) -> ProgramResult {
         require!(!self.rewarder.is_paused, Paused);
-        assert_ata!(self.miner_vault, self.miner, self.token_mint, "miner vault");
-        assert_keys_eq!(self.miner_vault.owner, self.miner, "miner vault owner");
-        assert_keys_eq!(self.miner_vault.mint, self.token_mint, "miner vault mint");
+        assert_keys_eq!(self.miner_vault.owner, self.miner);
+        assert_keys_eq!(self.miner_vault.mint, self.token_mint);
         assert_keys_eq!(
             self.miner_vault.mint,
             self.quarry.token_mint_key,
@@ -187,9 +179,8 @@ impl<'info> Validate<'info> for ClaimRewards<'info> {
 
         // claim_fee_token_account validate
         assert_keys_eq!(
-            *self.claim_fee_token_account,
-            self.stake.rewarder.claim_fee_token_account,
-            "claim_fee_token_account"
+            self.claim_fee_token_account,
+            self.stake.rewarder.claim_fee_token_account
         );
         assert_keys_eq!(
             self.claim_fee_token_account.mint,
@@ -255,17 +246,15 @@ impl<'info> Validate<'info> for UserStake<'info> {
 impl<'info> Validate<'info> for ExtractFees<'info> {
     fn validate(&self) -> ProgramResult {
         require!(!self.rewarder.is_paused, Paused);
-        assert_ata!(
+        assert_keys_eq!(
             self.claim_fee_token_account,
-            self.rewarder,
+            self.rewarder.claim_fee_token_account
+        );
+        assert_keys_eq!(
+            self.claim_fee_token_account.mint,
             self.rewarder.rewards_token_mint
         );
 
-        assert_keys_eq!(
-            self.claim_fee_token_account.mint,
-            self.rewarder.rewards_token_mint,
-            "claim_fee_token_account.mint"
-        );
         assert_keys_eq!(
             self.fee_to_token_account.mint,
             self.rewarder.rewards_token_mint,
@@ -276,11 +265,10 @@ impl<'info> Validate<'info> for ExtractFees<'info> {
             addresses::FEE_TO,
             "fee_to_token_account.owner"
         );
-        assert_ata!(
-            self.fee_to_token_account,
-            addresses::FEE_TO,
-            self.rewarder.rewards_token_mint,
-            "fee ata"
+        assert_keys_eq!(self.fee_to_token_account.owner, addresses::FEE_TO);
+        assert_keys_eq!(
+            self.fee_to_token_account.mint,
+            self.rewarder.rewards_token_mint
         );
 
         Ok(())

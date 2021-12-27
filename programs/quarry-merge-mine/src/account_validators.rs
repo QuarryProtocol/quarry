@@ -2,7 +2,7 @@
 
 use anchor_lang::prelude::*;
 use vipers::validate::Validate;
-use vipers::{assert_ata, assert_keys_eq, invariant};
+use vipers::{assert_keys_eq, assert_keys_neq, invariant};
 
 use crate::ClaimRewards;
 use crate::WithdrawTokens;
@@ -11,9 +11,9 @@ use crate::{InitMiner, QuarryStake};
 use crate::{NewPool, QuarryStakeReplica};
 use anchor_lang::Key;
 
-/// --------------------------------
-/// Instruction account structs
-/// --------------------------------
+// --------------------------------
+// Instruction account validators
+// --------------------------------
 
 impl<'info> Validate<'info> for NewPool<'info> {
     fn validate(&self) -> ProgramResult {
@@ -55,18 +55,11 @@ impl<'info> Validate<'info> for InitMiner<'info> {
             InvalidMiner
         );
 
-        assert_keys_eq!(self.mm.pool, self.pool, "mm.pool");
-        assert_keys_eq!(
-            self.quarry.rewarder_key,
-            *self.rewarder,
-            "quarry.rewarder_key"
-        );
-        assert_ata!(
-            self.miner_vault,
-            self.miner,
-            self.quarry.token_mint_key,
-            "miner_vault"
-        );
+        assert_keys_eq!(self.mm.pool, self.pool);
+        assert_keys_eq!(self.quarry.rewarder_key, self.rewarder);
+
+        assert_keys_eq!(self.miner_vault.owner, self.miner);
+        assert_keys_eq!(self.miner_vault.mint, self.quarry.token_mint_key);
 
         Ok(())
     }
@@ -78,8 +71,9 @@ impl<'info> Validate<'info> for WithdrawTokens<'info> {
 
         assert_keys_eq!(self.withdraw_mint, withdraw_mint, "withdraw_mint");
         // cannot withdraw a replica mint.
-        require!(
-            self.withdraw_mint.key() != self.pool.replica_mint,
+        assert_keys_neq!(
+            self.withdraw_mint.key(),
+            self.pool.replica_mint,
             CannotWithdrawReplicaMint
         );
 
@@ -88,15 +82,12 @@ impl<'info> Validate<'info> for WithdrawTokens<'info> {
             require!(self.mm.replica_balance == 0, OutstandingReplicaTokens);
         }
 
-        assert_keys_eq!(self.owner, self.mm.owner, "owner");
-        assert_keys_eq!(self.pool, self.mm.pool, "pool");
+        assert_keys_eq!(self.owner, self.mm.owner);
+        assert_keys_eq!(self.pool, self.mm.pool);
 
-        assert_ata!(
-            self.mm_token_account,
-            self.mm,
-            withdraw_mint,
-            "mm_token_account"
-        );
+        assert_keys_eq!(self.mm_token_account.mint, withdraw_mint);
+        assert_keys_eq!(self.mm_token_account.owner, self.mm);
+
         assert_keys_eq!(
             self.token_destination.mint,
             withdraw_mint,
@@ -111,36 +102,17 @@ impl<'info> Validate<'info> for ClaimRewards<'info> {
     fn validate(&self) -> ProgramResult {
         self.stake.validate()?;
 
-        assert_keys_eq!(
-            self.minter.mint_wrapper,
-            *self.mint_wrapper,
-            "minter.mint_wrapper"
-        );
-        assert_keys_eq!(
-            self.minter.minter_authority,
-            *self.stake.rewarder,
-            "minter.minter_authority"
-        );
-        assert_keys_eq!(
-            *self.rewards_token_mint,
-            self.mint_wrapper.token_mint,
-            "mint_wrapper.token_mint"
-        );
-        assert_ata!(
-            *self.rewards_token_account,
-            self.stake.mm,
-            *self.rewards_token_mint,
-            "rewards_token_account"
-        );
-        assert_keys_eq!(
-            self.claim_fee_token_account.mint,
-            *self.rewards_token_mint,
-            "claim_fee_token_account.mint"
-        );
+        assert_keys_eq!(self.minter.mint_wrapper, self.mint_wrapper);
+        assert_keys_eq!(self.minter.minter_authority, self.stake.rewarder);
+        assert_keys_eq!(self.rewards_token_mint, self.mint_wrapper.token_mint);
+
+        assert_keys_eq!(self.rewards_token_account.mint, self.rewards_token_mint);
+        assert_keys_eq!(self.rewards_token_account.owner, self.stake.mm);
+
+        assert_keys_eq!(self.claim_fee_token_account.mint, self.rewards_token_mint);
         assert_keys_eq!(
             self.stake_token_account.mint,
-            self.stake.quarry.token_mint_key,
-            "stake_token_account.mint"
+            self.stake.quarry.token_mint_key
         );
 
         Ok(())
@@ -164,12 +136,12 @@ impl<'info> Validate<'info> for QuarryStakePrimary<'info> {
             self.stake.pool.primary_mint,
             "stake.quarry.token_mint_key"
         );
-        assert_ata!(
-            self.mm_primary_token_account,
-            self.stake.mm,
-            self.stake.pool.primary_mint,
-            "mm_primary_token_account"
+
+        assert_keys_eq!(
+            self.mm_primary_token_account.mint,
+            self.stake.pool.primary_mint
         );
+        assert_keys_eq!(self.mm_primary_token_account.owner, self.stake.mm);
 
         Ok(())
     }
@@ -194,12 +166,9 @@ impl<'info> Validate<'info> for QuarryStakeReplica<'info> {
             self.replica_mint,
             "stake.quarry.token_mint_key"
         );
-        assert_ata!(
-            self.replica_mint_token_account,
-            self.stake.mm,
-            self.replica_mint,
-            "replica_mint_token_account"
-        );
+
+        assert_keys_eq!(self.replica_mint_token_account.mint, self.replica_mint);
+        assert_keys_eq!(self.replica_mint_token_account.owner, self.stake.mm);
 
         Ok(())
     }
@@ -209,16 +178,11 @@ impl<'info> Validate<'info> for QuarryStake<'info> {
     fn validate(&self) -> ProgramResult {
         assert_keys_eq!(self.mm.pool, self.pool, "mm.pool");
 
-        assert_keys_eq!(*self.rewarder, self.quarry.rewarder_key, "rewarder");
-        assert_keys_eq!(*self.quarry, self.miner.quarry_key, "quarry");
+        assert_keys_eq!(self.rewarder, self.quarry.rewarder_key);
+        assert_keys_eq!(self.quarry, self.miner.quarry_key);
         assert_keys_eq!(self.miner.authority, self.mm, "miner.authority");
-        assert_keys_eq!(self.miner_vault, self.miner.token_vault_key, "miner_vault");
-        assert_ata!(
-            self.miner_vault,
-            *self.miner,
-            self.quarry.token_mint_key,
-            "miner_vault"
-        );
+        assert_keys_eq!(self.miner_vault, self.miner.token_vault_key);
+        assert_keys_eq!(self.miner_vault.owner, self.miner);
 
         Ok(())
     }
