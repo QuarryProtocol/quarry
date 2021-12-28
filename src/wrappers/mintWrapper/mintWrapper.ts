@@ -1,4 +1,4 @@
-import type { Provider } from "@saberhq/solana-contrib";
+import type { AugmentedProvider } from "@saberhq/solana-contrib";
 import { TransactionEnvelope } from "@saberhq/solana-contrib";
 import type { TokenAmount, u64 } from "@saberhq/token-utils";
 import {
@@ -25,7 +25,7 @@ export class MintWrapper {
     this.program = sdk.programs.MintWrapper;
   }
 
-  get provider(): Provider {
+  get provider(): AugmentedProvider {
     return this.sdk.provider;
   }
 
@@ -156,7 +156,7 @@ export class MintWrapper {
       authority,
       this.program.programId
     );
-    return this.sdk.newTx([
+    return this.provider.newTX([
       this.program.instruction.newMinter(bump, {
         accounts: {
           auth: {
@@ -188,7 +188,7 @@ export class MintWrapper {
       authority,
       this.program.programId
     );
-    return this.sdk.newTx([
+    return this.provider.newTX([
       this.program.instruction.minterUpdate(allowance, {
         accounts: {
           auth: {
@@ -223,7 +223,7 @@ export class MintWrapper {
   }
 
   transferAdmin(wrapper: PublicKey, nextAdmin: PublicKey): TransactionEnvelope {
-    return this.sdk.newTx([
+    return this.provider.newTX([
       this.program.instruction.transferAdmin({
         accounts: {
           mintWrapper: wrapper,
@@ -235,7 +235,7 @@ export class MintWrapper {
   }
 
   acceptAdmin(wrapper: PublicKey): TransactionEnvelope {
-    return this.sdk.newTx([
+    return this.provider.newTX([
       this.program.instruction.acceptAdmin({
         accounts: {
           mintWrapper: wrapper,
@@ -246,10 +246,45 @@ export class MintWrapper {
   }
 
   /**
+   * Mints tokens to an address as a Minter on the Mint Wrapper.
+   */
+  async performMintTo({
+    amount,
+    mintWrapper,
+    minterAuthority = this.provider.wallet.publicKey,
+    destOwner = this.provider.wallet.publicKey,
+  }: {
+    amount: TokenAmount;
+    mintWrapper: PublicKey;
+    minterAuthority?: PublicKey;
+    destOwner?: PublicKey;
+  }): Promise<TransactionEnvelope> {
+    const ata = await getOrCreateATA({
+      provider: this.provider,
+      mint: amount.token.mintAccount,
+      owner: destOwner,
+    });
+    const [minter] = await findMinterAddress(mintWrapper, minterAuthority);
+    return this.sdk.provider.newTX([
+      ata.instruction,
+      this.program.instruction.performMint(amount.toU64(), {
+        accounts: {
+          mintWrapper,
+          minterAuthority,
+          tokenMint: amount.token.mintAccount,
+          destination: ata.address,
+          minter,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        },
+      }),
+    ]);
+  }
+
+  /**
    * Performs a mint of tokens to an account.
    * @returns
    */
-  performMint = async ({
+  async performMint({
     amount,
     minter,
   }: {
@@ -258,15 +293,15 @@ export class MintWrapper {
       accountId: PublicKey;
       accountInfo: AccountInfo<MinterData>;
     };
-  }): Promise<TransactionEnvelope> => {
+  }): Promise<TransactionEnvelope> {
     const minterData = minter.accountInfo.data;
     const ata = await getOrCreateATA({
       provider: this.provider,
       mint: amount.token.mintAccount,
       owner: this.provider.wallet.publicKey,
     });
-    return this.sdk.newTx([
-      ...(ata.instruction ? [ata.instruction] : []),
+    return this.provider.newTX([
+      ata.instruction,
       this.program.instruction.performMint(amount.toU64(), {
         accounts: {
           mintWrapper: minterData.mintWrapper,
@@ -278,5 +313,5 @@ export class MintWrapper {
         },
       }),
     ]);
-  };
+  }
 }
