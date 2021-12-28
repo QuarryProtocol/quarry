@@ -7,6 +7,11 @@ use vipers::{assert_keys_eq, validate::Validate};
 
 impl<'info> Validate<'info> for CreateOperator<'info> {
     fn validate(&self) -> ProgramResult {
+        assert_keys_eq!(
+            self.operator,
+            self.rewarder.pending_authority,
+            PendingAuthorityNotSet
+        );
         Ok(())
     }
 }
