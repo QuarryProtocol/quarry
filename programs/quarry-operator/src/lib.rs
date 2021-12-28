@@ -353,4 +353,6 @@ impl<'info> WithDelegate<'info> {
 pub enum ErrorCode {
     #[msg("Unauthorized.")]
     Unauthorized,
+    #[msg("Pending authority must be set to the created operator.")]
+    PendingAuthorityNotSet,
 }
