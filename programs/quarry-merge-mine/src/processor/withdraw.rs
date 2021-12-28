@@ -8,13 +8,13 @@ use vipers::*;
 pub fn unstake_primary_miner(ctx: Context<QuarryStakePrimary>, amount: u64) -> ProgramResult {
     // Check to see if the [MergeMiner] is fully collateralized after the withdraw
     let mm = &ctx.accounts.stake.mm;
-    require!(amount <= mm.primary_balance, InsufficientBalance);
+    invariant!(amount <= mm.primary_balance, InsufficientBalance);
 
     // There must be zero replica tokens if there is an unstaking of the primary miner.
     // This is to ensure that the user cannot mine after withdrawing their stake.
     // To perform a partial unstake, one should do a full unstake of each replica miner,
     // unstake the desired amount, then stake back into each replica miner.
-    require!(mm.replica_balance == 0, OutstandingReplicaTokens);
+    invariant!(mm.replica_balance == 0, OutstandingReplicaTokens);
 
     // Withdraw tokens to the [MergeMiner]'s account
     mm.unstake_primary_miner(ctx.accounts, amount)?;

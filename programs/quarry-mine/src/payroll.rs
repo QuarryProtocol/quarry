@@ -1,14 +1,10 @@
 //! Calculates token distribution rates.
 
 use crate::{Miner, Quarry};
-use anchor_lang::{
-    prelude::{msg, ProgramError, ProgramResult},
-    require,
-};
+use anchor_lang::prelude::{msg, ProgramError, ProgramResult};
 use spl_math::uint::U192;
 use std::cmp;
-use std::convert::TryInto;
-use vipers::unwrap_int;
+use vipers::{invariant, unwrap_int};
 
 /// Number of seconds in a year.
 pub const SECONDS_PER_YEAR: u128 = 86_400 * 365;
@@ -88,7 +84,7 @@ impl Payroll {
 
     /// Calculates the amount of rewards to pay for each staked token, performing safety checks.
     pub fn calculate_reward_per_token(&self, current_ts: i64) -> Result<u128, ProgramError> {
-        require!(current_ts >= self.last_checkpoint_ts, InvalidTimestamp);
+        invariant!(current_ts >= self.last_checkpoint_ts, InvalidTimestamp);
         Ok(unwrap_int!(
             self.calculate_reward_per_token_unsafe(current_ts)
         ))
@@ -124,11 +120,11 @@ impl Payroll {
         rewards_per_token_paid: u128,
         rewards_earned: u64,
     ) -> Result<u128, ProgramError> {
-        require!(
+        invariant!(
             tokens_deposited <= self.total_tokens_deposited,
             NotEnoughTokens
         );
-        require!(current_ts >= self.last_checkpoint_ts, InvalidTimestamp);
+        invariant!(current_ts >= self.last_checkpoint_ts, InvalidTimestamp);
         let result = unwrap_int!(self.calculate_rewards_earned_unsafe(
             current_ts,
             tokens_deposited,
@@ -181,7 +177,7 @@ impl Payroll {
                 self,
                 miner,
             );
-            require!(
+            invariant!(
                 rewards_upperbound + 1 >= amount_claimable.into(), // Allow off by one.
                 UpperboundExceeded
             );

@@ -1,11 +1,10 @@
 //! Rewarder utilities.
 
 use anchor_lang::prelude::*;
-use anchor_lang::require;
 use anchor_spl::token::TokenAccount;
 use num_traits::ToPrimitive;
 use spl_math::uint::U192;
-use std::convert::TryInto;
+use vipers::invariant;
 use vipers::unwrap_int;
 
 use crate::ClaimEvent;
@@ -32,7 +31,7 @@ impl Rewarder {
         &self,
         quarry_rewards_share: u64,
     ) -> Result<u64, ProgramError> {
-        require!(
+        invariant!(
             quarry_rewards_share <= self.total_rewards_shares,
             InvalidRewardsShare
         );
@@ -64,7 +63,7 @@ impl<'info> ClaimRewards<'info> {
 
         // Calculate rewards
         let max_claim_fee_millibps = self.stake.rewarder.max_claim_fee_millibps;
-        require!(
+        invariant!(
             max_claim_fee_millibps < MAX_BPS * DEFAULT_CLAIM_FEE_MILLIBPS,
             InvalidMaxClaimFee
         );

@@ -17,6 +17,8 @@ declare_id!("QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV");
 
 #[program]
 pub mod quarry_mint_wrapper {
+    use vipers::invariant;
+
     use super::*;
 
     /// --------------------------------
@@ -137,10 +139,10 @@ pub mod quarry_mint_wrapper {
     pub fn perform_mint(ctx: Context<PerformMint>, amount: u64) -> ProgramResult {
         let mint_wrapper = &ctx.accounts.mint_wrapper;
         let minter = &mut ctx.accounts.minter;
-        require!(minter.allowance >= amount, MinterAllowanceExceeded);
+        invariant!(minter.allowance >= amount, MinterAllowanceExceeded);
 
         let new_supply = unwrap_int!(ctx.accounts.token_mint.supply.checked_add(amount));
-        require!(new_supply <= mint_wrapper.hard_cap, HardcapExceeded);
+        invariant!(new_supply <= mint_wrapper.hard_cap, HardcapExceeded);
 
         minter.allowance = unwrap_int!(minter.allowance.checked_sub(amount));
         minter.total_minted = unwrap_int!(minter.total_minted.checked_add(amount));
@@ -165,7 +167,7 @@ pub mod quarry_mint_wrapper {
 
         // extra sanity checks
         ctx.accounts.token_mint.reload()?;
-        require!(new_supply == ctx.accounts.token_mint.supply, Unauthorized);
+        invariant!(new_supply == ctx.accounts.token_mint.supply, Unauthorized);
 
         emit!(MinterMintEvent {
             mint_wrapper: mint_wrapper.key(),
