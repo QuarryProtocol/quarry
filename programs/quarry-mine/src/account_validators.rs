@@ -3,6 +3,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::Key;
 use vipers::assert_keys_eq;
+use vipers::invariant;
 use vipers::validate::Validate;
 
 use crate::addresses;
@@ -19,7 +20,7 @@ use crate::{
 
 impl<'info> Validate<'info> for NewRewarder<'info> {
     fn validate(&self) -> ProgramResult {
-        require!(self.base.is_signer, Unauthorized);
+        invariant!(self.base.is_signer, Unauthorized);
 
         assert_keys_eq!(self.claim_fee_token_account.owner, self.rewarder);
         assert_keys_eq!(self.claim_fee_token_account.mint, self.rewards_token_mint);
@@ -33,14 +34,14 @@ impl<'info> Validate<'info> for NewRewarder<'info> {
 impl<'info> Validate<'info> for SetPauseAuthority<'info> {
     fn validate(&self) -> ProgramResult {
         self.auth.validate()?;
-        require!(!self.auth.rewarder.is_paused, Paused);
+        invariant!(!self.auth.rewarder.is_paused, Paused);
         Ok(())
     }
 }
 
 impl<'info> Validate<'info> for MutableRewarderWithPauseAuthority<'info> {
     fn validate(&self) -> ProgramResult {
-        require!(self.pause_authority.is_signer, Unauthorized);
+        invariant!(self.pause_authority.is_signer, Unauthorized);
         assert_keys_eq!(
             self.rewarder.pause_authority,
             self.pause_authority,
@@ -52,8 +53,8 @@ impl<'info> Validate<'info> for MutableRewarderWithPauseAuthority<'info> {
 
 impl<'info> Validate<'info> for TransferAuthority<'info> {
     fn validate(&self) -> ProgramResult {
-        require!(!self.rewarder.is_paused, Paused);
-        require!(self.authority.is_signer, Unauthorized);
+        invariant!(!self.rewarder.is_paused, Paused);
+        invariant!(self.authority.is_signer, Unauthorized);
         assert_keys_eq!(self.authority, self.rewarder.authority);
         Ok(())
     }
@@ -61,8 +62,8 @@ impl<'info> Validate<'info> for TransferAuthority<'info> {
 
 impl<'info> Validate<'info> for AcceptAuthority<'info> {
     fn validate(&self) -> ProgramResult {
-        require!(!self.rewarder.is_paused, Paused);
-        require!(
+        invariant!(!self.rewarder.is_paused, Paused);
+        invariant!(
             self.rewarder.pending_authority != Pubkey::default(),
             PendingAuthorityNotSet
         );
@@ -78,7 +79,7 @@ impl<'info> Validate<'info> for AcceptAuthority<'info> {
 impl<'info> Validate<'info> for SetAnnualRewards<'info> {
     fn validate(&self) -> ProgramResult {
         self.auth.validate()?;
-        require!(!self.auth.rewarder.is_paused, Paused);
+        invariant!(!self.auth.rewarder.is_paused, Paused);
         Ok(())
     }
 }
@@ -90,7 +91,7 @@ impl<'info> Validate<'info> for SetAnnualRewards<'info> {
 impl<'info> Validate<'info> for CreateQuarry<'info> {
     fn validate(&self) -> ProgramResult {
         self.auth.validate()?;
-        require!(!self.auth.rewarder.is_paused, Paused);
+        invariant!(!self.auth.rewarder.is_paused, Paused);
         Ok(())
     }
 }
@@ -98,7 +99,7 @@ impl<'info> Validate<'info> for CreateQuarry<'info> {
 impl<'info> Validate<'info> for SetRewardsShare<'info> {
     fn validate(&self) -> ProgramResult {
         self.auth.validate()?;
-        require!(!self.auth.rewarder.is_paused, Paused);
+        invariant!(!self.auth.rewarder.is_paused, Paused);
         assert_keys_eq!(self.quarry.rewarder_key, self.auth.rewarder, "rewarder");
         Ok(())
     }
@@ -107,7 +108,7 @@ impl<'info> Validate<'info> for SetRewardsShare<'info> {
 impl<'info> Validate<'info> for SetFamine<'info> {
     fn validate(&self) -> ProgramResult {
         self.auth.validate()?;
-        require!(!self.auth.rewarder.is_paused, Paused);
+        invariant!(!self.auth.rewarder.is_paused, Paused);
         assert_keys_eq!(self.quarry.rewarder_key, self.auth.rewarder, "rewarder");
         Ok(())
     }
@@ -115,7 +116,7 @@ impl<'info> Validate<'info> for SetFamine<'info> {
 
 impl<'info> Validate<'info> for UpdateQuarryRewards<'info> {
     fn validate(&self) -> ProgramResult {
-        require!(!self.rewarder.is_paused, Paused);
+        invariant!(!self.rewarder.is_paused, Paused);
         assert_keys_eq!(self.quarry.rewarder_key, self.rewarder, "rewarder");
         Ok(())
     }
@@ -127,7 +128,7 @@ impl<'info> Validate<'info> for UpdateQuarryRewards<'info> {
 
 impl<'info> Validate<'info> for CreateMiner<'info> {
     fn validate(&self) -> ProgramResult {
-        require!(!self.rewarder.is_paused, Paused);
+        invariant!(!self.rewarder.is_paused, Paused);
         assert_keys_eq!(self.miner_vault.owner, self.miner);
         assert_keys_eq!(self.miner_vault.mint, self.token_mint);
         assert_keys_eq!(
@@ -145,7 +146,7 @@ impl<'info> Validate<'info> for ClaimRewards<'info> {
     /// Validates a [ClaimRewards] accounts struct.
     fn validate(&self) -> ProgramResult {
         self.stake.validate()?;
-        require!(!self.stake.rewarder.is_paused, Paused);
+        invariant!(!self.stake.rewarder.is_paused, Paused);
 
         assert_keys_eq!(
             self.mint_wrapper.token_mint,
@@ -194,9 +195,9 @@ impl<'info> Validate<'info> for ClaimRewards<'info> {
 
 impl<'info> Validate<'info> for UserClaim<'info> {
     fn validate(&self) -> ProgramResult {
-        require!(!self.rewarder.is_paused, Paused);
+        invariant!(!self.rewarder.is_paused, Paused);
         // authority
-        require!(self.authority.is_signer, Unauthorized);
+        invariant!(self.authority.is_signer, Unauthorized);
         assert_keys_eq!(self.authority, self.miner.authority, "miner authority");
 
         // quarry
@@ -212,9 +213,9 @@ impl<'info> Validate<'info> for UserClaim<'info> {
 impl<'info> Validate<'info> for UserStake<'info> {
     /// Validates the UserStake.
     fn validate(&self) -> ProgramResult {
-        require!(!self.rewarder.is_paused, Paused);
+        invariant!(!self.rewarder.is_paused, Paused);
         // authority
-        require!(self.authority.is_signer, Unauthorized);
+        invariant!(self.authority.is_signer, Unauthorized);
         assert_keys_eq!(self.authority, self.miner.authority, "miner authority");
 
         // quarry
@@ -245,7 +246,7 @@ impl<'info> Validate<'info> for UserStake<'info> {
 
 impl<'info> Validate<'info> for ExtractFees<'info> {
     fn validate(&self) -> ProgramResult {
-        require!(!self.rewarder.is_paused, Paused);
+        invariant!(!self.rewarder.is_paused, Paused);
         assert_keys_eq!(
             self.claim_fee_token_account,
             self.rewarder.claim_fee_token_account
@@ -277,7 +278,7 @@ impl<'info> Validate<'info> for ExtractFees<'info> {
 
 impl<'info> Validate<'info> for MutableRewarderWithAuthority<'info> {
     fn validate(&self) -> ProgramResult {
-        require!(self.authority.is_signer, Unauthorized);
+        invariant!(self.authority.is_signer, Unauthorized);
         assert_keys_eq!(self.rewarder.authority, self.authority, "authority");
         Ok(())
     }
@@ -286,7 +287,7 @@ impl<'info> Validate<'info> for MutableRewarderWithAuthority<'info> {
 impl<'info> Validate<'info> for ReadOnlyRewarderWithAuthority<'info> {
     /// Validates the [crate::Rewarder] is correct.
     fn validate(&self) -> ProgramResult {
-        require!(self.authority.is_signer, Unauthorized);
+        invariant!(self.authority.is_signer, Unauthorized);
         assert_keys_eq!(self.authority, self.rewarder.authority);
         Ok(())
     }
