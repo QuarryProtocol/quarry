@@ -8,7 +8,7 @@ use crate::{
 use anchor_lang::prelude::*;
 use anchor_lang::Key;
 use anchor_spl::token;
-use vipers::unwrap_int;
+use vipers::{invariant, unwrap_int};
 
 impl MergeMiner {
     /// Initializes a [quarry_mine::Miner] for the [MergeMiner].
@@ -80,7 +80,7 @@ impl MergeMiner {
 
     /// Unstakes from the primary miner.
     pub fn unstake_primary_miner(&self, stake: &QuarryStakePrimary, amount: u64) -> ProgramResult {
-        require!(amount <= stake.stake.miner.balance, InsufficientBalance);
+        invariant!(amount <= stake.stake.miner.balance, InsufficientBalance);
 
         // noop if there is nothing to usntake
         if amount == 0 {

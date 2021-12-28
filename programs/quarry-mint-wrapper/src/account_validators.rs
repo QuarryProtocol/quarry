@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use vipers::validate::Validate;
-use vipers::{assert_keys_eq, assert_keys_neq};
+use vipers::{assert_keys_eq, assert_keys_neq, invariant};
 
 use crate::AcceptAdmin;
 use crate::MinterUpdate;
@@ -51,7 +51,7 @@ impl<'info> Validate<'info> for MinterUpdate<'info> {
 
 impl<'info> Validate<'info> for TransferAdmin<'info> {
     fn validate(&self) -> ProgramResult {
-        require!(self.admin.is_signer, Unauthorized);
+        invariant!(self.admin.is_signer, Unauthorized);
         assert_keys_eq!(self.admin, self.mint_wrapper.admin, "admin");
         assert_keys_neq!(self.next_admin, self.mint_wrapper.admin, "next_admin");
 
@@ -61,7 +61,7 @@ impl<'info> Validate<'info> for TransferAdmin<'info> {
 
 impl<'info> Validate<'info> for AcceptAdmin<'info> {
     fn validate(&self) -> ProgramResult {
-        require!(self.pending_admin.is_signer, Unauthorized);
+        invariant!(self.pending_admin.is_signer, Unauthorized);
         assert_keys_eq!(
             self.pending_admin,
             self.mint_wrapper.pending_admin,
@@ -73,14 +73,14 @@ impl<'info> Validate<'info> for AcceptAdmin<'info> {
 
 impl<'info> Validate<'info> for PerformMint<'info> {
     fn validate(&self) -> ProgramResult {
-        require!(
+        invariant!(
             self.mint_wrapper.to_account_info().is_writable,
             Unauthorized
         );
-        require!(self.minter.to_account_info().is_writable, Unauthorized);
+        invariant!(self.minter.to_account_info().is_writable, Unauthorized);
 
-        require!(self.minter_authority.is_signer, Unauthorized);
-        require!(self.minter.allowance > 0, MinterAllowanceExceeded);
+        invariant!(self.minter_authority.is_signer, Unauthorized);
+        invariant!(self.minter.allowance > 0, MinterAllowanceExceeded);
         assert_keys_eq!(self.minter.mint_wrapper, self.mint_wrapper, "mint wrapper");
         assert_keys_eq!(
             self.minter_authority,
@@ -99,7 +99,7 @@ impl<'info> Validate<'info> for PerformMint<'info> {
 
 impl<'info> Validate<'info> for OnlyAdmin<'info> {
     fn validate(&self) -> ProgramResult {
-        require!(self.admin.is_signer, Unauthorized);
+        invariant!(self.admin.is_signer, Unauthorized);
         assert_keys_eq!(self.admin, self.mint_wrapper.admin, "admin");
         Ok(())
     }

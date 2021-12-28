@@ -49,7 +49,7 @@ impl<'info> Validate<'info> for InitMergeMiner<'info> {
 
 impl<'info> Validate<'info> for InitMiner<'info> {
     fn validate(&self) -> ProgramResult {
-        require!(
+        invariant!(
             self.quarry.token_mint_key == self.pool.primary_mint
                 || self.quarry.token_mint_key == self.pool.replica_mint,
             InvalidMiner
@@ -79,7 +79,7 @@ impl<'info> Validate<'info> for WithdrawTokens<'info> {
 
         if withdraw_mint == self.pool.primary_mint {
             // should be no replica balance if withdrawing primary
-            require!(self.mm.replica_balance == 0, OutstandingReplicaTokens);
+            invariant!(self.mm.replica_balance == 0, OutstandingReplicaTokens);
         }
 
         assert_keys_eq!(self.owner, self.mm.owner);

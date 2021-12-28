@@ -15,7 +15,7 @@ impl<'info> Validate<'info> for CreateRedeemer<'info> {
 
 impl<'info> Validate<'info> for RedeemTokens<'info> {
     fn validate(&self) -> ProgramResult {
-        require!(self.source_authority.is_signer, Unauthorized);
+        invariant!(self.source_authority.is_signer, Unauthorized);
         assert_keys_eq!(self.iou_mint, self.redeemer.iou_mint, "iou_mint");
         assert_keys_eq!(
             self.iou_source.mint,

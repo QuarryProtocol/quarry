@@ -45,6 +45,8 @@ pub const MAX_BPS: u64 = 10_000;
 #[program]
 pub mod quarry_mine {
 
+    use vipers::invariant;
+
     use super::*;
 
     /// --------------------------------
@@ -132,7 +134,7 @@ pub mod quarry_mine {
     /// Sets the amount of reward tokens distributed to all [Quarry]s per day.
     #[access_control(ctx.accounts.validate())]
     pub fn set_annual_rewards(ctx: Context<SetAnnualRewards>, new_rate: u64) -> ProgramResult {
-        require!(
+        invariant!(
             new_rate <= MAX_ANNUAL_REWARDS_RATE,
             MaxAnnualRewardsRateExceeded
         );
@@ -328,7 +330,7 @@ pub mod quarry_mine {
             // noop
             return Ok(());
         }
-        require!(
+        invariant!(
             amount <= ctx.accounts.miner_vault.amount,
             InsufficientBalance
         );
