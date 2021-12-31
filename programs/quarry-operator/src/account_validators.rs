@@ -70,7 +70,7 @@ impl<'info> Validate<'info> for DelegateSetFamine<'info> {
     fn validate(&self) -> ProgramResult {
         self.with_delegate.validate()?;
         assert_keys_eq!(
-            self.with_delegate.operator.rate_setter,
+            self.with_delegate.operator.share_allocator,
             self.with_delegate.delegate,
             Unauthorized
         );
