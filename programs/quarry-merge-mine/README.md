@@ -1,7 +1,5 @@
 # quarry-merge-mine
 
-**WARNING: this is beta software. Do not use in production.**
-
 Allows mining multiple quarries simultaneously.
 
 ## Overview
