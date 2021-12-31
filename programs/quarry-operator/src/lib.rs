@@ -351,7 +351,7 @@ impl<'info> WithDelegate<'info> {
 /// Errors
 #[error]
 pub enum ErrorCode {
-    #[msg("Unauthorized.")]
+    #[msg("Signer is not authorized to perform this action.")]
     Unauthorized,
     #[msg("Pending authority must be set to the created operator.")]
     PendingAuthorityNotSet,
