@@ -304,24 +304,24 @@ describe("Operator", () => {
     });
 
     it("set famine", async () => {
-      const rateSetterKP = Keypair.generate();
-      await expectTX(operator.setRateSetter(rateSetterKP.publicKey)).to
+      const shareAllocatorKP = Keypair.generate();
+      await expectTX(operator.setShareAllocator(shareAllocatorKP.publicKey)).to
         .fulfilled;
 
-      const rateSetterOperator = await sdk
-        .withSigner(rateSetterKP)
+      const shareAllocatorOperator = await sdk
+        .withSigner(shareAllocatorKP)
         .loadOperator(operator.key);
-      invariant(rateSetterOperator, "operator must exist");
+      invariant(shareAllocatorOperator, "operator must exist");
 
       await new PendingTransaction(
         sdk.provider.connection,
         await sdk.provider.connection.requestAirdrop(
-          rateSetterKP.publicKey,
+          shareAllocatorKP.publicKey,
           LAMPORTS_PER_SOL
         )
       ).wait();
 
-      const tx = rateSetterOperator.delegateSetFamine(
+      const tx = shareAllocatorOperator.delegateSetFamine(
         new u64("9000000000000000000"),
         quarryKey
       );
