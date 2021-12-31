@@ -30,6 +30,9 @@ impl<'info> Validate<'info> for RedeemTokens<'info> {
 
         assert_keys_eq!(self.redemption_vault.owner, self.redeemer);
         assert_keys_eq!(self.redemption_vault.mint, self.redeemer.redemption_mint);
+        invariant!(self.redemption_vault.delegate.is_none());
+        invariant!(self.redemption_vault.close_authority.is_none());
+
         assert_keys_eq!(
             self.redemption_destination.mint,
             self.redeemer.redemption_mint,

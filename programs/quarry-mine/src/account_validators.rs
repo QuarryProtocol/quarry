@@ -24,6 +24,8 @@ impl<'info> Validate<'info> for NewRewarder<'info> {
 
         assert_keys_eq!(self.claim_fee_token_account.owner, self.rewarder);
         assert_keys_eq!(self.claim_fee_token_account.mint, self.rewards_token_mint);
+        invariant!(self.claim_fee_token_account.delegate.is_none());
+        invariant!(self.claim_fee_token_account.close_authority.is_none());
 
         assert_keys_eq!(self.mint_wrapper.token_mint, self.rewards_token_mint);
 
@@ -131,6 +133,9 @@ impl<'info> Validate<'info> for CreateMiner<'info> {
         invariant!(!self.rewarder.is_paused, Paused);
         assert_keys_eq!(self.miner_vault.owner, self.miner);
         assert_keys_eq!(self.miner_vault.mint, self.token_mint);
+        invariant!(self.miner_vault.delegate.is_none());
+        invariant!(self.miner_vault.close_authority.is_none());
+
         assert_keys_eq!(
             self.miner_vault.mint,
             self.quarry.token_mint_key,
@@ -247,6 +252,7 @@ impl<'info> Validate<'info> for UserStake<'info> {
 impl<'info> Validate<'info> for ExtractFees<'info> {
     fn validate(&self) -> ProgramResult {
         invariant!(!self.rewarder.is_paused, Paused);
+
         assert_keys_eq!(
             self.claim_fee_token_account,
             self.rewarder.claim_fee_token_account
@@ -255,6 +261,8 @@ impl<'info> Validate<'info> for ExtractFees<'info> {
             self.claim_fee_token_account.mint,
             self.rewarder.rewards_token_mint
         );
+        invariant!(self.claim_fee_token_account.delegate.is_none());
+        invariant!(self.claim_fee_token_account.close_authority.is_none());
 
         assert_keys_eq!(
             self.fee_to_token_account.mint,
@@ -266,11 +274,14 @@ impl<'info> Validate<'info> for ExtractFees<'info> {
             addresses::FEE_TO,
             "fee_to_token_account.owner"
         );
+
         assert_keys_eq!(self.fee_to_token_account.owner, addresses::FEE_TO);
         assert_keys_eq!(
             self.fee_to_token_account.mint,
             self.rewarder.rewards_token_mint
         );
+        invariant!(self.fee_to_token_account.delegate.is_none());
+        invariant!(self.fee_to_token_account.close_authority.is_none());
 
         Ok(())
     }

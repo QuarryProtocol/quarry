@@ -60,6 +60,8 @@ impl<'info> Validate<'info> for InitMiner<'info> {
 
         assert_keys_eq!(self.miner_vault.owner, self.miner);
         assert_keys_eq!(self.miner_vault.mint, self.quarry.token_mint_key);
+        invariant!(self.miner_vault.delegate.is_none());
+        invariant!(self.miner_vault.close_authority.is_none());
 
         Ok(())
     }
@@ -87,6 +89,8 @@ impl<'info> Validate<'info> for WithdrawTokens<'info> {
 
         assert_keys_eq!(self.mm_token_account.mint, withdraw_mint);
         assert_keys_eq!(self.mm_token_account.owner, self.mm);
+        invariant!(self.mm_token_account.delegate.is_none());
+        invariant!(self.mm_token_account.close_authority.is_none());
 
         assert_keys_eq!(
             self.token_destination.mint,
@@ -142,6 +146,8 @@ impl<'info> Validate<'info> for QuarryStakePrimary<'info> {
             self.stake.pool.primary_mint
         );
         assert_keys_eq!(self.mm_primary_token_account.owner, self.stake.mm);
+        invariant!(self.mm_primary_token_account.delegate.is_none());
+        invariant!(self.mm_primary_token_account.close_authority.is_none());
 
         Ok(())
     }
@@ -169,6 +175,8 @@ impl<'info> Validate<'info> for QuarryStakeReplica<'info> {
 
         assert_keys_eq!(self.replica_mint_token_account.mint, self.replica_mint);
         assert_keys_eq!(self.replica_mint_token_account.owner, self.stake.mm);
+        invariant!(self.replica_mint_token_account.delegate.is_none());
+        invariant!(self.replica_mint_token_account.close_authority.is_none());
 
         Ok(())
     }
@@ -181,8 +189,11 @@ impl<'info> Validate<'info> for QuarryStake<'info> {
         assert_keys_eq!(self.rewarder, self.quarry.rewarder_key);
         assert_keys_eq!(self.quarry, self.miner.quarry_key);
         assert_keys_eq!(self.miner.authority, self.mm, "miner.authority");
+
         assert_keys_eq!(self.miner_vault, self.miner.token_vault_key);
         assert_keys_eq!(self.miner_vault.owner, self.miner);
+        invariant!(self.miner_vault.delegate.is_none());
+        invariant!(self.miner_vault.close_authority.is_none());
 
         Ok(())
     }
