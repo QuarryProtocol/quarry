@@ -168,7 +168,7 @@ export class MergeMine {
      * Mint received as rewards from the initial rewarder.
      */
     rewardsMint: PublicKey;
-  }): Promise<{ key: PublicKey; tx: TransactionEnvelope }> {
+  }): Promise<{ key: PublicKey; tx: TransactionEnvelope | null }> {
     const [mm, bump] = await findMergeMinerAddress({
       programId: this.program.programId,
       pool: poolKey,
@@ -213,7 +213,9 @@ export class MergeMine {
 
     return {
       key: mm,
-      tx: new TransactionEnvelope(this.provider, allInstructions),
+      tx: allInstructions.length
+        ? new TransactionEnvelope(this.provider, allInstructions)
+        : null,
     };
   }
 
