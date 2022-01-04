@@ -1,6 +1,6 @@
 [package]
 name = "quarry-mine"
-version = "1.11.8"
+version = "1.11.9"
 description = "Distributes liquidity mining rewards to token stakers"
 edition = "2021"
 homepage = "https://quarry.so"
