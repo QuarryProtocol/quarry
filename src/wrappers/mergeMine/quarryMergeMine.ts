@@ -17,10 +17,14 @@ import type {
   QuarryMergeMineProgram,
 } from "../../programs";
 import type { QuarrySDK } from "../../sdk";
-import { findMinerAddress, findQuarryAddress } from "..";
-import { findReplicaMintAddress } from ".";
+import { findMinerAddress, findQuarryAddress } from "../mine/pda";
 import { MergeMiner } from "./mergeMiner";
-import { findMergeMinerAddress, findPoolAddress } from "./pda";
+import { MergePool } from "./mergePool";
+import {
+  findMergeMinerAddress,
+  findPoolAddress,
+  findReplicaMintAddress,
+} from "./pda";
 
 export class MergeMine {
   constructor(readonly sdk: QuarrySDK) {}
@@ -330,5 +334,13 @@ export class MergeMine {
     const mm = await this.fetchMergeMinerData(mmKey);
     const pool = await this.fetchMergePoolData(mm.data.pool);
     return new MergeMiner(this, pool, mm);
+  }
+
+  /**
+   * Loads a mp.
+   * @returns
+   */
+  loadMP({ mpKey }: { mpKey: PublicKey }): MergePool {
+    return new MergePool(this, mpKey);
   }
 }

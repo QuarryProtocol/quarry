@@ -8,7 +8,7 @@ import {
   SPLToken,
   TOKEN_PROGRAM_ID,
 } from "@saberhq/token-utils";
-import type { PublicKey } from "@solana/web3.js";
+import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { Keypair, SystemProgram } from "@solana/web3.js";
 
 import { QUARRY_ADDRESSES } from "../../constants";
@@ -57,11 +57,11 @@ export class MergePool {
   async deposit({
     amount,
     rewarder,
-    mmOwner,
+    mmOwner = this.provider.wallet.publicKey,
   }: {
     amount: TokenAmount;
     rewarder: PublicKey;
-    mmOwner: PublicKey;
+    mmOwner?: PublicKey;
   }): Promise<TransactionEnvelope> {
     const poolData = await this.data();
 
@@ -73,16 +73,46 @@ export class MergePool {
     if (instruction) {
       throw new Error("User has no tokens to deposit");
     }
-    const [mmKey] = await findMergeMinerAddress({
+    const [mmKey, bump] = await findMergeMinerAddress({
       pool: this.key,
       owner: mmOwner,
     });
-    const mmPrimaryTokenAccount = await getATAAddress({
-      mint: poolData.primaryMint,
-      owner: mmKey,
-    });
 
-    return new TransactionEnvelope(this.provider, [
+    const mmAccount = await this.provider.getAccountInfo(mmKey);
+    const { address: mmPrimaryTokenAccount, instruction: mmATAIx } =
+      await getOrCreateATA({
+        provider: this.provider,
+        mint: poolData.primaryMint,
+        owner: mmKey,
+      });
+    const allInstructions: TransactionInstruction[] = [];
+    // Initialize mergeMiner if it does not exist
+    if (!mmAccount) {
+      allInstructions.push(
+        this.program.instruction.initMergeMiner(bump, {
+          accounts: {
+            pool: this.key,
+            owner: mmOwner,
+            mm: mmKey,
+            payer: this.provider.wallet.publicKey,
+            systemProgram: SystemProgram.programId,
+          },
+        })
+      );
+      if (mmATAIx) {
+        allInstructions.push(mmATAIx);
+      }
+      const { ixs: initPrimaryIxs } = await this.mergeMine.getOrCreatePrimary({
+        mint: poolData.primaryMint,
+        pool: this.key,
+        mm: mmKey,
+        payer: this.provider.wallet.publicKey,
+        rewarder,
+      });
+      allInstructions.push(...initPrimaryIxs);
+    }
+
+    allInstructions.push(
       SPLToken.createTransferInstruction(
         TOKEN_PROGRAM_ID,
         ata,
@@ -90,8 +120,12 @@ export class MergePool {
         mmOwner,
         [],
         amount.toU64()
-      ),
-    ]).combine(await this.stakePrimaryMiner(rewarder, mmKey));
+      )
+    );
+
+    return new TransactionEnvelope(this.provider, allInstructions).combine(
+      await this.stakePrimaryMiner(rewarder, mmKey)
+    );
   }
 
   /**
@@ -452,7 +486,7 @@ export class MergePool {
     return {
       pool: this.key,
       tokenProgram: TOKEN_PROGRAM_ID,
-      mineProgram: QUARRY_ADDRESSES.MergeMine,
+      mineProgram: this.mergeMine.programs.Mine.programId,
       unusedAccount: Keypair.generate().publicKey,
     };
   }
