@@ -36,9 +36,7 @@ export class MergePool {
     if (this._data) {
       return this._data;
     }
-
-    this._data = await this.mergeMine.program.account.mergePool.fetch(this.key);
-    return this._data;
+    return await this.reloadData();
   }
 
   get provider(): Provider {
