@@ -1,6 +1,6 @@
 [package]
 name = "quarry-merge-mine"
-version = "1.11.9"
+version = "1.11.10"
 description = "Mines multiple quarries at the same time"
 homepage = "https://quarry.so"
 repository = "https://github.com/QuarryProtocol/quarry"
@@ -27,4 +27,4 @@ quarry-mint-wrapper = { path = "../quarry-mint-wrapper", features = [
     "cpi"
 ], version = "^1.11" }
 num-traits = "0.2"
-vipers = "1.5.5"
+vipers = "1.5.7"
