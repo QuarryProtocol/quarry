@@ -202,4 +202,30 @@ export class RewarderWrapper {
       }),
     ]);
   }
+
+  /**
+   * Pause the rewarder
+   */
+  pause(
+    authority: PublicKey = this.sdk.provider.wallet.publicKey
+  ): TransactionEnvelope {
+    return new TransactionEnvelope(this.sdk.provider, [
+      this.program.instruction.pause({
+        accounts: { pauseAuthority: authority, rewarder: this.rewarderKey },
+      }),
+    ]);
+  }
+
+  /**
+   * Unpause the rewarder
+   */
+  unpause(
+    authority: PublicKey = this.sdk.provider.wallet.publicKey
+  ): TransactionEnvelope {
+    return new TransactionEnvelope(this.sdk.provider, [
+      this.program.instruction.unpause({
+        accounts: { pauseAuthority: authority, rewarder: this.rewarderKey },
+      }),
+    ]);
+  }
 }
