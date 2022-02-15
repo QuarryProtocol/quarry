@@ -1,6 +1,6 @@
 [package]
 name = "quarry-operator"
-version = "1.11.11"
+version = "2.0.0"
 description = "Delegates Quarry Rewarder authority roles."
 edition = "2021"
 homepage = "https://quarry.so"
@@ -22,5 +22,5 @@ default = []
 [dependencies]
 anchor-lang = ">=0.21"
 anchor-spl = ">=0.21"
-quarry-mine = { path = "../quarry-mine", version = "^1.11", features = ["cpi"] }
+quarry-mine = { path = "../quarry-mine", version = "2.0.0", features = ["cpi"] }
 vipers = "^1.6"
