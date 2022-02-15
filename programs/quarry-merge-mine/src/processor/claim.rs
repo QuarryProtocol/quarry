@@ -2,7 +2,7 @@
 
 use crate::{events::*, ClaimRewards};
 use anchor_lang::prelude::*;
-use vipers::*;
+use vipers::prelude::*;
 
 /// Claims [quarry_mine] rewards on behalf of the [MergeMiner].
 pub fn claim_rewards(ctx: Context<ClaimRewards>) -> ProgramResult {

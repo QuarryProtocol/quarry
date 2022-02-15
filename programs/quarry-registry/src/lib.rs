@@ -3,8 +3,7 @@
 #![allow(rustdoc::missing_doc_code_examples)]
 
 use anchor_lang::prelude::*;
-use quarry_mine::Quarry;
-use quarry_mine::Rewarder;
+use quarry_mine::{Quarry, Rewarder};
 use vipers::prelude::*;
 
 mod account_validators;

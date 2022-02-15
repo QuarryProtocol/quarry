@@ -16,7 +16,7 @@ pub mod state;
 
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
-use vipers::validate::Validate;
+use vipers::prelude::*;
 
 use state::*;
 

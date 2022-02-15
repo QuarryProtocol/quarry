@@ -6,9 +6,8 @@ use crate::{
     ClaimRewards, InitMiner, MergeMiner, QuarryStakePrimary, QuarryStakeReplica, WithdrawTokens,
 };
 use anchor_lang::prelude::*;
-use anchor_lang::Key;
 use anchor_spl::token;
-use vipers::{invariant, unwrap_int};
+use vipers::prelude::*;
 
 impl MergeMiner {
     /// Initializes a [quarry_mine::Miner] for the [MergeMiner].

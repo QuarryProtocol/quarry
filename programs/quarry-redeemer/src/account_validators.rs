@@ -1,7 +1,6 @@
 use crate::{CreateRedeemer, RedeemTokens};
 use anchor_lang::prelude::*;
-use vipers::validate::Validate;
-use vipers::{assert_keys_eq, invariant};
+use vipers::prelude::*;
 
 impl<'info> Validate<'info> for CreateRedeemer<'info> {
     fn validate(&self) -> ProgramResult {

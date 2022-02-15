@@ -1,10 +1,7 @@
 //! Validations for various accounts.
 
 use anchor_lang::prelude::*;
-use anchor_lang::Key;
-use vipers::assert_keys_eq;
-use vipers::invariant;
-use vipers::validate::Validate;
+use vipers::prelude::*;
 
 use crate::addresses;
 use crate::{

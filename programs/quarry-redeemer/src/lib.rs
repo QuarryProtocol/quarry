@@ -3,11 +3,8 @@
 #![allow(rustdoc::missing_doc_code_examples)]
 
 use anchor_lang::prelude::*;
-use anchor_spl::token::Token;
-use anchor_spl::token::{Mint, TokenAccount};
-use vipers::invariant;
-use vipers::unwrap_int;
-use vipers::validate::Validate;
+use anchor_spl::token::{Mint, Token, TokenAccount};
+use vipers::prelude::*;
 
 mod account_validators;
 mod macros;

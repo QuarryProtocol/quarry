@@ -43,9 +43,6 @@ pub const MAX_BPS: u64 = 10_000;
 /// Program for [quarry_mine].
 #[program]
 pub mod quarry_mine {
-
-    use vipers::invariant;
-
     use super::*;
 
     /// --------------------------------

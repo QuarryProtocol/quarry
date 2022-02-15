@@ -4,8 +4,7 @@
 
 use anchor_lang::prelude::*;
 use quarry_mine::{Quarry, Rewarder};
-use vipers::unwrap_int;
-use vipers::validate::Validate;
+use vipers::prelude::*;
 
 mod account_validators;
 mod macros;

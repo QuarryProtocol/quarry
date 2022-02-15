@@ -2,7 +2,7 @@
 
 use crate::{events::*, QuarryStakePrimary, QuarryStakeReplica, WithdrawTokens};
 use anchor_lang::prelude::*;
-use vipers::*;
+use vipers::prelude::*;
 
 /// Withdraws tokens from the [MergeMiner].
 pub fn unstake_primary_miner(ctx: Context<QuarryStakePrimary>, amount: u64) -> ProgramResult {

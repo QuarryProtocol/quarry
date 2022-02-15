@@ -1,14 +1,12 @@
 //! Account validators
 
 use anchor_lang::prelude::*;
-use vipers::validate::Validate;
-use vipers::{assert_keys_eq, assert_keys_neq, invariant};
+use vipers::prelude::*;
 
-use crate::ClaimRewards;
-use crate::WithdrawTokens;
-use crate::{InitMergeMiner, QuarryStakePrimary};
-use crate::{InitMiner, QuarryStake};
-use crate::{NewPool, QuarryStakeReplica};
+use crate::{
+    ClaimRewards, InitMergeMiner, InitMiner, NewPool, QuarryStake, QuarryStakePrimary,
+    QuarryStakeReplica, WithdrawTokens,
+};
 use anchor_lang::Key;
 
 // --------------------------------

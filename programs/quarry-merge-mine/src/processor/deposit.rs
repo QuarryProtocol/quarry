@@ -2,7 +2,7 @@
 
 use crate::{events::*, QuarryStakePrimary, QuarryStakeReplica};
 use anchor_lang::prelude::*;
-use vipers::*;
+use vipers::prelude::*;
 
 /// Deposits tokens into the [MergeMiner].
 /// Before calling this, the owner should call the [token::transfer] instruction
