@@ -4,7 +4,7 @@ use crate::{Miner, Quarry};
 use anchor_lang::prelude::{msg, ProgramError, ProgramResult};
 use spl_math::uint::U192;
 use std::cmp;
-use vipers::{invariant, unwrap_int};
+use vipers::prelude::*;
 
 /// Number of seconds in a year.
 pub const SECONDS_PER_YEAR: u128 = 86_400 * 365;

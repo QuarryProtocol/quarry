@@ -1,7 +1,7 @@
 //! Validations for various accounts.
 
 use anchor_lang::prelude::*;
-use vipers::{assert_keys_eq, validate::Validate};
+use vipers::prelude::*;
 
 use crate::{NewRegistry, SyncQuarry};
 

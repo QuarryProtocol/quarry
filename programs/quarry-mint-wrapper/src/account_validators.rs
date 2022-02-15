@@ -1,6 +1,7 @@
+//! Validators for mint wrapper accounts.
+
 use anchor_lang::prelude::*;
-use vipers::validate::Validate;
-use vipers::{assert_keys_eq, assert_keys_neq, invariant};
+use vipers::prelude::*;
 
 use crate::AcceptAdmin;
 use crate::MinterUpdate;

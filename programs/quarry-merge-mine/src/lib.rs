@@ -16,7 +16,7 @@ pub mod state;
 
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
-use vipers::validate::Validate;
+use vipers::prelude::*;
 
 use state::*;
 
@@ -31,15 +31,15 @@ pub mod quarry_merge_mine {
     /// Creates a new [MergePool].
     /// Anyone can call this.
     #[access_control(ctx.accounts.validate())]
-    pub fn new_pool(ctx: Context<NewPool>, bump: u8, _mint_bump: u8) -> ProgramResult {
-        processor::init::new_pool(ctx, bump)
+    pub fn new_pool(ctx: Context<NewPool>, _bump: u8, _mint_bump: u8) -> ProgramResult {
+        processor::init::new_pool(ctx)
     }
 
     /// Creates a new [MergeMiner].
     /// Anyone can call this.
     #[access_control(ctx.accounts.validate())]
-    pub fn init_merge_miner(ctx: Context<InitMergeMiner>, bump: u8) -> ProgramResult {
-        processor::init::init_merge_miner(ctx, bump)
+    pub fn init_merge_miner(ctx: Context<InitMergeMiner>, _bump: u8) -> ProgramResult {
+        processor::init::init_merge_miner(ctx)
     }
 
     /// Initializes a [quarry_mine::Miner] owned by the [MergeMiner].
@@ -107,7 +107,6 @@ pub mod quarry_merge_mine {
 
 /// [quarry_merge_mine::new_pool] accounts
 #[derive(Accounts)]
-#[instruction(bump: u8, mint_bump: u8)]
 pub struct NewPool<'info> {
     /// [MergePool].
     #[account(
@@ -116,7 +115,7 @@ pub struct NewPool<'info> {
           b"MergePool",
           primary_mint.key().to_bytes().as_ref()
         ],
-        bump = bump,
+        bump,
         payer = payer
     )]
     pub pool: Account<'info, MergePool>,
@@ -133,7 +132,7 @@ pub struct NewPool<'info> {
         ],
         mint::decimals = primary_mint.decimals,
         mint::authority = pool,
-        bump = mint_bump,
+        bump,
         payer = payer,
         space = Mint::LEN
     )]
@@ -155,7 +154,6 @@ pub struct NewPool<'info> {
 
 /// [quarry_merge_mine::init_merge_miner] accounts
 #[derive(Accounts)]
-#[instruction(bump: u8)]
 pub struct InitMergeMiner<'info> {
     /// [MergePool] of the underlying LP token.
     pub pool: Account<'info, MergePool>,
@@ -171,7 +169,7 @@ pub struct InitMergeMiner<'info> {
           pool.key().to_bytes().as_ref(),
           owner.key().to_bytes().as_ref()
         ],
-        bump = bump,
+        bump,
         payer = payer
     )]
     pub mm: Account<'info, MergeMiner>,

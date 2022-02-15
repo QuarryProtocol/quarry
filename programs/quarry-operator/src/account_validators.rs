@@ -1,9 +1,11 @@
+//! Validators for Quarry operator accounts.
+
 use crate::{
     CreateOperator, DelegateCreateQuarry, DelegateSetAnnualRewards, DelegateSetFamine,
     DelegateSetRewardsShare, SetRole, WithDelegate,
 };
 use anchor_lang::prelude::*;
-use vipers::{assert_keys_eq, validate::Validate};
+use vipers::prelude::*;
 
 impl<'info> Validate<'info> for CreateOperator<'info> {
     fn validate(&self) -> ProgramResult {

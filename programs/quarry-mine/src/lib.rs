@@ -18,8 +18,7 @@ use anchor_spl::token::Token;
 use anchor_spl::token::{self, Mint, TokenAccount, Transfer};
 use payroll::Payroll;
 use std::cmp;
-use vipers::unwrap_int;
-use vipers::validate::Validate;
+use vipers::prelude::*;
 
 pub mod account_validators;
 pub mod addresses;
@@ -44,9 +43,6 @@ pub const MAX_BPS: u64 = 10_000;
 /// Program for [quarry_mine].
 #[program]
 pub mod quarry_mine {
-
-    use vipers::invariant;
-
     use super::*;
 
     /// --------------------------------
@@ -55,11 +51,11 @@ pub mod quarry_mine {
 
     /// Creates a new [Rewarder].
     #[access_control(ctx.accounts.validate())]
-    pub fn new_rewarder(ctx: Context<NewRewarder>, bump: u8) -> ProgramResult {
+    pub fn new_rewarder(ctx: Context<NewRewarder>, _bump: u8) -> ProgramResult {
         let rewarder = &mut ctx.accounts.rewarder;
 
         rewarder.base = ctx.accounts.base.key();
-        rewarder.bump = bump;
+        rewarder.bump = *unwrap_int!(ctx.bumps.get("rewarder"));
 
         rewarder.authority = ctx.accounts.authority.key();
         rewarder.pending_authority = Pubkey::default();
@@ -159,14 +155,14 @@ pub mod quarry_mine {
     /// Creates a new [Quarry].
     /// This may only be called by the [Rewarder]::authority.
     #[access_control(ctx.accounts.validate())]
-    pub fn create_quarry(ctx: Context<CreateQuarry>, bump: u8) -> ProgramResult {
+    pub fn create_quarry(ctx: Context<CreateQuarry>, _bump: u8) -> ProgramResult {
         let rewarder = &mut ctx.accounts.auth.rewarder;
         // Update rewarder's quarry stats
         let index = rewarder.num_quarries;
         rewarder.num_quarries = unwrap_int!(rewarder.num_quarries.checked_add(1));
 
         let quarry = &mut ctx.accounts.quarry;
-        quarry.bump = bump;
+        quarry.bump = *unwrap_int!(ctx.bumps.get("quarry"));
 
         // Set quarry params
         quarry.index = index;
@@ -248,14 +244,14 @@ pub mod quarry_mine {
     ///
     /// Anyone can call this; this is an associated account.
     #[access_control(ctx.accounts.validate())]
-    pub fn create_miner(ctx: Context<CreateMiner>, bump: u8) -> ProgramResult {
+    pub fn create_miner(ctx: Context<CreateMiner>, _bump: u8) -> ProgramResult {
         let quarry = &mut ctx.accounts.quarry;
         let index = quarry.num_miners;
         quarry.num_miners = unwrap_int!(quarry.num_miners.checked_add(1));
 
         let miner = &mut ctx.accounts.miner;
         miner.authority = ctx.accounts.authority.key();
-        miner.bump = bump;
+        miner.bump = *unwrap_int!(ctx.bumps.get("miner"));
         miner.quarry_key = ctx.accounts.quarry.key();
         miner.token_vault_key = ctx.accounts.miner_vault.key();
         miner.rewards_earned = 0;
@@ -527,7 +523,6 @@ pub struct Miner {
 
 /// Accounts for [quarry_mine::new_rewarder].
 #[derive(Accounts)]
-#[instruction(bump: u8)]
 pub struct NewRewarder<'info> {
     /// Base. Arbitrary key.
     pub base: Signer<'info>,
@@ -539,7 +534,7 @@ pub struct NewRewarder<'info> {
             b"Rewarder".as_ref(),
             base.key().to_bytes().as_ref()
         ],
-        bump = bump,
+        bump,
         payer = payer
     )]
     pub rewarder: Account<'info, Rewarder>,
@@ -631,7 +626,6 @@ pub struct SetAnnualRewards<'info> {
 
 /// Accounts for [quarry_mine::create_quarry].
 #[derive(Accounts)]
-#[instruction(bump: u8)]
 pub struct CreateQuarry<'info> {
     /// [Quarry].
     #[account(
@@ -641,7 +635,7 @@ pub struct CreateQuarry<'info> {
             auth.rewarder.key().to_bytes().as_ref(),
             token_mint.key().to_bytes().as_ref()
         ],
-        bump = bump,
+        bump,
         payer = payer
     )]
     pub quarry: Account<'info, Quarry>,
@@ -700,7 +694,6 @@ pub struct UpdateQuarryRewards<'info> {
 
 /// Accounts for [quarry_mine::create_miner].
 #[derive(Accounts)]
-#[instruction(bump: u8)]
 pub struct CreateMiner<'info> {
     /// Authority of the [Miner].
     pub authority: Signer<'info>,
@@ -713,7 +706,7 @@ pub struct CreateMiner<'info> {
             quarry.key().to_bytes().as_ref(),
             authority.key().to_bytes().as_ref()
         ],
-        bump = bump,
+        bump,
         payer = payer
     )]
     pub miner: Account<'info, Miner>,

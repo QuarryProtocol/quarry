@@ -3,11 +3,8 @@
 #![allow(rustdoc::missing_doc_code_examples)]
 
 use anchor_lang::prelude::*;
-use anchor_spl::token::Token;
-use anchor_spl::token::{Mint, TokenAccount};
-use vipers::invariant;
-use vipers::unwrap_int;
-use vipers::validate::Validate;
+use anchor_spl::token::{Mint, Token, TokenAccount};
+use vipers::prelude::*;
 
 mod account_validators;
 mod macros;
@@ -22,11 +19,11 @@ pub mod quarry_redeemer {
 
     /// Creates a new [Redeemer].
     #[access_control(ctx.accounts.validate())]
-    pub fn create_redeemer(ctx: Context<CreateRedeemer>, bump: u8) -> ProgramResult {
+    pub fn create_redeemer(ctx: Context<CreateRedeemer>, _bump: u8) -> ProgramResult {
         let redeemer = &mut ctx.accounts.redeemer;
         redeemer.iou_mint = ctx.accounts.iou_mint.key();
         redeemer.redemption_mint = ctx.accounts.redemption_mint.key();
-        redeemer.bump = bump;
+        redeemer.bump = *unwrap_int!(ctx.bumps.get("redeemer"));
 
         redeemer.total_tokens_redeemed = 0;
         Ok(())
@@ -94,7 +91,6 @@ pub struct Redeemer {
 // --------------------------------
 
 #[derive(Accounts)]
-#[instruction(bump: u8)]
 pub struct CreateRedeemer<'info> {
     /// Redeemer PDA.
     #[account(
@@ -104,7 +100,7 @@ pub struct CreateRedeemer<'info> {
             iou_mint.to_account_info().key.as_ref(),
             redemption_mint.to_account_info().key.as_ref()
         ],
-        bump = bump,
+        bump,
         payer = payer
     )]
     pub redeemer: Account<'info, Redeemer>,

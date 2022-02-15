@@ -3,16 +3,16 @@
 #![allow(rustdoc::missing_doc_code_examples)]
 
 use anchor_lang::prelude::*;
-use quarry_mine::Quarry;
-use quarry_mine::Rewarder;
+use quarry_mine::{Quarry, Rewarder};
+use vipers::prelude::*;
 
 mod account_validators;
 
 declare_id!("QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc");
 
+/// Registry to help frontends quickly locate all active quarries.
 #[program]
 pub mod quarry_registry {
-    use vipers::validate::Validate;
 
     use super::*;
 
@@ -22,10 +22,10 @@ pub mod quarry_registry {
     ///
     /// * `max_quarries` - The maximum number of quarries that can be held in the registry.
     /// * `bump` - Bump seed.
-    pub fn new_registry(ctx: Context<NewRegistry>, max_quarries: u16, bump: u8) -> ProgramResult {
+    pub fn new_registry(ctx: Context<NewRegistry>, max_quarries: u16, _bump: u8) -> ProgramResult {
         ctx.accounts.validate()?;
         let registry = &mut ctx.accounts.registry;
-        registry.bump = bump;
+        registry.bump = *unwrap_int!(ctx.bumps.get("registry"));
         registry.rewarder = ctx.accounts.rewarder.key();
         registry
             .tokens
@@ -45,7 +45,7 @@ pub mod quarry_registry {
 
 /// Accounts for [quarry_registry::new_registry].
 #[derive(Accounts)]
-#[instruction(max_quarries: u16, bump: u8)]
+#[instruction(max_quarries: u16)]
 pub struct NewRegistry<'info> {
     /// [Rewarder].
     pub rewarder: Account<'info, Rewarder>,
@@ -57,7 +57,7 @@ pub struct NewRegistry<'info> {
             b"QuarryRegistry".as_ref(),
             rewarder.key().to_bytes().as_ref()
         ],
-        bump = bump,
+        bump,
         payer = payer,
         space = (8 + 1 + 32 + 32 * max_quarries + 100) as usize
     )]

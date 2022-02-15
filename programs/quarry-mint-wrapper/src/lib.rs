@@ -8,8 +8,7 @@ mod macros;
 use anchor_lang::prelude::*;
 use anchor_spl::token::Token;
 use anchor_spl::token::{self, Mint, TokenAccount};
-use vipers::unwrap_int;
-use vipers::validate::Validate;
+use vipers::prelude::*;
 
 mod account_validators;
 
@@ -17,8 +16,6 @@ declare_id!("QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV");
 
 #[program]
 pub mod quarry_mint_wrapper {
-    use vipers::invariant;
-
     use super::*;
 
     /// --------------------------------
@@ -27,10 +24,10 @@ pub mod quarry_mint_wrapper {
 
     /// Creates a new [MintWrapper].
     #[access_control(ctx.accounts.validate())]
-    pub fn new_wrapper(ctx: Context<NewWrapper>, bump: u8, hard_cap: u64) -> ProgramResult {
+    pub fn new_wrapper(ctx: Context<NewWrapper>, _bump: u8, hard_cap: u64) -> ProgramResult {
         let mint_wrapper = &mut ctx.accounts.mint_wrapper;
         mint_wrapper.base = ctx.accounts.base.key();
-        mint_wrapper.bump = bump;
+        mint_wrapper.bump = *unwrap_int!(ctx.bumps.get("mint_wrapper"));
         mint_wrapper.hard_cap = hard_cap;
         mint_wrapper.admin = ctx.accounts.admin.key();
         mint_wrapper.pending_admin = Pubkey::default();
@@ -86,12 +83,12 @@ pub mod quarry_mint_wrapper {
 
     /// Creates a new [Minter].
     #[access_control(ctx.accounts.validate())]
-    pub fn new_minter(ctx: Context<NewMinter>, bump: u8) -> ProgramResult {
+    pub fn new_minter(ctx: Context<NewMinter>, _bump: u8) -> ProgramResult {
         let minter = &mut ctx.accounts.minter;
 
         minter.mint_wrapper = ctx.accounts.auth.mint_wrapper.key();
         minter.minter_authority = ctx.accounts.minter_authority.key();
-        minter.bump = bump;
+        minter.bump = *unwrap_int!(ctx.bumps.get("minter"));
 
         let index = ctx.accounts.auth.mint_wrapper.num_minters;
         minter.index = index;
@@ -184,7 +181,6 @@ pub mod quarry_mint_wrapper {
 /// --------------------------------
 
 #[derive(Accounts)]
-#[instruction(bump: u8)]
 pub struct NewWrapper<'info> {
     /// Base account.
     pub base: Signer<'info>,
@@ -195,7 +191,7 @@ pub struct NewWrapper<'info> {
             b"MintWrapper",
             base.key().to_bytes().as_ref()
         ],
-        bump = bump,
+        bump,
         payer = payer
     )]
     pub mint_wrapper: Account<'info, MintWrapper>,
@@ -219,7 +215,6 @@ pub struct NewWrapper<'info> {
 
 /// Adds a minter.
 #[derive(Accounts)]
-#[instruction(bump: u8)]
 pub struct NewMinter<'info> {
     /// Owner of the [MintWrapper].
     pub auth: OnlyAdmin<'info>,
@@ -235,7 +230,7 @@ pub struct NewMinter<'info> {
             auth.mint_wrapper.key().to_bytes().as_ref(),
             minter_authority.key().to_bytes().as_ref()
         ],
-        bump = bump,
+        bump,
         payer = payer
     )]
     pub minter: Account<'info, Minter>,

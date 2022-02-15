@@ -1,7 +1,7 @@
 //! Quarry-related math and helpers.
 
 use anchor_lang::prelude::*;
-use vipers::unwrap_int;
+use vipers::prelude::*;
 
 use crate::{payroll::Payroll, Miner, Quarry, Rewarder};
 use num_traits::cast::ToPrimitive;
