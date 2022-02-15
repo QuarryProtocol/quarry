@@ -20,14 +20,14 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = ">=0.17.0"
-anchor-spl = ">=0.17.0"
+anchor-lang = ">=0.21"
+anchor-spl = ">=0.21"
 num-traits = "0.2.14"
 quarry-mint-wrapper = { path = "../quarry-mint-wrapper", features = [
   "cpi"
 ], version = "^1.11" }
 spl-math = { version = "0.1.0", features = ["no-entrypoint"] }
-vipers = "1.5.9"
+vipers = "^1.6"
 
 [dev-dependencies]
 proptest = { version = "1.0" }

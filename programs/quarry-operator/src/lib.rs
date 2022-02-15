@@ -19,10 +19,10 @@ pub mod quarry_operator {
 
     /// Creates a new [Operator].
     #[access_control(ctx.accounts.validate())]
-    pub fn create_operator(ctx: Context<CreateOperator>, bump: u8) -> ProgramResult {
+    pub fn create_operator(ctx: Context<CreateOperator>, _bump: u8) -> ProgramResult {
         let operator = &mut ctx.accounts.operator;
         operator.base = ctx.accounts.base.key();
-        operator.bump = bump;
+        operator.bump = *unwrap_int!(ctx.bumps.get("operator"));
 
         operator.rewarder = ctx.accounts.rewarder.key();
         operator.admin = ctx.accounts.admin.key();
@@ -225,7 +225,6 @@ pub struct Operator {
 
 /// Accounts for [crate::quarry_operator::create_operator].
 #[derive(Accounts)]
-#[instruction(bump: u8)]
 pub struct CreateOperator<'info> {
     /// Base key used to create the [Operator].
     pub base: Signer<'info>,
@@ -236,7 +235,7 @@ pub struct CreateOperator<'info> {
             b"Operator".as_ref(),
             base.key().to_bytes().as_ref()
         ],
-        bump = bump,
+        bump,
         payer = payer
     )]
     pub operator: Account<'info, Operator>,

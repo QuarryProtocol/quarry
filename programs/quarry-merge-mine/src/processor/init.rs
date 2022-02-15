@@ -2,14 +2,14 @@
 
 use crate::{events::*, InitMergeMiner, InitMiner, NewPool};
 use anchor_lang::prelude::*;
-use vipers::*;
+use vipers::prelude::*;
 
 /// Creates a new [MergePool].
 /// Anyone can call this.
-pub fn new_pool(ctx: Context<NewPool>, bump: u8) -> ProgramResult {
+pub fn new_pool(ctx: Context<NewPool>) -> ProgramResult {
     let pool = &mut ctx.accounts.pool;
     pool.primary_mint = ctx.accounts.primary_mint.key();
-    pool.bump = bump;
+    pool.bump = *unwrap_int!(ctx.bumps.get("pool"));
 
     pool.replica_mint = ctx.accounts.replica_mint.key();
 
@@ -28,12 +28,12 @@ pub fn new_pool(ctx: Context<NewPool>, bump: u8) -> ProgramResult {
 
 /// Creates a new [MergeMiner].
 /// Anyone can call this.
-pub fn init_merge_miner(ctx: Context<InitMergeMiner>, bump: u8) -> ProgramResult {
+pub fn init_merge_miner(ctx: Context<InitMergeMiner>) -> ProgramResult {
     let mm = &mut ctx.accounts.mm;
 
     mm.pool = ctx.accounts.pool.key();
     mm.owner = ctx.accounts.owner.key();
-    mm.bump = bump;
+    mm.bump = *unwrap_int!(ctx.bumps.get("mm"));
 
     // Track total number of pools.
     let pool = &mut ctx.accounts.pool;

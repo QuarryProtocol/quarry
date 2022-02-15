@@ -16,7 +16,7 @@ pub fn claim_rewards(ctx: Context<ClaimRewards>) -> ProgramResult {
     let amount = unwrap_int!(end_balance.checked_sub(initial_balance));
 
     emit!(ClaimEvent {
-        pool: mm.pool.key(),
+        pool: mm.pool,
         mm: mm.key(),
         mint: ctx.accounts.rewards_token_account.mint,
         amount,

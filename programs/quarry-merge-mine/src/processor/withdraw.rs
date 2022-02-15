@@ -35,7 +35,7 @@ pub fn unstake_primary_miner(ctx: Context<QuarryStakePrimary>, amount: u64) -> P
         pool: pool.key(),
         mm: mm.key(),
         miner: ctx.accounts.stake.miner.key(),
-        owner: mm.owner.key(),
+        owner: mm.owner,
         amount,
     });
 
@@ -67,7 +67,7 @@ pub fn unstake_all_replica_miner(ctx: Context<QuarryStakeReplica>) -> ProgramRes
         pool: pool.key(),
         mm: mm.key(),
         miner: ctx.accounts.stake.miner.key(),
-        owner: mm.owner.key(),
+        owner: mm.owner,
         amount,
     });
 

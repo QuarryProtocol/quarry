@@ -27,7 +27,7 @@ pub fn stake_primary_miner(ctx: Context<QuarryStakePrimary>) -> ProgramResult {
         pool: pool.key(),
         mm: mm.key(),
         miner: ctx.accounts.stake.miner.key(),
-        owner: mm.owner.key(),
+        owner: mm.owner,
         amount,
     });
 
@@ -66,7 +66,7 @@ pub fn stake_replica_miner(ctx: Context<QuarryStakeReplica>) -> ProgramResult {
         pool: pool.key(),
         mm: mm.key(),
         miner: ctx.accounts.stake.miner.key(),
-        owner: mm.owner.key(),
+        owner: mm.owner,
         amount: stake_amount,
     });
 
