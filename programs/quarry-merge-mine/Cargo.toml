@@ -25,6 +25,6 @@ anchor-spl = ">=0.21"
 quarry-mine = { path = "../quarry-mine", features = ["cpi"], version = "2.0.0" }
 quarry-mint-wrapper = { path = "../quarry-mint-wrapper", features = [
     "cpi"
-], version = "^1.11" }
+], version = "2.0.0" }
 num-traits = "0.2"
 vipers = "^1.6"
