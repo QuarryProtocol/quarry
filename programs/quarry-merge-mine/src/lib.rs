@@ -349,11 +349,6 @@ pub struct QuarryStake<'info> {
 
     /// [quarry_mine] program.
     pub mine_program: Program<'info, quarry_mine::program::QuarryMine>,
-
-    /// Unused variable used as a filler for deprecated accounts. Handled by [quarry_mine].
-    /// One should pass in a randomly generated Keypair for this account.
-    #[account(mut)]
-    pub unused_account: UncheckedAccount<'info>,
 }
 
 /// Error Codes

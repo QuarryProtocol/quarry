@@ -52,8 +52,8 @@ impl<'info> QuarryStake<'info> {
             quarry: self.quarry.to_account_info(),
             token_program: self.token_program.to_account_info(),
             rewarder: self.rewarder.to_account_info(),
-            unused_miner_vault: self.unused_account.to_account_info(),
-            unused_token_account: self.unused_account.to_account_info(),
+            unused_miner_vault: self.token_program.to_account_info(),
+            unused_token_account: self.token_program.to_account_info(),
         }
     }
 
