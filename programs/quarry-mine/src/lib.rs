@@ -783,11 +783,9 @@ pub struct UserClaim<'info> {
     pub quarry: Account<'info, Quarry>,
 
     /// Placeholder for the miner vault.
-    #[account(mut)]
     pub unused_miner_vault: UncheckedAccount<'info>,
 
     /// Placeholder for the user's staked token account.
-    #[account(mut)]
     pub unused_token_account: UncheckedAccount<'info>,
 
     /// Token program
