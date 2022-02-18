@@ -120,7 +120,7 @@ pub mod quarry_operator {
                     auth: ctx.accounts.with_delegate.to_auth_accounts(),
                     token_mint: ctx.accounts.token_mint.to_account_info(),
                     payer: ctx.accounts.payer.to_account_info(),
-                    unused_clock: ctx.accounts.unused_clock.to_account_info(),
+                    unused_clock: ctx.accounts.system_program.to_account_info(),
                     system_program: ctx.accounts.system_program.to_account_info(),
                 },
                 signer_seeds,
