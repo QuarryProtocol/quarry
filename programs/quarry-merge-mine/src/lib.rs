@@ -18,7 +18,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use vipers::prelude::*;
 
-use state::*;
+pub use state::*;
 
 declare_id!("QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto");
 
