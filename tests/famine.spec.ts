@@ -205,8 +205,11 @@ describe("Famine", () => {
 
     const claimEvent = QUARRY_CODERS.Mine.parseProgramLogEvents(
       receipt.response.meta?.logMessages ?? []
-    )[0];
-    invariant(claimEvent?.name === "ClaimEvent", "claim event not found");
+    ).find((ev) => ev.name === "ClaimEvent");
+    invariant(
+      claimEvent && claimEvent.name === "ClaimEvent",
+      "claim event not found"
+    );
 
     const expectedRewards = dailyRewardsRate
       .div(new BN(86400))
