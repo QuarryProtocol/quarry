@@ -540,6 +540,7 @@ pub struct NewRewarder<'info> {
     pub rewarder: Account<'info, Rewarder>,
 
     /// Initial authority of the rewarder.
+    /// CHECK: OK
     pub authority: UncheckedAccount<'info>,
 
     /// Payer of the [Rewarder] initialization.
@@ -550,6 +551,7 @@ pub struct NewRewarder<'info> {
     pub system_program: Program<'info, System>,
 
     /// Unused variable that held the [Clock]. Placeholder.
+    /// CHECK: OK
     pub unused_clock: UncheckedAccount<'info>,
 
     /// Mint wrapper.
@@ -569,6 +571,7 @@ pub struct SetPauseAuthority<'info> {
     pub auth: MutableRewarderWithAuthority<'info>,
 
     /// The pause authority.
+    /// CHECK: OK
     pub pause_authority: UncheckedAccount<'info>,
 }
 
@@ -651,6 +654,7 @@ pub struct CreateQuarry<'info> {
     pub payer: Signer<'info>,
 
     /// Unused variable that held the clock. Placeholder.
+    /// CHECK: OK
     pub unused_clock: UncheckedAccount<'info>,
 
     /// System program.
@@ -783,10 +787,12 @@ pub struct UserClaim<'info> {
     pub quarry: Account<'info, Quarry>,
 
     /// Placeholder for the miner vault.
+    /// CHECK: OK
     #[account(mut)]
     pub unused_miner_vault: UncheckedAccount<'info>,
 
     /// Placeholder for the user's staked token account.
+    /// CHECK: OK
     #[account(mut)]
     pub unused_token_account: UncheckedAccount<'info>,
 

@@ -159,6 +159,7 @@ pub struct InitMergeMiner<'info> {
     pub pool: Account<'info, MergePool>,
 
     /// Owner of the [MergeMiner].
+    /// CHECK: Ok
     pub owner: UncheckedAccount<'info>,
 
     /// [MergeMiner].
@@ -193,7 +194,7 @@ pub struct InitMiner<'info> {
 
     /// [quarry_mine::Miner] to be created.
     #[account(mut)]
-    pub miner: UncheckedAccount<'info>,
+    pub miner: SystemAccount<'info>,
 
     /// [quarry_mine::Quarry] to create a [quarry_mine::Miner] for.
     #[account(mut)]
@@ -352,6 +353,7 @@ pub struct QuarryStake<'info> {
 
     /// Unused variable used as a filler for deprecated accounts. Handled by [quarry_mine].
     /// One should pass in a randomly generated Keypair for this account.
+    /// CHECK: OK
     #[account(mut)]
     pub unused_account: UncheckedAccount<'info>,
 }

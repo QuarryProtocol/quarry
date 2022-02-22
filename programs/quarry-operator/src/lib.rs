@@ -241,7 +241,7 @@ pub struct CreateOperator<'info> {
     /// [Rewarder] of the token.
     #[account(mut)]
     pub rewarder: Box<Account<'info, Rewarder>>,
-    /// The admin to set.
+    /// CHECK: The admin to set.
     pub admin: UncheckedAccount<'info>,
     /// Payer.
     #[account(mut)]
@@ -261,6 +261,7 @@ pub struct SetRole<'info> {
     /// The [Operator::admin].
     pub admin: Signer<'info>,
     /// The account to give the role to.
+    /// CHECK: Ok
     pub delegate: UncheckedAccount<'info>,
 }
 
@@ -275,7 +276,7 @@ pub struct DelegateSetAnnualRewards<'info> {
 pub struct DelegateCreateQuarry<'info> {
     pub with_delegate: WithDelegate<'info>,
     #[account(mut)]
-    pub quarry: UncheckedAccount<'info>,
+    pub quarry: SystemAccount<'info>,
     pub token_mint: Box<Account<'info, anchor_spl::token::Mint>>,
 
     /// Payer of [Quarry] creation.
@@ -283,6 +284,7 @@ pub struct DelegateCreateQuarry<'info> {
     pub payer: Signer<'info>,
 
     /// Unused variable that held the clock. Placeholder.
+    /// CHECK: OK
     pub unused_clock: UncheckedAccount<'info>,
 
     /// System program.

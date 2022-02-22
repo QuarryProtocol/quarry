@@ -196,7 +196,7 @@ pub struct NewWrapper<'info> {
     )]
     pub mint_wrapper: Account<'info, MintWrapper>,
 
-    /// Admin-to-be of the [MintWrapper].
+    /// CHECK: Admin-to-be of the [MintWrapper].
     pub admin: UncheckedAccount<'info>,
 
     /// Token mint to mint.
@@ -221,6 +221,7 @@ pub struct NewMinter<'info> {
     pub auth: OnlyAdmin<'info>,
 
     /// Account to authorize as a minter.
+    /// CHECK: OK
     pub minter_authority: UncheckedAccount<'info>,
 
     /// Information about the minter.
@@ -264,6 +265,7 @@ pub struct TransferAdmin<'info> {
     pub admin: Signer<'info>,
 
     /// The next admin.
+    /// CHECK: OK
     pub next_admin: UncheckedAccount<'info>,
 }
 
