@@ -5,7 +5,7 @@ use anchor_lang::prelude::*;
 /// A token that represents a locked other token.
 ///
 /// To derive the address, use the following code:
-/// ```
+/// ```ignore
 /// &[
 ///     b"MergePool" as &[u8],
 ///     &$pool.primary_mint.to_bytes(),
@@ -38,7 +38,7 @@ pub struct MergePool {
 /// Enables mining multiple [quarry_mine::Quarry]s simultaneously with only one deposit.
 ///
 /// To derive the address, use the following code:
-/// ```
+/// ```ignore
 /// &[
 ///   b"MergeMiner" as &[u8],
 ///   &$mm.pool.key().to_bytes(),

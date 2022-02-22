@@ -112,7 +112,7 @@ pub struct NewPool<'info> {
     #[account(
         init,
         seeds = [
-          b"MergePool",
+          b"MergePool".as_ref(),
           primary_mint.key().to_bytes().as_ref()
         ],
         bump,
@@ -127,7 +127,7 @@ pub struct NewPool<'info> {
     #[account(
         init,
         seeds = [
-            b"ReplicaMint",
+            b"ReplicaMint".as_ref(),
             pool.key().to_bytes().as_ref()
         ],
         mint::decimals = primary_mint.decimals,
@@ -165,7 +165,7 @@ pub struct InitMergeMiner<'info> {
     #[account(
         init,
         seeds = [
-          b"MergeMiner",
+          b"MergeMiner".as_ref(),
           pool.key().to_bytes().as_ref(),
           owner.key().to_bytes().as_ref()
         ],

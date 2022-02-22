@@ -188,7 +188,7 @@ pub struct NewWrapper<'info> {
     #[account(
         init,
         seeds = [
-            b"MintWrapper",
+            b"MintWrapper".as_ref(),
             base.key().to_bytes().as_ref()
         ],
         bump,
@@ -227,7 +227,7 @@ pub struct NewMinter<'info> {
     #[account(
         init,
         seeds = [
-            b"MintWrapperMinter",
+            b"MintWrapperMinter".as_ref(),
             auth.mint_wrapper.key().to_bytes().as_ref(),
             minter_authority.key().to_bytes().as_ref()
         ],
@@ -321,7 +321,7 @@ pub struct OnlyAdmin<'info> {
 
 /// Mint wrapper
 ///
-/// ```
+/// ```ignore
 /// seeds = [
 ///     b"MintWrapper",
 ///     base.key().to_bytes().as_ref(),
@@ -356,7 +356,7 @@ pub struct MintWrapper {
 
 /// One who can mint.
 ///
-/// ```
+/// ```ignore
 /// seeds = [
 ///     b"MintWrapperMinter",
 ///     auth.mint_wrapper.key().to_bytes().as_ref(),

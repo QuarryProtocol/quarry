@@ -137,7 +137,6 @@ mod tests {
     use proptest::prelude::*;
     use rand::thread_rng;
     use std::vec::Vec;
-    use vipers::program_err;
 
     use crate::MAX_ANNUAL_REWARDS_RATE;
 
@@ -154,42 +153,46 @@ mod tests {
             ..Default::default()
         };
 
-        let invalid: Result<u64, ProgramError> = program_err!(InvalidRewardsShare);
+        let invalid: Result<u64> = err!(InvalidRewardsShare);
 
         // invalid because there are no shares
         assert_eq!(
-            rewarder.compute_quarry_annual_rewards_rate(DEFAULT_ANNUAL_REWARDS_RATE),
-            invalid
+            rewarder
+                .compute_quarry_annual_rewards_rate(DEFAULT_ANNUAL_REWARDS_RATE)
+                .into_cmp_error(),
+            invalid.into_cmp_error()
         );
 
         rewarder.total_rewards_shares = 1_000_000_000_000;
         let tokens_per_share = DEFAULT_ANNUAL_REWARDS_RATE / rewarder.total_rewards_shares;
 
-        assert_eq!(rewarder.compute_quarry_annual_rewards_rate(0), Ok(0));
+        assert_eq!(rewarder.compute_quarry_annual_rewards_rate(0).unwrap(), 0);
         assert_eq!(
-            rewarder.compute_quarry_annual_rewards_rate(1),
-            Ok(tokens_per_share)
+            rewarder.compute_quarry_annual_rewards_rate(1).unwrap(),
+            tokens_per_share
         );
         assert_eq!(
-            rewarder.compute_quarry_annual_rewards_rate(10),
-            Ok(10 * tokens_per_share)
+            rewarder.compute_quarry_annual_rewards_rate(10).unwrap(),
+            10 * tokens_per_share
         );
         assert_eq!(
-            rewarder.compute_quarry_annual_rewards_rate(100),
-            Ok(100 * tokens_per_share)
+            rewarder.compute_quarry_annual_rewards_rate(100).unwrap(),
+            100 * tokens_per_share
         );
         assert_eq!(
-            rewarder.compute_quarry_annual_rewards_rate(1_000),
-            Ok(1_000 * tokens_per_share)
+            rewarder.compute_quarry_annual_rewards_rate(1_000).unwrap(),
+            1_000 * tokens_per_share
         );
 
         assert_eq!(
-            rewarder.compute_quarry_annual_rewards_rate(10_000),
-            Ok(10_000 * tokens_per_share)
+            rewarder.compute_quarry_annual_rewards_rate(10_000).unwrap(),
+            10_000 * tokens_per_share
         );
         assert_eq!(
-            rewarder.compute_quarry_annual_rewards_rate(100_000),
-            Ok(100_000 * tokens_per_share)
+            rewarder
+                .compute_quarry_annual_rewards_rate(100_000)
+                .unwrap(),
+            100_000 * tokens_per_share
         );
     }
 
@@ -244,8 +247,8 @@ mod tests {
                 annual_rewards_rate,
                 ..Default::default()
             };
-            assert_eq!(rewarder.compute_quarry_annual_rewards_rate(quarry_rewards_share), program_err!(InvalidRewardsShare));
-            assert_eq!(rewarder.compute_quarry_annual_rewards_rate(0), Ok(0));
+            assert_eq!(rewarder.compute_quarry_annual_rewards_rate(quarry_rewards_share).into_cmp_error(), error!(crate::ErrorCode::InvalidRewardsShare).into_cmp_error());
+            assert_eq!(rewarder.compute_quarry_annual_rewards_rate(0).unwrap(), 0);
         }
     }
 
