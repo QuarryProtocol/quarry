@@ -53,4 +53,4 @@ jobs:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v1
       - name: Run unit tests
-        run: cargo test --lib
+        run: cargo test
