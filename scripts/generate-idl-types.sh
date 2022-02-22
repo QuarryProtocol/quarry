@@ -23,6 +23,8 @@ generate_declaration_file() {
     cat $PROGRAM_SO >>$OUT_PATH
     echo ";" >>$OUT_PATH
 
+    cat artifacts/idl/$prog.ts | sed -E "s/${PREFIX}/Anchor${PREFIX}/" | sed -E "s/IDL: /Anchor${PREFIX}IDL: /" >>$OUT_PATH
+
     # raw json
     echo "export const $rawName: $typename =" >>$OUT_PATH
     cat $PROGRAM_SO >>$OUT_PATH

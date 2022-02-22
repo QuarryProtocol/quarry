@@ -1,11 +1,12 @@
+import type { Program } from "@project-serum/anchor";
 import type { AnchorTypes } from "@saberhq/anchor-contrib";
 
-import type { QuarryMineIDL } from "../idls/quarry_mine";
+import type { AnchorQuarryMine } from "../idls/quarry_mine";
 
 export * from "../idls/quarry_mine";
 
 export type MineTypes = AnchorTypes<
-  QuarryMineIDL,
+  AnchorQuarryMine,
   {
     rewarder: RewarderData;
     quarry: QuarryData;
@@ -14,13 +15,14 @@ export type MineTypes = AnchorTypes<
 >;
 
 type Accounts = MineTypes["Accounts"];
-export type RewarderData = Accounts["Rewarder"];
-export type QuarryData = Accounts["Quarry"];
-export type MinerData = Accounts["Miner"];
+export type RewarderData = Accounts["rewarder"];
+export type QuarryData = Accounts["quarry"];
+export type MinerData = Accounts["miner"];
 
 export type MineError = MineTypes["Error"];
 export type MineEvents = MineTypes["Events"];
-export type MineProgram = MineTypes["Program"];
+export type MineProgram = Omit<Program<AnchorQuarryMine>, "account"> &
+  MineTypes["Program"];
 
 export type ClaimEvent = MineEvents["ClaimEvent"];
 export type StakeEvent = MineEvents["StakeEvent"];
