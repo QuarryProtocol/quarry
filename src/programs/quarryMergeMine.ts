@@ -1,12 +1,13 @@
+import type { Program } from "@project-serum/anchor";
 import type { AnchorTypes } from "@saberhq/anchor-contrib";
 import type { PublicKey } from "@solana/web3.js";
 
-import type { QuarryMergeMineIDL } from "../idls/quarry_merge_mine";
+import type { AnchorQuarryMergeMine } from "../idls/quarry_merge_mine";
 
 export * from "../idls/quarry_merge_mine";
 
 export type QuarryMergeMineTypes = AnchorTypes<
-  QuarryMergeMineIDL,
+  AnchorQuarryMergeMine,
   {
     mergePool: MergePoolData;
     mergeMiner: MergeMinerData;
@@ -14,11 +15,15 @@ export type QuarryMergeMineTypes = AnchorTypes<
 >;
 
 type Accounts = QuarryMergeMineTypes["Accounts"];
-export type MergePoolData = Accounts["MergePool"];
-export type MergeMinerData = Accounts["MergeMiner"];
+export type MergePoolData = Accounts["mergePool"];
+export type MergeMinerData = Accounts["mergeMiner"];
 
 export type QuarryMergeMineError = QuarryMergeMineTypes["Error"];
-export type QuarryMergeMineProgram = QuarryMergeMineTypes["Program"];
+export type QuarryMergeMineProgram = Omit<
+  Program<AnchorQuarryMergeMine>,
+  "account"
+> &
+  QuarryMergeMineTypes["Program"];
 
 export type QuarryStakeAccounts = {
   [A in keyof Parameters<

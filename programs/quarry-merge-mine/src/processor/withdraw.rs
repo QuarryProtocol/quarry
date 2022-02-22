@@ -5,7 +5,7 @@ use anchor_lang::prelude::*;
 use vipers::prelude::*;
 
 /// Withdraws tokens from the [MergeMiner].
-pub fn unstake_primary_miner(ctx: Context<QuarryStakePrimary>, amount: u64) -> ProgramResult {
+pub fn unstake_primary_miner(ctx: Context<QuarryStakePrimary>, amount: u64) -> Result<()> {
     // Check to see if the [MergeMiner] is fully collateralized after the withdraw
     let mm = &ctx.accounts.stake.mm;
     invariant!(amount <= mm.primary_balance, InsufficientBalance);
@@ -43,7 +43,7 @@ pub fn unstake_primary_miner(ctx: Context<QuarryStakePrimary>, amount: u64) -> P
 }
 
 /// Unstakes all of a [crate::MergeMiner]'s replica tokens for a [quarry_mine::Miner].
-pub fn unstake_all_replica_miner(ctx: Context<QuarryStakeReplica>) -> ProgramResult {
+pub fn unstake_all_replica_miner(ctx: Context<QuarryStakeReplica>) -> Result<()> {
     // pre-instruction checks
     let pre_replica_mint_supply = ctx.accounts.replica_mint.supply;
     invariant!(
@@ -78,7 +78,7 @@ pub fn unstake_all_replica_miner(ctx: Context<QuarryStakeReplica>) -> ProgramRes
 }
 
 /// Withdraws tokens from the [MergeMiner].
-pub fn withdraw_tokens(ctx: Context<WithdrawTokens>) -> ProgramResult {
+pub fn withdraw_tokens(ctx: Context<WithdrawTokens>) -> Result<()> {
     // skip withdrawal if there is nothing to claim
     if ctx.accounts.mm_token_account.amount == 0 {
         return Ok(());
@@ -110,7 +110,7 @@ fn post_unstake_replica_miner(
     ctx: Context<QuarryStakeReplica>,
     pre_replica_mint_supply: u64,
     burn_amount: u64,
-) -> ProgramResult {
+) -> Result<()> {
     ctx.accounts.stake.miner.reload()?;
     ctx.accounts.stake.miner_vault.reload()?;
     ctx.accounts.replica_mint.reload()?;

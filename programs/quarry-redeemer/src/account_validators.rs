@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 use vipers::prelude::*;
 
 impl<'info> Validate<'info> for CreateRedeemer<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         invariant!(
             self.iou_mint.decimals == self.redemption_mint.decimals,
             "decimals mismatch"
@@ -13,7 +13,7 @@ impl<'info> Validate<'info> for CreateRedeemer<'info> {
 }
 
 impl<'info> Validate<'info> for RedeemTokens<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         invariant!(self.source_authority.is_signer, Unauthorized);
         assert_keys_eq!(self.iou_mint, self.redeemer.iou_mint, "iou_mint");
         assert_keys_eq!(

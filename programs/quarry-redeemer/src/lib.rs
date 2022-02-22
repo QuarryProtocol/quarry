@@ -19,7 +19,7 @@ pub mod quarry_redeemer {
 
     /// Creates a new [Redeemer].
     #[access_control(ctx.accounts.validate())]
-    pub fn create_redeemer(ctx: Context<CreateRedeemer>, _bump: u8) -> ProgramResult {
+    pub fn create_redeemer(ctx: Context<CreateRedeemer>, _bump: u8) -> Result<()> {
         let redeemer = &mut ctx.accounts.redeemer;
         redeemer.iou_mint = ctx.accounts.iou_mint.key();
         redeemer.redemption_mint = ctx.accounts.redemption_mint.key();
@@ -31,7 +31,7 @@ pub mod quarry_redeemer {
 
     /// Redeems some of a user's tokens from the redemption vault.
     #[access_control(ctx.accounts.validate())]
-    pub fn redeem_tokens(ctx: Context<RedeemTokens>, amount: u64) -> ProgramResult {
+    pub fn redeem_tokens(ctx: Context<RedeemTokens>, amount: u64) -> Result<()> {
         invariant!(
             amount <= ctx.accounts.iou_source.amount,
             "insufficient iou_source balance"
@@ -61,7 +61,7 @@ pub mod quarry_redeemer {
     }
 
     /// Redeems all of a user's tokens against the redemption vault.
-    pub fn redeem_all_tokens(ctx: Context<RedeemTokens>) -> ProgramResult {
+    pub fn redeem_all_tokens(ctx: Context<RedeemTokens>) -> Result<()> {
         let amount = ctx.accounts.iou_source.amount;
         redeem_tokens(ctx, amount)
     }
@@ -162,7 +162,7 @@ pub struct RedeemTokensEvent {
 }
 
 /// Errors
-#[error]
+#[error_code]
 pub enum ErrorCode {
     #[msg("Unauthorized.")]
     Unauthorized,

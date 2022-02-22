@@ -22,10 +22,7 @@ impl Rewarder {
 
     /// Computes the amount of rewards a [crate::Quarry] should receive, annualized.
     /// This should be run only after `total_rewards_shares` has been set.
-    pub fn compute_quarry_annual_rewards_rate(
-        &self,
-        quarry_rewards_share: u64,
-    ) -> Result<u64, ProgramError> {
+    pub fn compute_quarry_annual_rewards_rate(&self, quarry_rewards_share: u64) -> Result<u64> {
         invariant!(
             quarry_rewards_share <= self.total_rewards_shares,
             InvalidRewardsShare
@@ -48,7 +45,7 @@ impl Rewarder {
 
 impl<'info> ClaimRewards<'info> {
     /// Calculates rewards and claims them.
-    pub fn calculate_and_claim_rewards(&mut self) -> ProgramResult {
+    pub fn calculate_and_claim_rewards(&mut self) -> Result<()> {
         let miner = &mut self.stake.miner;
         let amount_claimable = miner.rewards_earned;
         if amount_claimable == 0 {
@@ -103,11 +100,7 @@ impl<'info> ClaimRewards<'info> {
         }
     }
 
-    fn perform_mint(
-        &self,
-        destination: Account<'info, TokenAccount>,
-        amount: u64,
-    ) -> ProgramResult {
+    fn perform_mint(&self, destination: Account<'info, TokenAccount>, amount: u64) -> Result<()> {
         let claim_mint_accounts = self.create_perform_mint_accounts(destination);
 
         // Create the signer seeds.
@@ -125,13 +118,13 @@ impl<'info> ClaimRewards<'info> {
     }
 
     /// Mints the claimed tokens.
-    fn mint_claimed_tokens(&self, amount_claimable_minus_fees: u64) -> ProgramResult {
+    fn mint_claimed_tokens(&self, amount_claimable_minus_fees: u64) -> Result<()> {
         let rewards_token_account = (*self.rewards_token_account).clone();
         self.perform_mint(rewards_token_account, amount_claimable_minus_fees)
     }
 
     /// Mints the fee tokens.
-    fn mint_fees(&self, claim_fee: u64) -> ProgramResult {
+    fn mint_fees(&self, claim_fee: u64) -> Result<()> {
         let claim_fee_token_account = (*self.claim_fee_token_account).clone();
         self.perform_mint(claim_fee_token_account, claim_fee)
     }
@@ -144,7 +137,6 @@ mod tests {
     use proptest::prelude::*;
     use rand::thread_rng;
     use std::vec::Vec;
-    use vipers::program_err;
 
     use crate::MAX_ANNUAL_REWARDS_RATE;
 
@@ -161,42 +153,46 @@ mod tests {
             ..Default::default()
         };
 
-        let invalid: Result<u64, ProgramError> = program_err!(InvalidRewardsShare);
+        let invalid: Result<u64> = err!(InvalidRewardsShare);
 
         // invalid because there are no shares
         assert_eq!(
-            rewarder.compute_quarry_annual_rewards_rate(DEFAULT_ANNUAL_REWARDS_RATE),
-            invalid
+            rewarder
+                .compute_quarry_annual_rewards_rate(DEFAULT_ANNUAL_REWARDS_RATE)
+                .into_cmp_error(),
+            invalid.into_cmp_error()
         );
 
         rewarder.total_rewards_shares = 1_000_000_000_000;
         let tokens_per_share = DEFAULT_ANNUAL_REWARDS_RATE / rewarder.total_rewards_shares;
 
-        assert_eq!(rewarder.compute_quarry_annual_rewards_rate(0), Ok(0));
+        assert_eq!(rewarder.compute_quarry_annual_rewards_rate(0).unwrap(), 0);
         assert_eq!(
-            rewarder.compute_quarry_annual_rewards_rate(1),
-            Ok(tokens_per_share)
+            rewarder.compute_quarry_annual_rewards_rate(1).unwrap(),
+            tokens_per_share
         );
         assert_eq!(
-            rewarder.compute_quarry_annual_rewards_rate(10),
-            Ok(10 * tokens_per_share)
+            rewarder.compute_quarry_annual_rewards_rate(10).unwrap(),
+            10 * tokens_per_share
         );
         assert_eq!(
-            rewarder.compute_quarry_annual_rewards_rate(100),
-            Ok(100 * tokens_per_share)
+            rewarder.compute_quarry_annual_rewards_rate(100).unwrap(),
+            100 * tokens_per_share
         );
         assert_eq!(
-            rewarder.compute_quarry_annual_rewards_rate(1_000),
-            Ok(1_000 * tokens_per_share)
+            rewarder.compute_quarry_annual_rewards_rate(1_000).unwrap(),
+            1_000 * tokens_per_share
         );
 
         assert_eq!(
-            rewarder.compute_quarry_annual_rewards_rate(10_000),
-            Ok(10_000 * tokens_per_share)
+            rewarder.compute_quarry_annual_rewards_rate(10_000).unwrap(),
+            10_000 * tokens_per_share
         );
         assert_eq!(
-            rewarder.compute_quarry_annual_rewards_rate(100_000),
-            Ok(100_000 * tokens_per_share)
+            rewarder
+                .compute_quarry_annual_rewards_rate(100_000)
+                .unwrap(),
+            100_000 * tokens_per_share
         );
     }
 
@@ -251,8 +247,8 @@ mod tests {
                 annual_rewards_rate,
                 ..Default::default()
             };
-            assert_eq!(rewarder.compute_quarry_annual_rewards_rate(quarry_rewards_share), program_err!(InvalidRewardsShare));
-            assert_eq!(rewarder.compute_quarry_annual_rewards_rate(0), Ok(0));
+            assert_eq!(rewarder.compute_quarry_annual_rewards_rate(quarry_rewards_share).into_cmp_error(), error!(crate::ErrorCode::InvalidRewardsShare).into_cmp_error());
+            assert_eq!(rewarder.compute_quarry_annual_rewards_rate(0).unwrap(), 0);
         }
     }
 

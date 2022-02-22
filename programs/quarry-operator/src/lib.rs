@@ -18,7 +18,7 @@ pub mod quarry_operator {
 
     /// Creates a new [Operator].
     #[access_control(ctx.accounts.validate())]
-    pub fn create_operator(ctx: Context<CreateOperator>, _bump: u8) -> ProgramResult {
+    pub fn create_operator(ctx: Context<CreateOperator>, _bump: u8) -> Result<()> {
         let operator = &mut ctx.accounts.operator;
         operator.base = ctx.accounts.base.key();
         operator.bump = *unwrap_int!(ctx.bumps.get("operator"));
@@ -46,7 +46,7 @@ pub mod quarry_operator {
 
     /// Sets the account that can set roles.
     #[access_control(ctx.accounts.validate())]
-    pub fn set_admin(ctx: Context<SetRole>) -> ProgramResult {
+    pub fn set_admin(ctx: Context<SetRole>) -> Result<()> {
         let operator = &mut ctx.accounts.operator;
         operator.admin = ctx.accounts.delegate.key();
         operator.record_update()?;
@@ -55,7 +55,7 @@ pub mod quarry_operator {
 
     /// Sets who can call [quarry_mine::quarry_mine::set_annual_rewards].
     #[access_control(ctx.accounts.validate())]
-    pub fn set_rate_setter(ctx: Context<SetRole>) -> ProgramResult {
+    pub fn set_rate_setter(ctx: Context<SetRole>) -> Result<()> {
         let operator = &mut ctx.accounts.operator;
         operator.rate_setter = ctx.accounts.delegate.key();
         operator.record_update()?;
@@ -64,7 +64,7 @@ pub mod quarry_operator {
 
     /// Sets who can call [quarry_mine::quarry_mine::create_quarry].
     #[access_control(ctx.accounts.validate())]
-    pub fn set_quarry_creator(ctx: Context<SetRole>) -> ProgramResult {
+    pub fn set_quarry_creator(ctx: Context<SetRole>) -> Result<()> {
         let operator = &mut ctx.accounts.operator;
         operator.quarry_creator = ctx.accounts.delegate.key();
         operator.record_update()?;
@@ -73,7 +73,7 @@ pub mod quarry_operator {
 
     /// Sets who can call [quarry_mine::quarry_mine::set_rewards_share].
     #[access_control(ctx.accounts.validate())]
-    pub fn set_share_allocator(ctx: Context<SetRole>) -> ProgramResult {
+    pub fn set_share_allocator(ctx: Context<SetRole>) -> Result<()> {
         let operator = &mut ctx.accounts.operator;
         operator.share_allocator = ctx.accounts.delegate.key();
         operator.record_update()?;
@@ -85,7 +85,7 @@ pub mod quarry_operator {
     pub fn delegate_set_annual_rewards(
         ctx: Context<DelegateSetAnnualRewards>,
         new_rate: u64,
-    ) -> ProgramResult {
+    ) -> Result<()> {
         let operator = &ctx.accounts.with_delegate.operator;
         let signer_seeds: &[&[&[u8]]] = &[gen_operator_signer_seeds!(operator)];
         quarry_mine::cpi::set_annual_rewards(
@@ -106,7 +106,7 @@ pub mod quarry_operator {
 
     /// Calls [quarry_mine::quarry_mine::create_quarry].
     #[access_control(ctx.accounts.validate())]
-    pub fn delegate_create_quarry(ctx: Context<DelegateCreateQuarry>, bump: u8) -> ProgramResult {
+    pub fn delegate_create_quarry(ctx: Context<DelegateCreateQuarry>, bump: u8) -> Result<()> {
         let operator = &ctx.accounts.with_delegate.operator;
         let signer_seeds: &[&[&[u8]]] = &[gen_operator_signer_seeds!(operator)];
         quarry_mine::cpi::create_quarry(
@@ -135,7 +135,7 @@ pub mod quarry_operator {
     pub fn delegate_set_rewards_share(
         ctx: Context<DelegateSetRewardsShare>,
         new_share: u64,
-    ) -> ProgramResult {
+    ) -> Result<()> {
         let operator = &ctx.accounts.with_delegate.operator;
         let signer_seeds: &[&[&[u8]]] = &[gen_operator_signer_seeds!(operator)];
         quarry_mine::cpi::set_rewards_share(
@@ -157,7 +157,7 @@ pub mod quarry_operator {
 
     /// Calls [quarry_mine::quarry_mine::set_famine].
     #[access_control(ctx.accounts.validate())]
-    pub fn delegate_set_famine(ctx: Context<DelegateSetFamine>, famine_ts: i64) -> ProgramResult {
+    pub fn delegate_set_famine(ctx: Context<DelegateSetFamine>, famine_ts: i64) -> Result<()> {
         let operator = &ctx.accounts.with_delegate.operator;
         let signer_seeds: &[&[&[u8]]] = &[gen_operator_signer_seeds!(operator)];
 
@@ -179,7 +179,7 @@ pub mod quarry_operator {
 }
 
 impl Operator {
-    fn record_update(&mut self) -> ProgramResult {
+    fn record_update(&mut self) -> Result<()> {
         self.last_modified_ts = Clock::get()?.unix_timestamp;
         self.generation = unwrap_int!(self.generation.checked_add(1));
         Ok(())
@@ -241,7 +241,7 @@ pub struct CreateOperator<'info> {
     /// [Rewarder] of the token.
     #[account(mut)]
     pub rewarder: Box<Account<'info, Rewarder>>,
-    /// The admin to set.
+    /// CHECK: The admin to set.
     pub admin: UncheckedAccount<'info>,
     /// Payer.
     #[account(mut)]
@@ -261,6 +261,7 @@ pub struct SetRole<'info> {
     /// The [Operator::admin].
     pub admin: Signer<'info>,
     /// The account to give the role to.
+    /// CHECK: Ok
     pub delegate: UncheckedAccount<'info>,
 }
 
@@ -275,7 +276,7 @@ pub struct DelegateSetAnnualRewards<'info> {
 pub struct DelegateCreateQuarry<'info> {
     pub with_delegate: WithDelegate<'info>,
     #[account(mut)]
-    pub quarry: UncheckedAccount<'info>,
+    pub quarry: SystemAccount<'info>,
     pub token_mint: Box<Account<'info, anchor_spl::token::Mint>>,
 
     /// Payer of [Quarry] creation.
@@ -283,6 +284,7 @@ pub struct DelegateCreateQuarry<'info> {
     pub payer: Signer<'info>,
 
     /// Unused variable that held the clock. Placeholder.
+    /// CHECK: OK
     pub unused_clock: UncheckedAccount<'info>,
 
     /// System program.
@@ -347,7 +349,7 @@ impl<'info> WithDelegate<'info> {
 }
 
 /// Errors
-#[error]
+#[error_code]
 pub enum ErrorCode {
     #[msg("Signer is not authorized to perform this action.")]
     Unauthorized,

@@ -5,7 +5,7 @@ use anchor_lang::prelude::*;
 use vipers::prelude::*;
 
 /// Claims [quarry_mine] rewards on behalf of the [MergeMiner].
-pub fn claim_rewards(ctx: Context<ClaimRewards>) -> ProgramResult {
+pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
     let initial_balance = ctx.accounts.rewards_token_account.amount;
 
     let mm = &ctx.accounts.stake.mm;

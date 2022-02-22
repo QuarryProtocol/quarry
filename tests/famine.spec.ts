@@ -186,7 +186,7 @@ describe("Famine", () => {
     );
 
     const rewardsDuration = 5; // 5 seconds
-    const famine = new BN(Date.now() / 1000 + rewardsDuration);
+    const famine = new BN(Date.now() / 1_000 + rewardsDuration);
     await expectTX(
       minerActions
         .stake(new TokenAmount(stakeToken, stakeAmount))
@@ -195,7 +195,7 @@ describe("Famine", () => {
     );
 
     // Sleep for 8 seconds
-    await sleep(8000);
+    await sleep(8_000);
 
     const tx = await minerActions.claim();
     const claimSent = await tx.send();
@@ -205,8 +205,11 @@ describe("Famine", () => {
 
     const claimEvent = QUARRY_CODERS.Mine.parseProgramLogEvents(
       receipt.response.meta?.logMessages ?? []
-    )[0];
-    invariant(claimEvent?.name === "ClaimEvent", "claim event not found");
+    ).find((ev) => ev.name === "ClaimEvent");
+    invariant(
+      claimEvent && claimEvent.name === "ClaimEvent",
+      "claim event not found"
+    );
 
     const expectedRewards = dailyRewardsRate
       .div(new BN(86400))

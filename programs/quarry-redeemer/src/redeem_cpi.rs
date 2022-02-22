@@ -4,7 +4,7 @@ use anchor_spl::token;
 
 impl<'info> RedeemTokens<'info> {
     /// Burn IOU tokens from source account.
-    pub fn burn_iou_tokens(&self, amount: u64) -> ProgramResult {
+    pub fn burn_iou_tokens(&self, amount: u64) -> Result<()> {
         let cpi_ctx = CpiContext::new(
             self.token_program.to_account_info(),
             token::Burn {
@@ -17,7 +17,7 @@ impl<'info> RedeemTokens<'info> {
     }
 
     /// Transfer redemption tokens from the redemption vault to the user.
-    pub fn transfer_redemption_tokens(&self, amount: u64) -> ProgramResult {
+    pub fn transfer_redemption_tokens(&self, amount: u64) -> Result<()> {
         let seeds = gen_redeemer_signer_seeds!(self.redeemer);
         let signer_seeds = &[&seeds[..]];
         let cpi_ctx = CpiContext::new_with_signer(

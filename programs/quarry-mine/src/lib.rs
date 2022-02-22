@@ -51,7 +51,7 @@ pub mod quarry_mine {
 
     /// Creates a new [Rewarder].
     #[access_control(ctx.accounts.validate())]
-    pub fn new_rewarder(ctx: Context<NewRewarder>, _bump: u8) -> ProgramResult {
+    pub fn new_rewarder(ctx: Context<NewRewarder>, _bump: u8) -> Result<()> {
         let rewarder = &mut ctx.accounts.rewarder;
 
         rewarder.base = ctx.accounts.base.key();
@@ -84,7 +84,7 @@ pub mod quarry_mine {
 
     /// Sets the pause authority.
     #[access_control(ctx.accounts.validate())]
-    pub fn set_pause_authority(ctx: Context<SetPauseAuthority>) -> ProgramResult {
+    pub fn set_pause_authority(ctx: Context<SetPauseAuthority>) -> Result<()> {
         let rewarder = &mut ctx.accounts.auth.rewarder;
         rewarder.pause_authority = ctx.accounts.pause_authority.key();
         Ok(())
@@ -92,7 +92,7 @@ pub mod quarry_mine {
 
     /// Pauses the [Rewarder].
     #[access_control(ctx.accounts.validate())]
-    pub fn pause(ctx: Context<MutableRewarderWithPauseAuthority>) -> ProgramResult {
+    pub fn pause(ctx: Context<MutableRewarderWithPauseAuthority>) -> Result<()> {
         let rewarder = &mut ctx.accounts.rewarder;
         rewarder.is_paused = true;
         Ok(())
@@ -100,7 +100,7 @@ pub mod quarry_mine {
 
     /// Unpauses the [Rewarder].
     #[access_control(ctx.accounts.validate())]
-    pub fn unpause(ctx: Context<MutableRewarderWithPauseAuthority>) -> ProgramResult {
+    pub fn unpause(ctx: Context<MutableRewarderWithPauseAuthority>) -> Result<()> {
         let rewarder = &mut ctx.accounts.rewarder;
         rewarder.is_paused = false;
         Ok(())
@@ -111,7 +111,7 @@ pub mod quarry_mine {
     pub fn transfer_authority(
         ctx: Context<TransferAuthority>,
         new_authority: Pubkey,
-    ) -> ProgramResult {
+    ) -> Result<()> {
         let rewarder = &mut ctx.accounts.rewarder;
         rewarder.pending_authority = new_authority;
         Ok(())
@@ -119,7 +119,7 @@ pub mod quarry_mine {
 
     /// Accepts the authority to become the new rewarder.
     #[access_control(ctx.accounts.validate())]
-    pub fn accept_authority(ctx: Context<AcceptAuthority>) -> ProgramResult {
+    pub fn accept_authority(ctx: Context<AcceptAuthority>) -> Result<()> {
         let rewarder = &mut ctx.accounts.rewarder;
         let next_authority = rewarder.pending_authority;
         rewarder.authority = next_authority;
@@ -129,7 +129,7 @@ pub mod quarry_mine {
 
     /// Sets the amount of reward tokens distributed to all [Quarry]s per day.
     #[access_control(ctx.accounts.validate())]
-    pub fn set_annual_rewards(ctx: Context<SetAnnualRewards>, new_rate: u64) -> ProgramResult {
+    pub fn set_annual_rewards(ctx: Context<SetAnnualRewards>, new_rate: u64) -> Result<()> {
         invariant!(
             new_rate <= MAX_ANNUAL_REWARDS_RATE,
             MaxAnnualRewardsRateExceeded
@@ -155,7 +155,7 @@ pub mod quarry_mine {
     /// Creates a new [Quarry].
     /// This may only be called by the [Rewarder]::authority.
     #[access_control(ctx.accounts.validate())]
-    pub fn create_quarry(ctx: Context<CreateQuarry>, _bump: u8) -> ProgramResult {
+    pub fn create_quarry(ctx: Context<CreateQuarry>, _bump: u8) -> Result<()> {
         let rewarder = &mut ctx.accounts.auth.rewarder;
         // Update rewarder's quarry stats
         let index = rewarder.num_quarries;
@@ -184,7 +184,7 @@ pub mod quarry_mine {
 
     /// Sets the rewards share of a quarry.
     #[access_control(ctx.accounts.validate())]
-    pub fn set_rewards_share(ctx: Context<SetRewardsShare>, new_share: u64) -> ProgramResult {
+    pub fn set_rewards_share(ctx: Context<SetRewardsShare>, new_share: u64) -> Result<()> {
         let rewarder = &mut ctx.accounts.auth.rewarder;
         let quarry = &mut ctx.accounts.quarry;
         rewarder.total_rewards_shares = unwrap_int!(rewarder
@@ -209,7 +209,7 @@ pub mod quarry_mine {
 
     /// Sets the famine, which stops rewards.
     #[access_control(ctx.accounts.validate())]
-    pub fn set_famine(ctx: Context<SetFamine>, famine_ts: i64) -> ProgramResult {
+    pub fn set_famine(ctx: Context<SetFamine>, famine_ts: i64) -> Result<()> {
         let quarry = &mut ctx.accounts.quarry;
         quarry.famine_ts = famine_ts;
 
@@ -219,7 +219,7 @@ pub mod quarry_mine {
     /// Synchronizes quarry rewards with the rewarder.
     /// Anyone can call this.
     #[access_control(ctx.accounts.validate())]
-    pub fn update_quarry_rewards(ctx: Context<UpdateQuarryRewards>) -> ProgramResult {
+    pub fn update_quarry_rewards(ctx: Context<UpdateQuarryRewards>) -> Result<()> {
         let current_ts = Clock::get()?.unix_timestamp;
         let rewarder = &ctx.accounts.rewarder;
         let payroll: Payroll = (*ctx.accounts.quarry).into();
@@ -244,7 +244,7 @@ pub mod quarry_mine {
     ///
     /// Anyone can call this; this is an associated account.
     #[access_control(ctx.accounts.validate())]
-    pub fn create_miner(ctx: Context<CreateMiner>, _bump: u8) -> ProgramResult {
+    pub fn create_miner(ctx: Context<CreateMiner>, _bump: u8) -> Result<()> {
         let quarry = &mut ctx.accounts.quarry;
         let index = quarry.num_miners;
         quarry.num_miners = unwrap_int!(quarry.num_miners.checked_add(1));
@@ -270,7 +270,7 @@ pub mod quarry_mine {
 
     /// Claims rewards for the [Miner].
     #[access_control(ctx.accounts.validate())]
-    pub fn claim_rewards(ctx: Context<ClaimRewards>) -> ProgramResult {
+    pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
         let miner = &mut ctx.accounts.stake.miner;
 
         let now = Clock::get()?.unix_timestamp;
@@ -284,7 +284,7 @@ pub mod quarry_mine {
 
     /// Stakes tokens into the [Miner].
     #[access_control(ctx.accounts.validate())]
-    pub fn stake_tokens(ctx: Context<UserStake>, amount: u64) -> ProgramResult {
+    pub fn stake_tokens(ctx: Context<UserStake>, amount: u64) -> Result<()> {
         if amount == 0 {
             // noop
             return Ok(());
@@ -321,7 +321,7 @@ pub mod quarry_mine {
 
     /// Withdraws tokens from the [Miner].
     #[access_control(ctx.accounts.validate())]
-    pub fn withdraw_tokens(ctx: Context<UserStake>, amount: u64) -> ProgramResult {
+    pub fn withdraw_tokens(ctx: Context<UserStake>, amount: u64) -> Result<()> {
         if amount == 0 {
             // noop
             return Ok(());
@@ -378,7 +378,7 @@ pub mod quarry_mine {
     /// Extracts fees to the Quarry DAO.
     /// This can be called by anyone.
     #[access_control(ctx.accounts.validate())]
-    pub fn extract_fees(ctx: Context<ExtractFees>) -> ProgramResult {
+    pub fn extract_fees(ctx: Context<ExtractFees>) -> Result<()> {
         let seeds = gen_rewarder_signer_seeds!(ctx.accounts.rewarder);
         let signer_seeds = &[&seeds[..]];
 
@@ -540,6 +540,7 @@ pub struct NewRewarder<'info> {
     pub rewarder: Account<'info, Rewarder>,
 
     /// Initial authority of the rewarder.
+    /// CHECK: OK
     pub authority: UncheckedAccount<'info>,
 
     /// Payer of the [Rewarder] initialization.
@@ -550,6 +551,7 @@ pub struct NewRewarder<'info> {
     pub system_program: Program<'info, System>,
 
     /// Unused variable that held the [Clock]. Placeholder.
+    /// CHECK: OK
     pub unused_clock: UncheckedAccount<'info>,
 
     /// Mint wrapper.
@@ -569,6 +571,7 @@ pub struct SetPauseAuthority<'info> {
     pub auth: MutableRewarderWithAuthority<'info>,
 
     /// The pause authority.
+    /// CHECK: OK
     pub pause_authority: UncheckedAccount<'info>,
 }
 
@@ -651,6 +654,7 @@ pub struct CreateQuarry<'info> {
     pub payer: Signer<'info>,
 
     /// Unused variable that held the clock. Placeholder.
+    /// CHECK: OK
     pub unused_clock: UncheckedAccount<'info>,
 
     /// System program.
@@ -783,10 +787,12 @@ pub struct UserClaim<'info> {
     pub quarry: Account<'info, Quarry>,
 
     /// Placeholder for the miner vault.
+    /// CHECK: OK
     #[account(mut)]
     pub unused_miner_vault: UncheckedAccount<'info>,
 
     /// Placeholder for the user's staked token account.
+    /// CHECK: OK
     #[account(mut)]
     pub unused_token_account: UncheckedAccount<'info>,
 
@@ -973,7 +979,7 @@ pub struct QuarryRewardsUpdateEvent {
 /// --------------------------------
 /// Error Codes
 /// --------------------------------
-#[error]
+#[error_code]
 pub enum ErrorCode {
     #[msg("You are not authorized to perform this action.")]
     Unauthorized,

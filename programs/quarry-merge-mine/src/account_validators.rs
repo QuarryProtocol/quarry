@@ -14,7 +14,7 @@ use anchor_lang::Key;
 // --------------------------------
 
 impl<'info> Validate<'info> for NewPool<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         // replica_mint checks are now redundant
         // since it is now an associated mint
         assert_keys_eq!(
@@ -40,13 +40,13 @@ impl<'info> Validate<'info> for NewPool<'info> {
 }
 
 impl<'info> Validate<'info> for InitMergeMiner<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         Ok(())
     }
 }
 
 impl<'info> Validate<'info> for InitMiner<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         invariant!(
             self.quarry.token_mint_key == self.pool.primary_mint
                 || self.quarry.token_mint_key == self.pool.replica_mint,
@@ -66,7 +66,7 @@ impl<'info> Validate<'info> for InitMiner<'info> {
 }
 
 impl<'info> Validate<'info> for WithdrawTokens<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         let withdraw_mint = self.mm_token_account.mint;
 
         assert_keys_eq!(self.withdraw_mint, withdraw_mint, "withdraw_mint");
@@ -101,7 +101,7 @@ impl<'info> Validate<'info> for WithdrawTokens<'info> {
 }
 
 impl<'info> Validate<'info> for ClaimRewards<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         self.stake.validate()?;
 
         assert_keys_eq!(self.minter.mint_wrapper, self.mint_wrapper);
@@ -126,7 +126,7 @@ impl<'info> Validate<'info> for ClaimRewards<'info> {
 /// --------------------------------
 
 impl<'info> Validate<'info> for QuarryStakePrimary<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         self.stake.validate()?;
 
         // For primary staking:
@@ -152,7 +152,7 @@ impl<'info> Validate<'info> for QuarryStakePrimary<'info> {
 }
 
 impl<'info> Validate<'info> for QuarryStakeReplica<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         self.stake.validate()?;
 
         // For replica staking:
@@ -181,7 +181,7 @@ impl<'info> Validate<'info> for QuarryStakeReplica<'info> {
 }
 
 impl<'info> Validate<'info> for QuarryStake<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         assert_keys_eq!(self.mm.pool, self.pool, "mm.pool");
 
         assert_keys_eq!(self.rewarder, self.quarry.rewarder_key);

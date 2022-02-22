@@ -21,7 +21,7 @@ impl Quarry {
         current_ts: i64,
         rewarder: &Rewarder,
         payroll: &Payroll,
-    ) -> ProgramResult {
+    ) -> Result<()> {
         let updated_rewards_per_token_stored = payroll.calculate_reward_per_token(current_ts)?;
         // Update quarry struct
         self.rewards_per_token_stored = updated_rewards_per_token_stored;
@@ -39,7 +39,7 @@ impl Quarry {
         miner: &mut Miner,
         rewarder: &Rewarder,
         current_ts: i64,
-    ) -> ProgramResult {
+    ) -> Result<()> {
         let payroll: Payroll = (*self).into();
         self.update_rewards_internal(current_ts, rewarder, &payroll)?;
 
@@ -68,7 +68,7 @@ impl Quarry {
         rewarder: &Rewarder,
         miner: &mut Miner,
         amount: u64,
-    ) -> ProgramResult {
+    ) -> Result<()> {
         self.update_rewards_and_miner(miner, rewarder, current_ts)?;
         match action {
             StakeAction::Stake => {

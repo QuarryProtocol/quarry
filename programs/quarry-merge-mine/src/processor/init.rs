@@ -6,7 +6,7 @@ use vipers::prelude::*;
 
 /// Creates a new [MergePool].
 /// Anyone can call this.
-pub fn new_pool(ctx: Context<NewPool>) -> ProgramResult {
+pub fn new_pool(ctx: Context<NewPool>) -> Result<()> {
     let pool = &mut ctx.accounts.pool;
     pool.primary_mint = ctx.accounts.primary_mint.key();
     pool.bump = *unwrap_int!(ctx.bumps.get("pool"));
@@ -28,7 +28,7 @@ pub fn new_pool(ctx: Context<NewPool>) -> ProgramResult {
 
 /// Creates a new [MergeMiner].
 /// Anyone can call this.
-pub fn init_merge_miner(ctx: Context<InitMergeMiner>) -> ProgramResult {
+pub fn init_merge_miner(ctx: Context<InitMergeMiner>) -> Result<()> {
     let mm = &mut ctx.accounts.mm;
 
     mm.pool = ctx.accounts.pool.key();
@@ -56,7 +56,7 @@ pub fn init_merge_miner(ctx: Context<InitMergeMiner>) -> ProgramResult {
 }
 
 /// Initializes a [quarry_mine::Miner] owned by the [MergeMiner].
-pub fn init_miner(ctx: Context<InitMiner>, bump: u8) -> ProgramResult {
+pub fn init_miner(ctx: Context<InitMiner>, bump: u8) -> Result<()> {
     let mm = &ctx.accounts.mm;
     mm.init_miner(ctx.accounts, bump)?;
 

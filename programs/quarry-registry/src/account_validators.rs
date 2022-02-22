@@ -6,13 +6,13 @@ use vipers::prelude::*;
 use crate::{NewRegistry, SyncQuarry};
 
 impl<'info> Validate<'info> for NewRegistry<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         Ok(())
     }
 }
 
 impl<'info> Validate<'info> for SyncQuarry<'info> {
-    fn validate(&self) -> ProgramResult {
+    fn validate(&self) -> Result<()> {
         assert_keys_eq!(
             self.quarry.rewarder_key,
             self.registry.rewarder,

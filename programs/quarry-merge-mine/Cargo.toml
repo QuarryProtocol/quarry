@@ -20,11 +20,11 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = ">=0.21"
-anchor-spl = ">=0.21"
+anchor-lang = "^0.22"
+anchor-spl = "^0.22"
 quarry-mine = { path = "../quarry-mine", features = ["cpi"], version = "2.0.0" }
 quarry-mint-wrapper = { path = "../quarry-mint-wrapper", features = [
     "cpi"
 ], version = "2.0.0" }
 num-traits = "0.2"
-vipers = "^1.6"
+vipers = "^2.0"

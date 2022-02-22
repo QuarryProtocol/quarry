@@ -31,20 +31,20 @@ pub mod quarry_merge_mine {
     /// Creates a new [MergePool].
     /// Anyone can call this.
     #[access_control(ctx.accounts.validate())]
-    pub fn new_pool(ctx: Context<NewPool>, _bump: u8, _mint_bump: u8) -> ProgramResult {
+    pub fn new_pool(ctx: Context<NewPool>, _bump: u8, _mint_bump: u8) -> Result<()> {
         processor::init::new_pool(ctx)
     }
 
     /// Creates a new [MergeMiner].
     /// Anyone can call this.
     #[access_control(ctx.accounts.validate())]
-    pub fn init_merge_miner(ctx: Context<InitMergeMiner>, _bump: u8) -> ProgramResult {
+    pub fn init_merge_miner(ctx: Context<InitMergeMiner>, _bump: u8) -> Result<()> {
         processor::init::init_merge_miner(ctx)
     }
 
     /// Initializes a [quarry_mine::Miner] owned by the [MergeMiner].
     #[access_control(ctx.accounts.validate())]
-    pub fn init_miner(ctx: Context<InitMiner>, bump: u8) -> ProgramResult {
+    pub fn init_miner(ctx: Context<InitMiner>, bump: u8) -> Result<()> {
         processor::init::init_miner(ctx, bump)
     }
 
@@ -56,7 +56,7 @@ pub mod quarry_merge_mine {
     /// Before calling this, the owner should call the [anchor_spl::token::transfer] instruction
     /// to transfer to the [MergeMiner]'s primary token ATA.
     #[access_control(ctx.accounts.validate())]
-    pub fn stake_primary_miner(ctx: Context<QuarryStakePrimary>) -> ProgramResult {
+    pub fn stake_primary_miner(ctx: Context<QuarryStakePrimary>) -> Result<()> {
         processor::deposit::stake_primary_miner(ctx)
     }
 
@@ -64,7 +64,7 @@ pub mod quarry_merge_mine {
     /// Before calling this, the owner should call [stake_primary_miner] with the tokens
     /// they would like to stake.
     #[access_control(ctx.accounts.validate())]
-    pub fn stake_replica_miner(ctx: Context<QuarryStakeReplica>) -> ProgramResult {
+    pub fn stake_replica_miner(ctx: Context<QuarryStakeReplica>) -> Result<()> {
         processor::deposit::stake_replica_miner(ctx)
     }
 
@@ -74,19 +74,19 @@ pub mod quarry_merge_mine {
 
     /// Withdraws tokens from the [MergeMiner].
     #[access_control(ctx.accounts.validate())]
-    pub fn unstake_primary_miner(ctx: Context<QuarryStakePrimary>, amount: u64) -> ProgramResult {
+    pub fn unstake_primary_miner(ctx: Context<QuarryStakePrimary>, amount: u64) -> Result<()> {
         processor::withdraw::unstake_primary_miner(ctx, amount)
     }
 
     /// Unstakes all of a [MergeMiner]'s replica tokens for a [quarry_mine::Miner].
     #[access_control(ctx.accounts.validate())]
-    pub fn unstake_all_replica_miner(ctx: Context<QuarryStakeReplica>) -> ProgramResult {
+    pub fn unstake_all_replica_miner(ctx: Context<QuarryStakeReplica>) -> Result<()> {
         processor::withdraw::unstake_all_replica_miner(ctx)
     }
 
     /// Withdraws tokens from the [MergeMiner].
     #[access_control(ctx.accounts.validate())]
-    pub fn withdraw_tokens(ctx: Context<WithdrawTokens>) -> ProgramResult {
+    pub fn withdraw_tokens(ctx: Context<WithdrawTokens>) -> Result<()> {
         processor::withdraw::withdraw_tokens(ctx)
     }
 
@@ -96,7 +96,7 @@ pub mod quarry_merge_mine {
 
     /// Claims [quarry_mine] rewards on behalf of the [MergeMiner].
     #[access_control(ctx.accounts.validate())]
-    pub fn claim_rewards(ctx: Context<ClaimRewards>) -> ProgramResult {
+    pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
         processor::claim::claim_rewards(ctx)
     }
 }
@@ -112,7 +112,7 @@ pub struct NewPool<'info> {
     #[account(
         init,
         seeds = [
-          b"MergePool",
+          b"MergePool".as_ref(),
           primary_mint.key().to_bytes().as_ref()
         ],
         bump,
@@ -127,7 +127,7 @@ pub struct NewPool<'info> {
     #[account(
         init,
         seeds = [
-            b"ReplicaMint",
+            b"ReplicaMint".as_ref(),
             pool.key().to_bytes().as_ref()
         ],
         mint::decimals = primary_mint.decimals,
@@ -159,13 +159,14 @@ pub struct InitMergeMiner<'info> {
     pub pool: Account<'info, MergePool>,
 
     /// Owner of the [MergeMiner].
+    /// CHECK: Ok
     pub owner: UncheckedAccount<'info>,
 
     /// [MergeMiner].
     #[account(
         init,
         seeds = [
-          b"MergeMiner",
+          b"MergeMiner".as_ref(),
           pool.key().to_bytes().as_ref(),
           owner.key().to_bytes().as_ref()
         ],
@@ -193,7 +194,7 @@ pub struct InitMiner<'info> {
 
     /// [quarry_mine::Miner] to be created.
     #[account(mut)]
-    pub miner: UncheckedAccount<'info>,
+    pub miner: SystemAccount<'info>,
 
     /// [quarry_mine::Quarry] to create a [quarry_mine::Miner] for.
     #[account(mut)]
@@ -352,12 +353,13 @@ pub struct QuarryStake<'info> {
 
     /// Unused variable used as a filler for deprecated accounts. Handled by [quarry_mine].
     /// One should pass in a randomly generated Keypair for this account.
+    /// CHECK: OK
     #[account(mut)]
     pub unused_account: UncheckedAccount<'info>,
 }
 
 /// Error Codes
-#[error]
+#[error_code]
 pub enum ErrorCode {
     #[msg("Unauthorized.")]
     Unauthorized,

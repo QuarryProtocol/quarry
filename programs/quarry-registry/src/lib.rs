@@ -22,7 +22,7 @@ pub mod quarry_registry {
     ///
     /// * `max_quarries` - The maximum number of quarries that can be held in the registry.
     /// * `bump` - Bump seed.
-    pub fn new_registry(ctx: Context<NewRegistry>, max_quarries: u16, _bump: u8) -> ProgramResult {
+    pub fn new_registry(ctx: Context<NewRegistry>, max_quarries: u16, _bump: u8) -> Result<()> {
         ctx.accounts.validate()?;
         let registry = &mut ctx.accounts.registry;
         registry.bump = *unwrap_int!(ctx.bumps.get("registry"));
@@ -34,7 +34,7 @@ pub mod quarry_registry {
     }
 
     /// Synchronizes a [Quarry]'s token mint with the registry of its [Rewarder].
-    pub fn sync_quarry(ctx: Context<SyncQuarry>) -> ProgramResult {
+    pub fn sync_quarry(ctx: Context<SyncQuarry>) -> Result<()> {
         ctx.accounts.validate()?;
         let quarry = &ctx.accounts.quarry;
         let registry = &mut ctx.accounts.registry;
@@ -64,6 +64,7 @@ pub struct NewRegistry<'info> {
     pub registry: Account<'info, Registry>,
 
     /// Payer of the [Registry] initialization.
+    #[account(mut)]
     pub payer: Signer<'info>,
 
     /// System program.

@@ -7,7 +7,7 @@ use vipers::prelude::*;
 /// Deposits tokens into the [MergeMiner].
 /// Before calling this, the owner should call the [token::transfer] instruction
 /// to transfer to the [MergeMiner]'s [MergeMiner]::primary_token_account.
-pub fn stake_primary_miner(ctx: Context<QuarryStakePrimary>) -> ProgramResult {
+pub fn stake_primary_miner(ctx: Context<QuarryStakePrimary>) -> Result<()> {
     let mm = &ctx.accounts.stake.mm;
     let amount = mm.stake_max_primary_miner(ctx.accounts)?;
 
@@ -37,7 +37,7 @@ pub fn stake_primary_miner(ctx: Context<QuarryStakePrimary>) -> ProgramResult {
 /// Stakes all possible replica tokens into a [quarry_mine::Quarry].
 /// Before calling this, the owner should call the [anchor_spl::token::transfer] instruction
 /// to transfer to the [MergeMiner]'s primary token ATA.
-pub fn stake_replica_miner(ctx: Context<QuarryStakeReplica>) -> ProgramResult {
+pub fn stake_replica_miner(ctx: Context<QuarryStakeReplica>) -> Result<()> {
     // ! IMPORTANT NOTE !
     // The replica mint issued to this pool could greatly exceed that of the balance.
     // However, withdrawals are only possible if all of the replica miners are unstaked,
@@ -81,7 +81,7 @@ fn post_stake_replica_miner(
     ctx: Context<QuarryStakeReplica>,
     pre_replica_mint_supply: u64,
     stake_amount: u64,
-) -> ProgramResult {
+) -> Result<()> {
     ctx.accounts.stake.miner.reload()?;
     ctx.accounts.stake.miner_vault.reload()?;
     ctx.accounts.replica_mint.reload()?;

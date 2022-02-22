@@ -20,6 +20,6 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = ">=0.21"
-anchor-spl = ">=0.21"
-vipers = "^1.6"
+anchor-lang = "^0.22"
+anchor-spl = "^0.22"
+vipers = "^2.0"
