@@ -18,14 +18,14 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_TOOLCHAIN: nightly-2021-12-10
+  RUST_TOOLCHAIN: "1.58.1"
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install Rust nightly
+      - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
           override: true
@@ -37,14 +37,14 @@ jobs:
         run: cargo fmt -- --check
       - name: Run clippy
         run: cargo clippy --all-targets -- --deny=warnings
-      - name: Run doc
-        run: cargo doc
+      - name: Check if publish works
+        run: cargo publish --no-verify --dry-run
 
   unit-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install Rust nightly
+      - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
           override: true
@@ -54,3 +54,18 @@ jobs:
       - uses: Swatinem/rust-cache@v1
       - name: Run unit tests
         run: cargo test
+
+  doc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          override: true
+          profile: minimal
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v1
+      - name: Generate docs
+        run: cargo doc
