@@ -24,7 +24,7 @@ pub mod quarry_mint_wrapper {
 
     /// Creates a new [MintWrapper].
     #[access_control(ctx.accounts.validate())]
-    pub fn new_wrapper(ctx: Context<NewWrapper>, _bump: u8, hard_cap: u64) -> ProgramResult {
+    pub fn new_wrapper(ctx: Context<NewWrapper>, _bump: u8, hard_cap: u64) -> Result<()> {
         let mint_wrapper = &mut ctx.accounts.mint_wrapper;
         mint_wrapper.base = ctx.accounts.base.key();
         mint_wrapper.bump = *unwrap_int!(ctx.bumps.get("mint_wrapper"));
@@ -83,7 +83,7 @@ pub mod quarry_mint_wrapper {
 
     /// Creates a new [Minter].
     #[access_control(ctx.accounts.validate())]
-    pub fn new_minter(ctx: Context<NewMinter>, _bump: u8) -> ProgramResult {
+    pub fn new_minter(ctx: Context<NewMinter>, _bump: u8) -> Result<()> {
         let minter = &mut ctx.accounts.minter;
 
         minter.mint_wrapper = ctx.accounts.auth.mint_wrapper.key();
@@ -111,7 +111,7 @@ pub mod quarry_mint_wrapper {
 
     /// Updates a [Minter]'s allowance.
     #[access_control(ctx.accounts.validate())]
-    pub fn minter_update(ctx: Context<MinterUpdate>, allowance: u64) -> ProgramResult {
+    pub fn minter_update(ctx: Context<MinterUpdate>, allowance: u64) -> Result<()> {
         let minter = &mut ctx.accounts.minter;
         let previous_allowance = minter.allowance;
         minter.allowance = allowance;
@@ -133,7 +133,7 @@ pub mod quarry_mint_wrapper {
 
     /// Performs a mint.
     #[access_control(ctx.accounts.validate())]
-    pub fn perform_mint(ctx: Context<PerformMint>, amount: u64) -> ProgramResult {
+    pub fn perform_mint(ctx: Context<PerformMint>, amount: u64) -> Result<()> {
         let mint_wrapper = &ctx.accounts.mint_wrapper;
         let minter = &mut ctx.accounts.minter;
         invariant!(minter.allowance >= amount, MinterAllowanceExceeded);
@@ -207,7 +207,8 @@ pub struct NewWrapper<'info> {
     pub token_program: Program<'info, Token>,
 
     /// Payer.
-    pub payer: UncheckedAccount<'info>,
+    #[account(mut)]
+    pub payer: Signer<'info>,
 
     /// System program.
     pub system_program: Program<'info, System>,
@@ -236,6 +237,7 @@ pub struct NewMinter<'info> {
     pub minter: Account<'info, Minter>,
 
     /// Payer for creating the minter.
+    #[account(mut)]
     pub payer: Signer<'info>,
 
     /// System program.
@@ -478,7 +480,7 @@ pub struct MinterMintEvent {
 /// Error Codes
 /// --------------------------------
 
-#[error]
+#[error_code]
 pub enum ErrorCode {
     #[msg("You are not authorized to perform this action.")]
     Unauthorized,

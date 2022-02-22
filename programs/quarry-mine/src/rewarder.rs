@@ -22,10 +22,7 @@ impl Rewarder {
 
     /// Computes the amount of rewards a [crate::Quarry] should receive, annualized.
     /// This should be run only after `total_rewards_shares` has been set.
-    pub fn compute_quarry_annual_rewards_rate(
-        &self,
-        quarry_rewards_share: u64,
-    ) -> Result<u64, ProgramError> {
+    pub fn compute_quarry_annual_rewards_rate(&self, quarry_rewards_share: u64) -> Result<u64> {
         invariant!(
             quarry_rewards_share <= self.total_rewards_shares,
             InvalidRewardsShare
@@ -48,7 +45,7 @@ impl Rewarder {
 
 impl<'info> ClaimRewards<'info> {
     /// Calculates rewards and claims them.
-    pub fn calculate_and_claim_rewards(&mut self) -> ProgramResult {
+    pub fn calculate_and_claim_rewards(&mut self) -> Result<()> {
         let miner = &mut self.stake.miner;
         let amount_claimable = miner.rewards_earned;
         if amount_claimable == 0 {
@@ -103,11 +100,7 @@ impl<'info> ClaimRewards<'info> {
         }
     }
 
-    fn perform_mint(
-        &self,
-        destination: Account<'info, TokenAccount>,
-        amount: u64,
-    ) -> ProgramResult {
+    fn perform_mint(&self, destination: Account<'info, TokenAccount>, amount: u64) -> Result<()> {
         let claim_mint_accounts = self.create_perform_mint_accounts(destination);
 
         // Create the signer seeds.
@@ -125,13 +118,13 @@ impl<'info> ClaimRewards<'info> {
     }
 
     /// Mints the claimed tokens.
-    fn mint_claimed_tokens(&self, amount_claimable_minus_fees: u64) -> ProgramResult {
+    fn mint_claimed_tokens(&self, amount_claimable_minus_fees: u64) -> Result<()> {
         let rewards_token_account = (*self.rewards_token_account).clone();
         self.perform_mint(rewards_token_account, amount_claimable_minus_fees)
     }
 
     /// Mints the fee tokens.
-    fn mint_fees(&self, claim_fee: u64) -> ProgramResult {
+    fn mint_fees(&self, claim_fee: u64) -> Result<()> {
         let claim_fee_token_account = (*self.claim_fee_token_account).clone();
         self.perform_mint(claim_fee_token_account, claim_fee)
     }

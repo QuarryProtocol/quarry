@@ -1,7 +1,7 @@
 //! Calculates token distribution rates.
 
 use crate::{Miner, Quarry};
-use anchor_lang::prelude::{msg, ProgramError, ProgramResult};
+use anchor_lang::prelude::*;
 use spl_math::uint::U192;
 use std::cmp;
 use vipers::prelude::*;
@@ -83,7 +83,7 @@ impl Payroll {
     }
 
     /// Calculates the amount of rewards to pay for each staked token, performing safety checks.
-    pub fn calculate_reward_per_token(&self, current_ts: i64) -> Result<u128, ProgramError> {
+    pub fn calculate_reward_per_token(&self, current_ts: i64) -> Result<u128> {
         invariant!(current_ts >= self.last_checkpoint_ts, InvalidTimestamp);
         Ok(unwrap_int!(
             self.calculate_reward_per_token_unsafe(current_ts)
@@ -119,7 +119,7 @@ impl Payroll {
         tokens_deposited: u64,
         rewards_per_token_paid: u128,
         rewards_earned: u64,
-    ) -> Result<u128, ProgramError> {
+    ) -> Result<u128> {
         invariant!(
             tokens_deposited <= self.total_tokens_deposited,
             NotEnoughTokens
@@ -161,7 +161,7 @@ impl Payroll {
         current_ts: i64,
         amount_claimable: u64,
         miner: &Miner,
-    ) -> ProgramResult {
+    ) -> Result<()> {
         let rewards_upperbound =
             unwrap_int!(self
                 .calculate_claimable_upper_bound_unsafe(current_ts, miner.rewards_per_token_paid,));
