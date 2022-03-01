@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Release SDK on NPM
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: cachix/install-nix-action@v16
       - name: Setup Cachix
@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Release crate on crates.io
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v16
       - name: Setup Cachix
         uses: cachix/cachix-action@v10
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Release verifiable binaries
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v16
       - name: Setup Cachix
         uses: cachix/cachix-action@v10
@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - uses: cachix/install-nix-action@v16
       - name: Setup Cachix
