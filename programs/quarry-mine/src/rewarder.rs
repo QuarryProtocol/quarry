@@ -47,7 +47,11 @@ impl<'info> ClaimRewards<'info> {
     /// Calculates rewards and claims them.
     pub fn calculate_and_claim_rewards(&mut self) -> Result<()> {
         let miner = &mut self.stake.miner;
-        let amount_claimable = miner.rewards_earned;
+
+        let miner_rewards = miner.rewards_earned;
+        let hard_cap = self.mint_wrapper.hard_cap;
+        let amount_claimable = std::cmp::min(miner_rewards, hard_cap);
+
         if amount_claimable == 0 {
             // 0 claimable -- skip all logic
             return Ok(());
