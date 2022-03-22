@@ -1,7 +1,12 @@
 import type { Provider } from "@saberhq/solana-contrib";
 import { TransactionEnvelope } from "@saberhq/solana-contrib";
-import type { Token } from "@saberhq/token-utils";
-import { getATAAddress, getOrCreateATA, u64 } from "@saberhq/token-utils";
+import type { ProgramAccount } from "@saberhq/token-utils";
+import {
+  getATAAddress,
+  getOrCreateATA,
+  Token,
+  u64,
+} from "@saberhq/token-utils";
 import type { PublicKey } from "@solana/web3.js";
 
 import type {
@@ -10,7 +15,7 @@ import type {
   QuarryData,
   RewarderData,
 } from "../../programs/mine";
-import type { QuarrySDK } from "../../sdk";
+import { QuarrySDK } from "../../sdk";
 import { MinerWrapper } from "./miner";
 import { Payroll } from "./payroll";
 import { findMinerAddress } from "./pda";
@@ -36,6 +41,23 @@ export class QuarryWrapper {
      */
     readonly key: PublicKey
   ) {}
+
+  static fromData(
+    provider: Provider,
+    rewarder: ProgramAccount<RewarderData>,
+    quarry: ProgramAccount<QuarryData>
+  ): QuarryWrapper {
+    return new QuarryWrapper(
+      QuarrySDK.load({ provider }),
+      Token.fromMint(
+        quarry.account.tokenMintKey,
+        quarry.account.tokenMintDecimals
+      ),
+      rewarder.account,
+      quarry.account,
+      quarry.publicKey
+    );
+  }
 
   /**
    * The program.
