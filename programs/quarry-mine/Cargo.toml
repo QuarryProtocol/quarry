@@ -20,8 +20,8 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = "^0.22"
-anchor-spl = "^0.22"
+anchor-lang = ">=0.22, <0.24"
+anchor-spl = ">=0.22, <0.24"
 num-traits = "0.2.14"
 quarry-mint-wrapper = { path = "../quarry-mint-wrapper", features = [
   "cpi"
