@@ -116,7 +116,8 @@ pub struct NewPool<'info> {
           primary_mint.key().to_bytes().as_ref()
         ],
         bump,
-        payer = payer
+        payer = payer,
+        space = 8 + MergePool::LEN
     )]
     pub pool: Account<'info, MergePool>,
 
@@ -133,8 +134,7 @@ pub struct NewPool<'info> {
         mint::decimals = primary_mint.decimals,
         mint::authority = pool,
         bump,
-        payer = payer,
-        space = Mint::LEN
+        payer = payer
     )]
     pub replica_mint: Account<'info, Mint>,
 
@@ -171,7 +171,8 @@ pub struct InitMergeMiner<'info> {
           owner.key().to_bytes().as_ref()
         ],
         bump,
-        payer = payer
+        payer = payer,
+        space = 8 + MergeMiner::LEN
     )]
     pub mm: Account<'info, MergeMiner>,
 

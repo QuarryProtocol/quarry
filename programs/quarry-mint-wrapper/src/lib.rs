@@ -192,7 +192,8 @@ pub struct NewWrapper<'info> {
             base.key().to_bytes().as_ref()
         ],
         bump,
-        payer = payer
+        payer = payer,
+        space = 8 + MintWrapper::LEN
     )]
     pub mint_wrapper: Account<'info, MintWrapper>,
 
@@ -233,7 +234,8 @@ pub struct NewMinter<'info> {
             minter_authority.key().to_bytes().as_ref()
         ],
         bump,
-        payer = payer
+        payer = payer,
+        space = 8 + Minter::LEN
     )]
     pub minter: Account<'info, Minter>,
 
@@ -356,6 +358,10 @@ pub struct MintWrapper {
     pub total_minted: u64,
 }
 
+impl MintWrapper {
+    pub const LEN: usize = 32 + 1 + 8 + 32 + 32 + 32 + 8 + 8 + 8;
+}
+
 /// One who can mint.
 ///
 /// ```ignore
@@ -383,6 +389,10 @@ pub struct Minter {
     pub allowance: u64,
     /// Cumulative sum of the number of tokens ever minted by this [Minter].
     pub total_minted: u64,
+}
+
+impl Minter {
+    pub const LEN: usize = 32 + 32 + 1 + 8 + 8 + 8;
 }
 
 /// --------------------------------
