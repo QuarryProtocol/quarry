@@ -35,6 +35,10 @@ pub struct MergePool {
     pub reserved: [u64; 16],
 }
 
+impl MergePool {
+    pub const LEN: usize = 32 + 1 + 32 + 8 + 8 + 8 + 8 * 16;
+}
+
 /// Enables mining multiple [quarry_mine::Quarry]s simultaneously with only one deposit.
 ///
 /// To derive the address, use the following code:
@@ -72,4 +76,8 @@ pub struct MergeMiner {
     /// Primary tokens may only be withdrawn if [MergeMiner::primary_balance] == 0 and
     /// [MergeMiner::replica_balance] == 0.
     pub replica_balance: u64,
+}
+
+impl MergeMiner {
+    pub const LEN: usize = 32 + 32 + 1 + 8 + 8 + 8;
 }

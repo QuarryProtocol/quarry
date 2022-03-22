@@ -86,6 +86,10 @@ pub struct Redeemer {
     pub total_tokens_redeemed: u64,
 }
 
+impl Redeemer {
+    pub const LEN: usize = 32 + 32 + 1 + 8;
+}
+
 // --------------------------------
 // Instructions
 // --------------------------------
@@ -101,7 +105,8 @@ pub struct CreateRedeemer<'info> {
             redemption_mint.to_account_info().key.as_ref()
         ],
         bump,
-        payer = payer
+        payer = payer,
+        space = 8 + Redeemer::LEN
     )]
     pub redeemer: Account<'info, Redeemer>,
     /// [Mint] of the IOU token.

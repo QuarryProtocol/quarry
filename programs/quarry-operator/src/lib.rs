@@ -218,6 +218,10 @@ pub struct Operator {
     pub generation: u64,
 }
 
+impl Operator {
+    pub const LEN: usize = 32 + 1 + 32 + 32 + 32 + 32 + 32 + 8 + 8;
+}
+
 // --------------------------------
 // Instructions
 // --------------------------------
@@ -235,7 +239,8 @@ pub struct CreateOperator<'info> {
             base.key().to_bytes().as_ref()
         ],
         bump,
-        payer = payer
+        payer = payer,
+        space = 8 + Operator::LEN
     )]
     pub operator: Account<'info, Operator>,
     /// [Rewarder] of the token.
