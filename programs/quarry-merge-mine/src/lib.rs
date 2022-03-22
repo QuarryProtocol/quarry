@@ -134,8 +134,7 @@ pub struct NewPool<'info> {
         mint::decimals = primary_mint.decimals,
         mint::authority = pool,
         bump,
-        payer = payer,
-        space = Mint::LEN
+        payer = payer
     )]
     pub replica_mint: Account<'info, Mint>,
 
