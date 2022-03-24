@@ -728,14 +728,14 @@ pub struct CreateMiner<'info> {
         payer = payer,
         space = 8 + Miner::LEN
     )]
-    pub miner: Account<'info, Miner>,
+    pub miner: Box<Account<'info, Miner>>,
 
     /// [Quarry] to create a [Miner] for.
     #[account(mut)]
-    pub quarry: Account<'info, Quarry>,
+    pub quarry: Box<Account<'info, Quarry>>,
 
     /// [Rewarder].
-    pub rewarder: Account<'info, Rewarder>,
+    pub rewarder: Box<Account<'info, Rewarder>>,
 
     /// System program.
     pub system_program: Program<'info, System>,
