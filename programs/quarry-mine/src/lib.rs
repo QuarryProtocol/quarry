@@ -26,6 +26,9 @@ pub mod payroll;
 pub mod quarry;
 pub mod rewarder;
 
+mod instructions;
+use instructions::*;
+
 use crate::quarry::StakeAction;
 
 declare_id!("QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB");
@@ -369,6 +372,15 @@ pub mod quarry_mine {
             token: ctx.accounts.token_account.mint,
         });
         Ok(())
+    }
+
+    /// Withdraw tokens from a [Miner]-owned token account that is not the [Miner::token_vault_key].
+    /// This is useful for if tokens are sent directly to a [Miner].
+    ///
+    /// Only the [Miner::authority] may call this.
+    #[access_control(ctx.accounts.validate())]
+    pub fn rescue_tokens(ctx: Context<RescueTokens>, amount: u64) -> Result<()> {
+        instructions::rescue_tokens::handler(ctx, amount)
     }
 
     /// --------------------------------
