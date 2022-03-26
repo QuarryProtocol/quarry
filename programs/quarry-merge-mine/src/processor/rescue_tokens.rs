@@ -30,6 +30,8 @@ pub fn handler(ctx: Context<RescueTokens>, amount: u64) -> Result<()> {
 pub struct RescueTokens<'info> {
     /// The [MergeMiner::owner].
     pub mm_owner: Signer<'info>,
+    /// The [MergePool].
+    pub merge_pool: Account<'info, MergePool>,
     /// The [MergeMiner] (also the [quarry_mine::Miner] authority).
     pub mm: Account<'info, MergeMiner>,
 
@@ -52,6 +54,8 @@ impl<'info> Validate<'info> for RescueTokens<'info> {
         // only callable by merge miner authority
         assert_keys_eq!(self.mm_owner, self.mm.owner);
 
+        assert_keys_eq!(self.merge_pool, self.mm.pool);
+
         // mm must be authority of the miner
         assert_keys_eq!(self.miner.authority, self.mm);
 
@@ -67,6 +71,12 @@ impl<'info> Validate<'info> for RescueTokens<'info> {
             self.miner_token_account.mint,
             self.destination_token_account.mint
         );
+
+        // cannot be a primary or replica mint
+        let mint = self.miner_token_account.mint;
+        assert_keys_neq!(self.merge_pool.primary_mint, mint);
+        assert_keys_neq!(self.merge_pool.replica_mint, mint);
+
         Ok(())
     }
 }

@@ -332,11 +332,13 @@ export class MergeMine {
    * @returns
    */
   rescueTokens({
+    mergePool,
     mergeMiner,
     miner,
     minerTokenAccount,
     destinationTokenAccount,
   }: {
+    mergePool: PublicKey;
     mergeMiner: PublicKey;
     miner: PublicKey;
     minerTokenAccount: PublicKey;
@@ -346,6 +348,7 @@ export class MergeMine {
     const withdrawTokensIX = this.program.instruction.rescueTokens({
       accounts: {
         mmOwner: owner,
+        mergePool,
         mm: mergeMiner,
         miner,
         minerTokenAccount,
