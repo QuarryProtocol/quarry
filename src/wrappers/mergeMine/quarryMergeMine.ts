@@ -11,6 +11,7 @@ import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { SystemProgram, SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
 
 import type { Programs } from "../../constants";
+import { QUARRY_ADDRESSES } from "../../constants";
 import type {
   MergeMinerData,
   MergePoolData,
@@ -324,6 +325,36 @@ export class MergeMine {
       ]),
       miner: minerKey,
     };
+  }
+
+  /**
+   * Rescue stuck tokens in a merge miner.
+   * @returns
+   */
+  rescueTokens({
+    mergeMiner,
+    miner,
+    minerTokenAccount,
+    destinationTokenAccount,
+  }: {
+    mergeMiner: PublicKey;
+    miner: PublicKey;
+    minerTokenAccount: PublicKey;
+    destinationTokenAccount: PublicKey;
+  }): TransactionEnvelope {
+    const owner = this.provider.wallet.publicKey;
+    const withdrawTokensIX = this.program.instruction.rescueTokens({
+      accounts: {
+        mmOwner: owner,
+        mm: mergeMiner,
+        miner,
+        minerTokenAccount,
+        destinationTokenAccount,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        quarryMineProgram: QUARRY_ADDRESSES.Mine,
+      },
+    });
+    return new TransactionEnvelope(this.provider, [withdrawTokensIX]);
   }
 
   /**
