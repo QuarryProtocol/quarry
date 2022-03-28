@@ -788,6 +788,17 @@ describe("Mine", () => {
         const userATA = await getTokenAccount(provider, userATAKey);
         expect(userATA.amount).to.bignumber.eq(EXPECTED_RESCUE_AMOUNT);
       });
+
+      it("Cannot rescue with incorrect signer", async () => {
+        const minerActions = await quarry.getMinerActions(user.publicKey);
+        const tx = await minerActions.rescueTokens({
+          mint: tokenMint,
+          owner: user.publicKey,
+        });
+        await expectTX(tx, "rescue tokens for user").to.be.rejectedWith(
+          "Signature verification failed"
+        );
+      });
     });
   });
 });
