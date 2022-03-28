@@ -23,7 +23,6 @@ import invariant from "tiny-invariant";
 
 import type {
   MinerData,
-  MinerWrapper,
   MineWrapper,
   MintWrapper,
   QuarryData,
@@ -702,7 +701,6 @@ describe("Mine", () => {
 
     context("Rescue tokens", () => {
       let user: Keypair;
-      let minerWrapper: MinerWrapper;
       let tokenMint: PublicKey;
       const EXPECTED_RESCUE_AMOUNT = new u64(100_000_000);
 
@@ -720,7 +718,7 @@ describe("Mine", () => {
         expect(quarry).to.exist;
 
         // create the miner
-        const { miner, wrapper, tx } = await quarry.createMiner({
+        const { miner, tx } = await quarry.createMiner({
           authority: user.publicKey,
         });
         tx.addSigners(user);
@@ -746,11 +744,37 @@ describe("Mine", () => {
         );
 
         await expectTXTable(tx, "create miner with ATA").to.be.fulfilled;
-        minerWrapper = wrapper;
+      });
+
+      it("Cannot rescue staked token", async () => {
+        const stakeAmount = EXPECTED_RESCUE_AMOUNT;
+        await newUserStakeTokenAccount(
+          sdk,
+          quarry,
+          stakeToken,
+          stakedMintAuthority,
+          stakeAmount.toNumber()
+        );
+        const minerActions = await quarry.getMinerActions(
+          provider.wallet.publicKey
+        );
+        const stakeTx = minerActions.stake(
+          new TokenAmount(stakeToken, stakeAmount)
+        );
+        await expectTX(stakeTx, "deposit staked tokens").to.be.fulfilled;
+
+        const rescueTX = await minerActions.rescueTokens({
+          mint: stakeToken.mintAccount,
+        });
+        await expectTX(
+          rescueTX,
+          "rescue staked tokens for user"
+        ).to.be.rejectedWith("0x454");
       });
 
       it("Rescue tokens from miner ATA", async () => {
-        const tx = await minerWrapper.rescueTokens({
+        const minerActions = await quarry.getMinerActions(user.publicKey);
+        const tx = await minerActions.rescueTokens({
           mint: tokenMint,
           owner: user.publicKey,
         });
