@@ -5,24 +5,21 @@ use anchor_spl::token;
 use quarry_mine::{program::QuarryMine, Miner};
 
 /// Handler for the [crate::quarry_merge_mine::rescue_tokens] instruction.
-pub fn handler(ctx: Context<RescueTokens>, amount: u64) -> Result<()> {
+pub fn handler(ctx: Context<RescueTokens>) -> Result<()> {
     // Rescue tokens
     let seeds = gen_merge_miner_signer_seeds!(ctx.accounts.mm);
     let signer_seeds = &[&seeds[..]];
-    quarry_mine::cpi::rescue_tokens(
-        CpiContext::new_with_signer(
-            ctx.accounts.quarry_mine_program.to_account_info(),
-            quarry_mine::cpi::accounts::RescueTokens {
-                miner: ctx.accounts.miner.to_account_info(),
-                authority: ctx.accounts.mm.to_account_info(),
-                miner_token_account: ctx.accounts.miner_token_account.to_account_info(),
-                destination_token_account: ctx.accounts.destination_token_account.to_account_info(),
-                token_program: ctx.accounts.token_program.to_account_info(),
-            },
-            signer_seeds,
-        ),
-        amount,
-    )
+    quarry_mine::cpi::rescue_tokens(CpiContext::new_with_signer(
+        ctx.accounts.quarry_mine_program.to_account_info(),
+        quarry_mine::cpi::accounts::RescueTokens {
+            miner: ctx.accounts.miner.to_account_info(),
+            authority: ctx.accounts.mm.to_account_info(),
+            miner_token_account: ctx.accounts.miner_token_account.to_account_info(),
+            destination_token_account: ctx.accounts.destination_token_account.to_account_info(),
+            token_program: ctx.accounts.token_program.to_account_info(),
+        },
+        signer_seeds,
+    ))
 }
 
 /// Accounts for the [crate::quarry_merge_mine::rescue_tokens] instruction.

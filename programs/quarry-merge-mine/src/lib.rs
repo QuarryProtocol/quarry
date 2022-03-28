@@ -93,8 +93,8 @@ pub mod quarry_merge_mine {
 
     /// Rescues stuck tokens in miners owned by a [MergeMiner].
     #[access_control(ctx.accounts.validate())]
-    pub fn rescue_tokens(ctx: Context<RescueTokens>, amount: u64) -> Result<()> {
-        processor::rescue_tokens::handler(ctx, amount)
+    pub fn rescue_tokens(ctx: Context<RescueTokens>) -> Result<()> {
+        processor::rescue_tokens::handler(ctx)
     }
 
     // --------------------------------

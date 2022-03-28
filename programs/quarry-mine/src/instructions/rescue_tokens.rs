@@ -3,7 +3,7 @@
 use crate::*;
 
 /// Handler for the [crate::quarry_mine::rescue_tokens] instruction.
-pub fn handler(ctx: Context<RescueTokens>, amount: u64) -> Result<()> {
+pub fn handler(ctx: Context<RescueTokens>) -> Result<()> {
     let seeds = gen_miner_signer_seeds!(ctx.accounts.miner);
     let signer_seeds = &[&seeds[..]];
 
@@ -18,7 +18,7 @@ pub fn handler(ctx: Context<RescueTokens>, amount: u64) -> Result<()> {
             },
             signer_seeds,
         ),
-        amount,
+        ctx.accounts.miner_token_account.amount,
     )?;
 
     Ok(())
