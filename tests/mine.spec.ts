@@ -1,5 +1,5 @@
 import * as anchor from "@project-serum/anchor";
-import { expectTX } from "@saberhq/chai-solana";
+import { expectTX, expectTXTable } from "@saberhq/chai-solana";
 import type { Provider } from "@saberhq/solana-contrib";
 import { TransactionEnvelope } from "@saberhq/solana-contrib";
 import {
@@ -8,12 +8,14 @@ import {
   getATAAddress,
   getOrCreateATA,
   getTokenAccount,
+  SPLToken,
   Token,
   TOKEN_PROGRAM_ID,
   TokenAmount,
+  u64,
 } from "@saberhq/token-utils";
 import type { PublicKey } from "@solana/web3.js";
-import { Keypair } from "@solana/web3.js";
+import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import * as assert from "assert";
 import { BN } from "bn.js";
 import { expect } from "chai";
@@ -21,6 +23,7 @@ import invariant from "tiny-invariant";
 
 import type {
   MinerData,
+  MinerWrapper,
   MineWrapper,
   MintWrapper,
   QuarryData,
@@ -695,6 +698,72 @@ describe("Mine", () => {
         userStakeTokenAccount
       );
       expect(userStakeTokenAccountInfo.amount.toNumber()).to.eq(amount);
+    });
+
+    context("Rescue tokens", () => {
+      let user: Keypair;
+      let minerWrapper: MinerWrapper;
+      let tokenMint: PublicKey;
+      const EXPECTED_RESCUE_AMOUNT = new u64(100_000_000);
+
+      before("Set up user and mint", async () => {
+        user = Keypair.generate();
+        await provider.connection.requestAirdrop(
+          user.publicKey,
+          LAMPORTS_PER_SOL
+        );
+        tokenMint = await createMint(provider);
+      });
+
+      beforeEach("Set up miner", async () => {
+        quarry = await rewarder.getQuarry(stakeToken);
+        expect(quarry).to.exist;
+
+        // create the miner
+        const { miner, wrapper, tx } = await quarry.createMiner({
+          authority: user.publicKey,
+        });
+        tx.addSigners(user);
+
+        const { address: minerATA, instruction } = await getOrCreateATA({
+          provider,
+          mint: tokenMint,
+          owner: miner,
+        });
+        if (instruction) {
+          tx.instructions.push(instruction);
+        }
+        // Mint tokens to miner
+        tx.instructions.push(
+          SPLToken.createMintToInstruction(
+            TOKEN_PROGRAM_ID,
+            tokenMint,
+            minerATA,
+            provider.wallet.publicKey,
+            [],
+            EXPECTED_RESCUE_AMOUNT
+          )
+        );
+
+        await expectTXTable(tx, "create miner with ATA").to.be.fulfilled;
+        minerWrapper = wrapper;
+      });
+
+      it("Rescue tokens from miner ATA", async () => {
+        const tx = await minerWrapper.rescueTokens({
+          mint: tokenMint,
+          owner: user.publicKey,
+        });
+        tx.addSigners(user);
+        await expectTXTable(tx, "rescue tokens for user").to.be.fulfilled;
+
+        const userATAKey = await getATAAddress({
+          mint: tokenMint,
+          owner: user.publicKey,
+        });
+        const userATA = await getTokenAccount(provider, userATAKey);
+        expect(userATA.amount).to.bignumber.eq(EXPECTED_RESCUE_AMOUNT);
+      });
     });
   });
 });
