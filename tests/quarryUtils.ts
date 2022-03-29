@@ -7,20 +7,7 @@ import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import type { RewarderWrapper } from "../src";
 import { QuarrySDK, QuarryWrapper } from "../src";
 
-export const createRewarderAndQuarry = async ({
-  connection,
-  stakedToken,
-  annualRate,
-  adminKP = Keypair.generate(),
-}: {
-  adminKP?: Keypair;
-  connection: Connection;
-  /**
-   * Token to stake in the Quarry.
-   */
-  stakedToken: Token;
-  annualRate: u64;
-}): Promise<{
+export type RewarderAndQuarry = {
   adminKP: Keypair;
   /**
    * Token issued as Quarry rewards.
@@ -38,7 +25,22 @@ export const createRewarderAndQuarry = async ({
    * Rewarder wrapper
    */
   rewarderW: RewarderWrapper;
-}> => {
+};
+
+export const createRewarderAndQuarry = async ({
+  connection,
+  stakedToken,
+  annualRate,
+  adminKP = Keypair.generate(),
+}: {
+  adminKP?: Keypair;
+  connection: Connection;
+  /**
+   * Token to stake in the Quarry.
+   */
+  stakedToken: Token;
+  annualRate: u64;
+}): Promise<RewarderAndQuarry> => {
   const { rewardsToken, rewarder, rewarderW, quarrySDK } = await createRewarder(
     {
       connection,

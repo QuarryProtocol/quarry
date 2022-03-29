@@ -440,48 +440,4 @@ export class MergeMiner {
       unusedAccount: Keypair.generate().publicKey,
     };
   }
-
-  /**
-   * Rescue stuck tokens in a merge miner.
-   * @returns
-   */
-  async rescueTokens({
-    rewarder,
-    mint,
-    minerTokenAccount,
-  }: {
-    rewarder: PublicKey;
-    mint: PublicKey;
-    minerTokenAccount: PublicKey;
-  }): Promise<TransactionEnvelope> {
-    const owner = this.provider.wallet.publicKey;
-
-    const [quarry] = await findQuarryAddress(rewarder, this.primaryMint);
-    const [miner] = await findMinerAddress(quarry, this.mm.key);
-
-    const { address: destinationTokenAccount, instruction: ataIx } =
-      await getOrCreateATA({
-        provider: this.provider,
-        mint,
-        owner,
-      });
-
-    const withdrawTokensIX = this.program.instruction.rescueTokens({
-      accounts: {
-        mmOwner: owner,
-        mergePool: this.pool,
-        mm: this.mm,
-        miner,
-        minerTokenAccount,
-        destinationTokenAccount,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        quarryMineProgram: QUARRY_ADDRESSES.Mine,
-      },
-    });
-
-    return new TransactionEnvelope(
-      this.provider,
-      ataIx ? [ataIx, withdrawTokensIX] : [withdrawTokensIX]
-    );
-  }
 }

@@ -2,7 +2,10 @@ import { expectTX, expectTXTable } from "@saberhq/chai-solana";
 import type { Provider } from "@saberhq/solana-contrib";
 import { TransactionEnvelope } from "@saberhq/solana-contrib";
 import {
+  createATAInstruction,
   createMint,
+  getATAAddress,
+  getOrCreateATA,
   getOrCreateATAs,
   getTokenAccount,
   sleep,
@@ -12,12 +15,15 @@ import {
   TokenAmount,
   u64,
 } from "@saberhq/token-utils";
+import type { PublicKey } from "@solana/web3.js";
 import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import BN from "bn.js";
 import { expect } from "chai";
+import invariant from "tiny-invariant";
 
 import { findMergeMinerAddress, findMinerAddress, QuarrySDK } from "../src";
 import { QuarryMergeMineErrors } from "../src/idls/quarry_merge_mine";
+import type { RewarderAndQuarry } from "./quarryUtils";
 import { createRewarderAndQuarry } from "./quarryUtils";
 import { DEFAULT_DECIMALS } from "./utils";
 import { makeSDK } from "./workspace";
@@ -27,6 +33,8 @@ describe("Quarry Merge Mine", () => {
   let adminKP: Keypair;
   let minterKP: Keypair;
   let ownerKP: Keypair;
+  let stakedToken: Token;
+  let primary: RewarderAndQuarry;
 
   beforeEach("Initialize", async () => {
     const sdk = makeSDK();
@@ -43,25 +51,25 @@ describe("Quarry Merge Mine", () => {
     await connection.confirmTransaction(
       await connection.requestAirdrop(ownerKP.publicKey, 10 * LAMPORTS_PER_SOL)
     );
+
+    const stakedTokenMint = await createMint(
+      provider,
+      minterKP.publicKey,
+      DEFAULT_DECIMALS
+    );
+    stakedToken = Token.fromMint(stakedTokenMint, DEFAULT_DECIMALS);
+
+    // primary pool
+    primary = await createRewarderAndQuarry({
+      connection,
+      stakedToken,
+      annualRate: new u64(1_000_000000),
+    });
   });
 
   describe("MergeMiner SDK", () => {
     it("happy path", async () => {
       const { connection } = provider;
-
-      const stakedTokenMint = await createMint(
-        provider,
-        minterKP.publicKey,
-        DEFAULT_DECIMALS
-      );
-      const stakedToken = Token.fromMint(stakedTokenMint, DEFAULT_DECIMALS);
-
-      // primary pool
-      const primary = await createRewarderAndQuarry({
-        connection,
-        stakedToken,
-        annualRate: new u64(1_000_000000),
-      });
 
       const ownerSDK = QuarrySDK.load({
         provider,
@@ -71,7 +79,7 @@ describe("Quarry Merge Mine", () => {
         key: poolKey,
         replicaToken,
       } = await ownerSDK.mergeMine.newPool({
-        primaryMint: stakedTokenMint,
+        primaryMint: stakedToken.mintAccount,
       });
       await expectTX(initPoolTX, "Init pool").to.be.fulfilled;
 
@@ -108,7 +116,7 @@ describe("Quarry Merge Mine", () => {
         await getOrCreateATAs({
           provider,
           mints: {
-            staked: stakedTokenMint,
+            staked: stakedToken.mintAccount,
             primaryRewards: primary.rewardsToken.mintAccount,
             replicaARewards: replicaA.rewardsToken.mintAccount,
             replicaBRewards: replicaB.rewardsToken.mintAccount,
@@ -122,11 +130,11 @@ describe("Quarry Merge Mine", () => {
             ...createUserATAs,
             SPLToken.createMintToInstruction(
               TOKEN_PROGRAM_ID,
-              stakedTokenMint,
+              stakedToken.mintAccount,
               ownerAccounts.staked,
               minterKP.publicKey,
               [],
-              1_000_000_000000
+              1_000_000_000_000
             ),
           ],
           [minterKP]
@@ -412,6 +420,102 @@ describe("Quarry Merge Mine", () => {
           )}`
         );
       }
+    });
+
+    describe("Rescue Tokens", () => {
+      let rescueMint: PublicKey;
+      let minerKey: PublicKey;
+      let minerATAKey: PublicKey;
+      let mergePoolKey: PublicKey;
+      let mergeMinerKey: PublicKey;
+      const EXPECTED_RESCUE_AMOUNT = new u64(1_000_000);
+
+      beforeEach("set up merge miner", async () => {
+        const ownerSDK = QuarrySDK.load({
+          provider,
+        }).withSigner(ownerKP);
+        const { tx: initPoolTX, key: poolKey } =
+          await ownerSDK.mergeMine.newPool({
+            primaryMint: stakedToken.mintAccount,
+          });
+        await expectTX(initPoolTX, "Init pool").to.be.fulfilled;
+
+        // init merge miner
+        const poolData =
+          await ownerSDK.mergeMine.program.account.mergePool.fetch(poolKey);
+        const { tx: initMMTX, key: mmKey } = await ownerSDK.mergeMine.newMM({
+          pool: {
+            key: poolKey,
+            data: poolData,
+          },
+          rewarder: primary.rewarder,
+          rewardsMint: primary.rewardsToken.mintAccount,
+        });
+        invariant(initMMTX, "initMMTX");
+        await expectTX(initMMTX, "Init merge miner").to.be.fulfilled;
+
+        mergePoolKey = poolKey;
+        mergeMinerKey = mmKey;
+      });
+
+      beforeEach("airdrop rescue token's to merge miner's miner", async () => {
+        rescueMint = await createMint(provider);
+        const [miner] = await findMinerAddress(primary.quarry, mergeMinerKey);
+        minerATAKey = await getATAAddress({
+          mint: rescueMint,
+          owner: miner,
+        });
+        const mintToTX = new TransactionEnvelope(provider, [
+          createATAInstruction({
+            address: minerATAKey,
+            mint: rescueMint,
+            owner: miner,
+            payer: provider.wallet.publicKey,
+          }),
+          SPLToken.createMintToInstruction(
+            TOKEN_PROGRAM_ID,
+            rescueMint,
+            minerATAKey,
+            provider.wallet.publicKey,
+            [],
+            EXPECTED_RESCUE_AMOUNT
+          ),
+        ]);
+        await expectTX(mintToTX, "Mint rescue tokens to miner").to.be.fulfilled;
+        minerKey = miner;
+      });
+
+      it("Successfully rescue tokens", async () => {
+        const ownerSDK = QuarrySDK.load({
+          provider,
+        }).withSigner(ownerKP);
+
+        const { address: destinationTokenAccount, instruction } =
+          await getOrCreateATA({
+            provider: ownerSDK.provider,
+            mint: rescueMint,
+            owner: ownerKP.publicKey,
+          });
+        const tx = ownerSDK.mergeMine.rescueTokens({
+          mergePool: mergePoolKey,
+          mergeMiner: mergeMinerKey,
+          miner: minerKey,
+          minerTokenAccount: minerATAKey,
+          destinationTokenAccount,
+        });
+        if (instruction) {
+          tx.instructions.unshift(instruction);
+        }
+
+        await expectTXTable(tx, "rescue tokens from mergeMiner").to.be
+          .fulfilled;
+
+        const tokenAccount = await getTokenAccount(
+          provider,
+          destinationTokenAccount
+        );
+        expect(tokenAccount.amount).to.bignumber.eq(EXPECTED_RESCUE_AMOUNT);
+      });
     });
   });
 
