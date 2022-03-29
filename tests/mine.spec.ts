@@ -701,7 +701,7 @@ describe("Mine", () => {
 
     context("Rescue tokens", () => {
       let user: Keypair;
-      let tokenMint: PublicKey;
+      let rescueMint: PublicKey;
       const EXPECTED_RESCUE_AMOUNT = new u64(100_000_000);
 
       before("Set up user and mint", async () => {
@@ -710,7 +710,7 @@ describe("Mine", () => {
           user.publicKey,
           LAMPORTS_PER_SOL
         );
-        tokenMint = await createMint(provider);
+        rescueMint = await createMint(provider);
       });
 
       beforeEach("Set up miner", async () => {
@@ -725,7 +725,7 @@ describe("Mine", () => {
 
         const { address: minerATA, instruction } = await getOrCreateATA({
           provider,
-          mint: tokenMint,
+          mint: rescueMint,
           owner: miner,
         });
         if (instruction) {
@@ -735,7 +735,7 @@ describe("Mine", () => {
         tx.instructions.push(
           SPLToken.createMintToInstruction(
             TOKEN_PROGRAM_ID,
-            tokenMint,
+            rescueMint,
             minerATA,
             provider.wallet.publicKey,
             [],
@@ -763,8 +763,13 @@ describe("Mine", () => {
         );
         await expectTX(stakeTx, "deposit staked tokens").to.be.fulfilled;
 
-        const rescueTX = await minerActions.rescueTokens({
+        const rescueTX = await sdk.mine.rescueTokens({
           mint: stakeToken.mintAccount,
+          miner: minerActions.minerKey,
+          minerTokenAccount: await getATAAddress({
+            mint: stakeToken.mintAccount,
+            owner: minerActions.minerKey,
+          }),
         });
         await expectTX(
           rescueTX,
@@ -773,16 +778,21 @@ describe("Mine", () => {
       });
 
       it("Rescue tokens from miner ATA", async () => {
-        const minerActions = await quarry.getMinerActions(user.publicKey);
-        const tx = await minerActions.rescueTokens({
-          mint: tokenMint,
+        const { minerKey } = await quarry.getMinerActions(user.publicKey);
+        const tx = await sdk.mine.rescueTokens({
+          mint: rescueMint,
+          miner: minerKey,
+          minerTokenAccount: await getATAAddress({
+            mint: rescueMint,
+            owner: minerKey,
+          }),
           owner: user.publicKey,
         });
         tx.addSigners(user);
         await expectTXTable(tx, "rescue tokens for user").to.be.fulfilled;
 
         const userATAKey = await getATAAddress({
-          mint: tokenMint,
+          mint: rescueMint,
           owner: user.publicKey,
         });
         const userATA = await getTokenAccount(provider, userATAKey);
@@ -790,9 +800,14 @@ describe("Mine", () => {
       });
 
       it("Cannot rescue with incorrect signer", async () => {
-        const minerActions = await quarry.getMinerActions(user.publicKey);
-        const tx = await minerActions.rescueTokens({
-          mint: tokenMint,
+        const { minerKey } = await quarry.getMinerActions(user.publicKey);
+        const tx = await sdk.mine.rescueTokens({
+          mint: rescueMint,
+          miner: minerKey,
+          minerTokenAccount: await getATAAddress({
+            mint: rescueMint,
+            owner: minerKey,
+          }),
           owner: user.publicKey,
         });
         await expectTX(tx, "rescue tokens for user").to.be.rejectedWith(
