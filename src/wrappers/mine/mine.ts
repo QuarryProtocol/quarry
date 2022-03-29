@@ -1,6 +1,6 @@
 import type { Provider, TransactionEnvelope } from "@saberhq/solana-contrib";
-import { getOrCreateATA } from "@saberhq/token-utils";
-import type { PublicKey } from "@solana/web3.js";
+import { getOrCreateATA, TOKEN_PROGRAM_ID } from "@saberhq/token-utils";
+import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { Keypair, SystemProgram, SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
 
 import type { MintWrapperData } from "../../programs";
@@ -89,5 +89,46 @@ export class MineWrapper {
   async loadRewarderWrapper(rewarder: PublicKey): Promise<RewarderWrapper> {
     const rewarderData = await this.program.account.rewarder.fetch(rewarder);
     return new RewarderWrapper(this, rewarder, rewarderData);
+  }
+
+  /**
+   * Rescue stuck tokens in a miner.
+   * @returns
+   */
+  async rescueTokens({
+    mint,
+    miner,
+    minerTokenAccount,
+    owner = this.provider.wallet.publicKey,
+  }: {
+    mint: PublicKey;
+    miner: PublicKey;
+    minerTokenAccount: PublicKey;
+    owner?: PublicKey;
+  }): Promise<TransactionEnvelope> {
+    const instructions: TransactionInstruction[] = [];
+    const { address: destinationTokenAccount, instruction: ataInstruction } =
+      await getOrCreateATA({
+        provider: this.provider,
+        mint,
+        owner,
+      });
+    if (ataInstruction) {
+      instructions.push(ataInstruction);
+    }
+
+    instructions.push(
+      this.program.instruction.rescueTokens({
+        accounts: {
+          authority: owner,
+          miner,
+          minerTokenAccount,
+          destinationTokenAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        },
+      })
+    );
+
+    return this.sdk.newTx(instructions);
   }
 }

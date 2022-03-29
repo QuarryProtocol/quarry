@@ -7,6 +7,7 @@ mod macros;
 
 mod account_validators;
 mod processor;
+use processor::*;
 
 pub(crate) mod account_conversions;
 pub(crate) mod mm_cpi;
@@ -88,6 +89,12 @@ pub mod quarry_merge_mine {
     #[access_control(ctx.accounts.validate())]
     pub fn withdraw_tokens(ctx: Context<WithdrawTokens>) -> Result<()> {
         processor::withdraw::withdraw_tokens(ctx)
+    }
+
+    /// Rescues stuck tokens in miners owned by a [MergeMiner].
+    #[access_control(ctx.accounts.validate())]
+    pub fn rescue_tokens(ctx: Context<RescueTokens>) -> Result<()> {
+        processor::rescue_tokens::handler(ctx)
     }
 
     // --------------------------------

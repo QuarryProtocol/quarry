@@ -5,7 +5,7 @@ solana_version = "1.9.12"
 seeds = true
 
 [scripts]
-test = "yarn mocha"
+test = "yarn mocha -b"
 
 [provider]
 cluster = "localnet"
