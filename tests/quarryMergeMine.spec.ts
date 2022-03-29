@@ -4,6 +4,7 @@ import { TransactionEnvelope } from "@saberhq/solana-contrib";
 import {
   createATAInstruction,
   createMint,
+  createTokenAccount,
   getATAAddress,
   getOrCreateATA,
   getOrCreateATAs,
@@ -491,7 +492,7 @@ describe("Quarry Merge Mine", () => {
         minerKey = miner;
       });
 
-      it("Cannot rescue with primary mint account", async () => {
+      it("Cannot rescue with miner's token vault account", async () => {
         const ownerSDK = QuarrySDK.load({
           provider,
         }).withSigner(ownerKP);
@@ -516,6 +517,42 @@ describe("Quarry Merge Mine", () => {
           tx.instructions.unshift(instruction);
         }
 
+        await expectTXTable(
+          tx,
+          "rescue tokens from mergeMiner"
+        ).to.be.rejectedWith("0x454");
+      });
+
+      it("Cannot rescue with primary mint", async () => {
+        const ownerSDK = QuarrySDK.load({
+          provider,
+        }).withSigner(ownerKP);
+
+        const primaryMint = primary.quarryW.quarryData.tokenMintKey;
+        const { key: minerTokenAccount, tx: createMinerTokenAccountTx } =
+          await createTokenAccount({
+            provider: ownerSDK.provider,
+            mint: primaryMint,
+            owner: minerKey,
+          });
+        const { address: destinationTokenAccount, instruction: primaryATAIx } =
+          await getOrCreateATA({
+            provider: ownerSDK.provider,
+            mint: primaryMint,
+            owner: ownerKP.publicKey,
+          });
+        const rescueTX = ownerSDK.mergeMine.rescueTokens({
+          mergePool: mergePoolKey,
+          mergeMiner: mergeMinerKey,
+          miner: minerKey,
+          minerTokenAccount,
+          destinationTokenAccount,
+        });
+        if (primaryATAIx) {
+          rescueTX.instructions.unshift(primaryATAIx);
+        }
+
+        const tx = createMinerTokenAccountTx.combine(rescueTX);
         await expectTXTable(
           tx,
           "rescue tokens from mergeMiner"
