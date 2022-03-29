@@ -428,16 +428,21 @@ describe("Quarry Merge Mine", () => {
       let minerATAKey: PublicKey;
       let mergePoolKey: PublicKey;
       let mergeMinerKey: PublicKey;
+
+      let replicaToken: Token;
       const EXPECTED_RESCUE_AMOUNT = new u64(1_000_000);
 
       beforeEach("set up merge miner", async () => {
         const ownerSDK = QuarrySDK.load({
           provider,
         }).withSigner(ownerKP);
-        const { tx: initPoolTX, key: poolKey } =
-          await ownerSDK.mergeMine.newPool({
-            primaryMint: stakedToken.mintAccount,
-          });
+        const {
+          tx: initPoolTX,
+          key: poolKey,
+          replicaToken: replicaTokenInner,
+        } = await ownerSDK.mergeMine.newPool({
+          primaryMint: stakedToken.mintAccount,
+        });
         await expectTX(initPoolTX, "Init pool").to.be.fulfilled;
 
         // init merge miner
@@ -456,6 +461,7 @@ describe("Quarry Merge Mine", () => {
 
         mergePoolKey = poolKey;
         mergeMinerKey = mmKey;
+        replicaToken = replicaTokenInner;
       });
 
       beforeEach("airdrop rescue token's to merge miner's miner", async () => {
@@ -483,6 +489,74 @@ describe("Quarry Merge Mine", () => {
         ]);
         await expectTX(mintToTX, "Mint rescue tokens to miner").to.be.fulfilled;
         minerKey = miner;
+      });
+
+      it("Cannot rescue with primary mint account", async () => {
+        const ownerSDK = QuarrySDK.load({
+          provider,
+        }).withSigner(ownerKP);
+
+        const { address: destinationTokenAccount, instruction } =
+          await getOrCreateATA({
+            provider: ownerSDK.provider,
+            mint: rescueMint,
+            owner: ownerKP.publicKey,
+          });
+        const tx = ownerSDK.mergeMine.rescueTokens({
+          mergePool: mergePoolKey,
+          mergeMiner: mergeMinerKey,
+          miner: minerKey,
+          minerTokenAccount: await getATAAddress({
+            mint: primary.quarryW.quarryData.tokenMintKey,
+            owner: minerKey,
+          }),
+          destinationTokenAccount,
+        });
+        if (instruction) {
+          tx.instructions.unshift(instruction);
+        }
+
+        await expectTXTable(
+          tx,
+          "rescue tokens from mergeMiner"
+        ).to.be.rejectedWith("0x454");
+      });
+
+      it("Cannot rescue with replica mint account", async () => {
+        const ownerSDK = QuarrySDK.load({
+          provider,
+        }).withSigner(ownerKP);
+
+        const { address: destinationTokenAccount, instruction: rescueATAIX } =
+          await getOrCreateATA({
+            provider: ownerSDK.provider,
+            mint: replicaToken.mintAccount,
+            owner: ownerKP.publicKey,
+          });
+        const { address: minerTokenAccount, instruction: replicaATAIX } =
+          await getOrCreateATA({
+            provider: ownerSDK.provider,
+            mint: replicaToken.mintAccount,
+            owner: minerKey,
+          });
+        const tx = ownerSDK.mergeMine.rescueTokens({
+          mergePool: mergePoolKey,
+          mergeMiner: mergeMinerKey,
+          miner: minerKey,
+          minerTokenAccount,
+          destinationTokenAccount,
+        });
+        if (replicaATAIX) {
+          tx.instructions.unshift(replicaATAIX);
+        }
+        if (rescueATAIX) {
+          tx.instructions.unshift(rescueATAIX);
+        }
+
+        await expectTXTable(
+          tx,
+          "rescue tokens from mergeMiner"
+        ).to.be.rejectedWith("0x454");
       });
 
       it("Successfully rescue tokens", async () => {
