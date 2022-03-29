@@ -251,11 +251,19 @@ describe("Quarry Merge Mine", () => {
       ).to.bignumber.eq("0");
 
       // claim primary rewards
-      const claimPrimaryTX = await mm.claimPrimaryRewards(primary.rewarder);
-      await expectTX(claimPrimaryTX, "Claim primary").to.be.fulfilled;
+      const claimPrimary = await mm.claimPrimaryRewards(primary.rewarder);
+      const { ataIXs: claimPrimaryATATx, tx: claimPrimaryTx } =
+        claimPrimary.splitATAIXs();
+      await expectTX(claimPrimaryATATx, "Create ATA accounts for primary claim")
+        .to.be.fulfilled;
+      await expectTX(claimPrimaryTx, "Claim primary").to.be.fulfilled;
 
       // claim replica A rewards
-      const claimReplicaATX = await mm.claimReplicaRewards(replicaA.rewarder);
+      const claimReplicaA = await mm.claimReplicaRewards(replicaA.rewarder);
+      const { ataIXs: claimReplicaATATx, tx: claimReplicaATX } =
+        claimReplicaA.splitATAIXs();
+      await expectTX(claimReplicaATATx, "Create ATA accounts for replica claim")
+        .to.be.fulfilled;
       await expectTX(claimReplicaATX, "Claim replica A").to.be.fulfilled;
 
       expect(
@@ -595,18 +603,30 @@ describe("Quarry Merge Mine", () => {
       ).to.bignumber.eq("0");
 
       // claim primary rewards
-      const claimPrimaryTX = await mp.claimPrimaryRewards(
+      const claimPrimary = await mp.claimPrimaryRewards(
         primary.rewarder,
         mmKey
       );
-      await expectTX(claimPrimaryTX, "Claim primary").to.be.fulfilled;
+      const { ataIXs: claimPrimaryATATx, tx: claimPrimaryTx } =
+        claimPrimary.splitATAIXs();
+      await expectTXTable(
+        claimPrimaryATATx,
+        "Create ATA accounts for primary claim"
+      ).to.be.fulfilled;
+      await expectTXTable(claimPrimaryTx, "Claim primary").to.be.fulfilled;
 
       // claim replica A rewards
-      const claimReplicaATX = await mp.claimReplicaRewards(
+      const claimReplicaA = await mp.claimReplicaRewards(
         replicaA.rewarder,
         mmKey
       );
-      await expectTX(claimReplicaATX, "Claim replica A").to.be.fulfilled;
+      const { ataIXs: claimReplicaATATx, tx: claimReplicaATX } =
+        claimReplicaA.splitATAIXs();
+      await expectTXTable(
+        claimReplicaATATx,
+        "Create ATA accounts for replica claim"
+      ).to.be.fulfilled;
+      await expectTXTable(claimReplicaATX, "Claim replica A").to.be.fulfilled;
 
       expect(
         (await getTokenAccount(provider, ownerAccounts.primaryRewards)).amount
