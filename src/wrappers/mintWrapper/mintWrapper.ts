@@ -163,7 +163,7 @@ export class MintWrapper {
             mintWrapper: wrapper,
             admin: this.program.provider.wallet.publicKey,
           },
-          minterAuthority: authority,
+          newMinterAuthority: authority,
           minter,
           payer: this.program.provider.wallet.publicKey,
           systemProgram: SystemProgram.programId,

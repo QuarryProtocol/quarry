@@ -9,7 +9,7 @@ use vipers::prelude::*;
 pub fn new_pool(ctx: Context<NewPool>) -> Result<()> {
     let pool = &mut ctx.accounts.pool;
     pool.primary_mint = ctx.accounts.primary_mint.key();
-    pool.bump = *unwrap_int!(ctx.bumps.get("pool"));
+    pool.bump = unwrap_bump!(ctx, "pool");
 
     pool.replica_mint = ctx.accounts.replica_mint.key();
 

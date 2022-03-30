@@ -27,7 +27,7 @@ pub mod quarry_mint_wrapper {
     pub fn new_wrapper(ctx: Context<NewWrapper>, _bump: u8, hard_cap: u64) -> Result<()> {
         let mint_wrapper = &mut ctx.accounts.mint_wrapper;
         mint_wrapper.base = ctx.accounts.base.key();
-        mint_wrapper.bump = *unwrap_int!(ctx.bumps.get("mint_wrapper"));
+        mint_wrapper.bump = unwrap_bump!(ctx, "mint_wrapper");
         mint_wrapper.hard_cap = hard_cap;
         mint_wrapper.admin = ctx.accounts.admin.key();
         mint_wrapper.pending_admin = Pubkey::default();
@@ -87,8 +87,8 @@ pub mod quarry_mint_wrapper {
         let minter = &mut ctx.accounts.minter;
 
         minter.mint_wrapper = ctx.accounts.auth.mint_wrapper.key();
-        minter.minter_authority = ctx.accounts.minter_authority.key();
-        minter.bump = *unwrap_int!(ctx.bumps.get("minter"));
+        minter.minter_authority = ctx.accounts.new_minter_authority.key();
+        minter.bump = unwrap_bump!(ctx, "minter");
 
         let index = ctx.accounts.auth.mint_wrapper.num_minters;
         minter.index = index;
@@ -201,7 +201,6 @@ pub struct NewWrapper<'info> {
     pub admin: UncheckedAccount<'info>,
 
     /// Token mint to mint.
-    #[account(mut)]
     pub token_mint: Account<'info, Mint>,
 
     /// Token program.
@@ -222,8 +221,8 @@ pub struct NewMinter<'info> {
     pub auth: OnlyAdmin<'info>,
 
     /// Account to authorize as a minter.
-    /// CHECK: OK
-    pub minter_authority: UncheckedAccount<'info>,
+    /// CHECK: Can be any Solana account.
+    pub new_minter_authority: UncheckedAccount<'info>,
 
     /// Information about the minter.
     #[account(
@@ -231,7 +230,7 @@ pub struct NewMinter<'info> {
         seeds = [
             b"MintWrapperMinter".as_ref(),
             auth.mint_wrapper.key().to_bytes().as_ref(),
-            minter_authority.key().to_bytes().as_ref()
+            new_minter_authority.key().to_bytes().as_ref()
         ],
         bump,
         payer = payer,
@@ -313,9 +312,10 @@ pub struct PerformMint<'info> {
 
 #[derive(Accounts)]
 pub struct OnlyAdmin<'info> {
-    /// The mint wrapper.
+    /// The [MintWrapper].
     #[account(mut)]
     pub mint_wrapper: Account<'info, MintWrapper>,
+    /// [MintWrapper::admin].
     pub admin: Signer<'info>,
 }
 

@@ -49,8 +49,9 @@ pub struct RescueTokens<'info> {
 impl<'info> Validate<'info> for RescueTokens<'info> {
     fn validate(&self) -> Result<()> {
         // only callable by merge miner authority
-        assert_keys_eq!(self.mm_owner, self.mm.owner);
+        assert_keys_eq!(self.mm_owner, self.mm.owner, Unauthorized);
 
+        // merge pool of the merge miner
         assert_keys_eq!(self.merge_pool, self.mm.pool);
 
         // mm must be authority of the miner
@@ -58,6 +59,9 @@ impl<'info> Validate<'info> for RescueTokens<'info> {
 
         // miner token vault should be completely unrelated to all accounts
         assert_keys_neq!(self.miner.token_vault_key, self.miner_token_account);
+        assert_keys_neq!(self.miner.token_vault_key, self.destination_token_account);
+
+        // don't allow withdraws back to the miner
         assert_keys_neq!(self.miner.token_vault_key, self.destination_token_account);
 
         // miner token vault should be owned by the miner

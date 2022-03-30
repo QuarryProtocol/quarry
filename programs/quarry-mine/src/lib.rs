@@ -60,7 +60,7 @@ pub mod quarry_mine {
         rewarder.base = ctx.accounts.base.key();
         rewarder.bump = *unwrap_int!(ctx.bumps.get("rewarder"));
 
-        rewarder.authority = ctx.accounts.authority.key();
+        rewarder.authority = ctx.accounts.initial_authority.key();
         rewarder.pending_authority = Pubkey::default();
 
         rewarder.annual_rewards_rate = 0;
@@ -89,7 +89,7 @@ pub mod quarry_mine {
     #[access_control(ctx.accounts.validate())]
     pub fn set_pause_authority(ctx: Context<SetPauseAuthority>) -> Result<()> {
         let rewarder = &mut ctx.accounts.auth.rewarder;
-        rewarder.pause_authority = ctx.accounts.pause_authority.key();
+        rewarder.pause_authority = ctx.accounts.new_pause_authority.key();
         Ok(())
     }
 
@@ -460,6 +460,12 @@ pub struct Rewarder {
 
 impl Rewarder {
     pub const LEN: usize = 32 + 1 + 32 + 32 + 2 + 8 + 8 + 32 + 32 + 32 + 8 + 32 + 1;
+
+    /// Asserts that this [Rewarder] is not paused.
+    pub fn assert_not_paused(&self) -> Result<()> {
+        invariant!(!self.is_paused, Paused);
+        Ok(())
+    }
 }
 
 /// A pool which distributes tokens to its [Miner]s.
@@ -566,7 +572,7 @@ pub struct NewRewarder<'info> {
 
     /// Initial authority of the rewarder.
     /// CHECK: OK
-    pub authority: UncheckedAccount<'info>,
+    pub initial_authority: UncheckedAccount<'info>,
 
     /// Payer of the [Rewarder] initialization.
     #[account(mut)]
@@ -597,7 +603,7 @@ pub struct SetPauseAuthority<'info> {
 
     /// The pause authority.
     /// CHECK: OK
-    pub pause_authority: UncheckedAccount<'info>,
+    pub new_pause_authority: UncheckedAccount<'info>,
 }
 
 /// Accounts for [quarry_mine::transfer_authority].

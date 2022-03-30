@@ -65,7 +65,7 @@ export class MineWrapper {
           this.program.instruction.newRewarder(bump, {
             accounts: {
               base: baseKP.publicKey,
-              authority,
+              initialAuthority: authority,
               rewarder: rewarderKey,
               payer: this.program.provider.wallet.publicKey,
               systemProgram: SystemProgram.programId,

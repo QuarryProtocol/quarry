@@ -21,7 +21,7 @@ pub mod quarry_operator {
     pub fn create_operator(ctx: Context<CreateOperator>, _bump: u8) -> Result<()> {
         let operator = &mut ctx.accounts.operator;
         operator.base = ctx.accounts.base.key();
-        operator.bump = *unwrap_int!(ctx.bumps.get("operator"));
+        operator.bump = unwrap_bump!(ctx, "operator");
 
         operator.rewarder = ctx.accounts.rewarder.key();
         operator.admin = ctx.accounts.admin.key();

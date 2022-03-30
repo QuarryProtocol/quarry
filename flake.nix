@@ -23,7 +23,7 @@
           packages.ci = ci;
           devShell = pkgs.stdenvNoCC.mkDerivation {
             name = "devshell";
-            buildInputs = with pkgs; [ ci rustup cargo-deps gh ];
+            buildInputs = with pkgs; [ ci rustup cargo-deps gh cargo-expand ];
           };
         });
 }
