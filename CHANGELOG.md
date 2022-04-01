@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+## [v4.2.0]
+
+### Features
+
+- Publicly release Soteria audit code changes.
+
+## [v4.1.0]
+
+### Features
+
+- Allow rescuing stuck tokens from Quarry mines ([#454](https://github.com/QuarryProtocol/quarry/pull/454)).
+
 ## [v4.0.0]
 
 ### Breaking
