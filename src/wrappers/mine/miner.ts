@@ -175,6 +175,44 @@ export class MinerWrapper {
    * Claims an amount of tokens.
    * @returns
    */
+  async claimV1(): Promise<TransactionEnvelope> {
+    const instructions: TransactionInstruction[] = [];
+    const { address: rewardsTokenAccount, instruction: ataInstruction } =
+      await getOrCreateATA({
+        provider: this.provider,
+        mint: this.quarry.rewarderData.rewardsTokenMint,
+        owner: this.authority,
+      });
+    if (ataInstruction) {
+      instructions.push(ataInstruction);
+    }
+
+    const [minter] = await findMinterAddress(
+      this.quarry.rewarderData.mintWrapper,
+      this.quarry.quarryData.rewarderKey,
+      this.sdk.mintWrapper.program.programId
+    );
+
+    const ix = this.quarry.program.instruction.claimRewards({
+      accounts: {
+        mintWrapper: this.quarry.rewarderData.mintWrapper,
+        minter,
+        rewardsTokenMint: this.quarry.rewarderData.rewardsTokenMint,
+        rewardsTokenAccount,
+        stake: this.userClaimAccounts,
+        mintWrapperProgram: this.sdk.programs.MintWrapper.programId,
+        claimFeeTokenAccount: this.quarry.rewarderData.claimFeeTokenAccount,
+      },
+    });
+    instructions.push(ix);
+
+    return this.sdk.newTx(instructions);
+  }
+
+  /**
+   * Claims an amount of tokens.
+   * @returns
+   */
   async claim(): Promise<TransactionEnvelope> {
     const instructions: TransactionInstruction[] = [];
     const { address: rewardsTokenAccount, instruction: ataInstruction } =
