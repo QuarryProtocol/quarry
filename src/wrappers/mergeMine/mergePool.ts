@@ -9,7 +9,7 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@saberhq/token-utils";
 import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
-import { Keypair, SystemProgram } from "@solana/web3.js";
+import { SystemProgram } from "@solana/web3.js";
 
 import { QUARRY_ADDRESSES } from "../../constants";
 import type {
@@ -473,19 +473,17 @@ export class MergePool {
       miner,
       minerVault,
       ...this.commonAccounts,
-      unusedAccount: Keypair.generate().publicKey,
     };
   }
 
   get commonAccounts(): Pick<
     QuarryStakeAccounts,
-    "pool" | "tokenProgram" | "unusedAccount" | "mineProgram"
+    "pool" | "tokenProgram" | "mineProgram"
   > {
     return {
       pool: this.key,
       tokenProgram: TOKEN_PROGRAM_ID,
       mineProgram: this.mergeMine.programs.Mine.programId,
-      unusedAccount: Keypair.generate().publicKey,
     };
   }
 }
