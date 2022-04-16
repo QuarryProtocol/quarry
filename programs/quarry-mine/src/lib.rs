@@ -577,6 +577,7 @@ pub struct ReadOnlyRewarderWithAuthority<'info> {
     pub authority: Signer<'info>,
 
     /// Rewarder of the farm.
+    #[account(has_one = authority)]
     pub rewarder: Account<'info, Rewarder>,
 }
 

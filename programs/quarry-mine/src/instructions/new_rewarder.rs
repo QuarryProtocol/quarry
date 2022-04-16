@@ -49,7 +49,7 @@ pub struct NewRewarder<'info> {
 
     /// Unused variable that held the [Clock]. Placeholder.
     /// CHECK: OK
-    pub unused_clock: UncheckedAccount<'info>,
+    pub unused_account: UncheckedAccount<'info>,
 
     /// Mint wrapper.
     pub mint_wrapper: Account<'info, quarry_mint_wrapper::MintWrapper>,
