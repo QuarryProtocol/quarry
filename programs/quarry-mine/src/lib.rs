@@ -9,9 +9,11 @@
 //! This program is modeled after [Synthetix's StakingRewards.sol](https://github.com/Synthetixio/synthetix/blob/4b9b2ee09b38638de6fe1c38dbe4255a11ebed86/contracts/StakingRewards.sol).
 #![deny(rustdoc::all)]
 #![allow(rustdoc::missing_doc_code_examples)]
+#![allow(deprecated)]
 
 #[macro_use]
 mod macros;
+pub mod utils;
 
 use anchor_lang::prelude::*;
 use anchor_spl::token::Token;
@@ -30,6 +32,7 @@ mod instructions;
 pub use instructions::*;
 
 use crate::quarry::StakeAction;
+pub use utils::*;
 
 declare_id!("QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB");
 
@@ -59,41 +62,23 @@ solana_security_txt::security_txt! {
 pub mod quarry_mine {
     use super::*;
 
-    /// --------------------------------
-    /// Rewarder Functions
-    /// --------------------------------
+    // --------------------------------
+    // Rewarder Functions
+    // --------------------------------
 
     /// Creates a new [Rewarder].
+    #[deprecated(since = "5.0.0", note = "Use `new_rewarder_v2` instead.")]
     #[access_control(ctx.accounts.validate())]
     pub fn new_rewarder(ctx: Context<NewRewarder>, _bump: u8) -> Result<()> {
-        let rewarder = &mut ctx.accounts.rewarder;
+        instructions::new_rewarder::handler(ctx)
+    }
 
-        rewarder.base = ctx.accounts.base.key();
-        rewarder.bump = *unwrap_int!(ctx.bumps.get("rewarder"));
-
-        rewarder.authority = ctx.accounts.initial_authority.key();
-        rewarder.pending_authority = Pubkey::default();
-
-        rewarder.annual_rewards_rate = 0;
-        rewarder.num_quarries = 0;
-        rewarder.total_rewards_shares = 0;
-        rewarder.mint_wrapper = ctx.accounts.mint_wrapper.key();
-
-        rewarder.rewards_token_mint = ctx.accounts.rewards_token_mint.key();
-
-        rewarder.claim_fee_token_account = ctx.accounts.claim_fee_token_account.key();
-        rewarder.max_claim_fee_millibps = DEFAULT_CLAIM_FEE_MILLIBPS;
-
-        rewarder.pause_authority = Pubkey::default();
-        rewarder.is_paused = false;
-
-        let current_ts = Clock::get()?.unix_timestamp;
-        emit!(NewRewarderEvent {
-            authority: rewarder.authority,
-            timestamp: current_ts,
-        });
-
-        Ok(())
+    /// Creates a new [Rewarder].
+    ///
+    /// The V2 variant removes the need for supplying the bump and clock.
+    #[access_control(ctx.accounts.validate())]
+    pub fn new_rewarder_v2(ctx: Context<NewRewarderV2>) -> Result<()> {
+        instructions::new_rewarder_v2::handler(ctx)
     }
 
     /// Sets the pause authority.
@@ -162,12 +147,13 @@ pub mod quarry_mine {
         Ok(())
     }
 
-    /// --------------------------------
-    /// Quarry functions
-    /// --------------------------------
+    // --------------------------------
+    // Quarry functions
+    // --------------------------------
 
     /// Creates a new [Quarry].
     /// This may only be called by the [Rewarder]::authority.
+    #[deprecated(since = "5.0.0", note = "Use `create_quarry_v2` instead.")]
     #[access_control(ctx.accounts.validate())]
     pub fn create_quarry(ctx: Context<CreateQuarry>, _bump: u8) -> Result<()> {
         instructions::create_quarry::handler(ctx)
@@ -175,6 +161,8 @@ pub mod quarry_mine {
 
     /// Creates a new [Quarry].
     /// This may only be called by the [Rewarder]::authority.
+    ///
+    /// The V2 variant removes the need for supplying the bump and clock.
     #[access_control(ctx.accounts.validate())]
     pub fn create_quarry_v2(ctx: Context<CreateQuarryV2>) -> Result<()> {
         instructions::create_quarry_v2::handler(ctx)
@@ -241,32 +229,24 @@ pub mod quarry_mine {
     /// Creates a [Miner] for the given authority.
     ///
     /// Anyone can call this; this is an associated account.
+    #[deprecated(since = "5.0.0", note = "Use `create_miner_v2` instead.")]
     #[access_control(ctx.accounts.validate())]
     pub fn create_miner(ctx: Context<CreateMiner>, _bump: u8) -> Result<()> {
-        let quarry = &mut ctx.accounts.quarry;
-        let index = quarry.num_miners;
-        quarry.num_miners = unwrap_int!(quarry.num_miners.checked_add(1));
+        instructions::create_miner::handler(ctx)
+    }
 
-        let miner = &mut ctx.accounts.miner;
-        miner.authority = ctx.accounts.authority.key();
-        miner.bump = *unwrap_int!(ctx.bumps.get("miner"));
-        miner.quarry = ctx.accounts.quarry.key();
-        miner.token_vault_key = ctx.accounts.miner_vault.key();
-        miner.rewards_earned = 0;
-        miner.rewards_per_token_paid = 0;
-        miner.balance = 0;
-        miner.index = index;
-
-        emit!(MinerCreateEvent {
-            authority: miner.authority,
-            quarry: miner.quarry,
-            miner: miner.key(),
-        });
-
-        Ok(())
+    /// Creates a [Miner] for the given authority.
+    ///
+    /// Anyone can call this; this is an associated account.
+    ///
+    /// The V2 variant removes the need for supplying the bump.
+    #[access_control(ctx.accounts.validate())]
+    pub fn create_miner_v2(ctx: Context<CreateMiner>) -> Result<()> {
+        instructions::create_miner::handler(ctx)
     }
 
     /// Claims rewards for the [Miner].
+    #[deprecated(since = "5.0.0", note = "Use `claim_rewards_v2` instead.")]
     #[access_control(ctx.accounts.validate())]
     pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
         instructions::claim_rewards::handler(ctx)
@@ -274,7 +254,7 @@ pub mod quarry_mine {
 
     /// Claims rewards for the [Miner].
     ///
-    /// This removes 2 accounts from the [crate::quarry_mine::claim_rewards] instruction.
+    /// The V2 variant removes 2 accounts from the [crate::quarry_mine::claim_rewards] instruction.
     #[access_control(ctx.accounts.validate())]
     pub fn claim_rewards_v2(ctx: Context<ClaimRewardsV2>) -> Result<()> {
         instructions::claim_rewards_v2::handler(ctx)
@@ -546,50 +526,6 @@ impl Miner {
 
 /* Rewarder contexts */
 
-/// Accounts for [quarry_mine::new_rewarder].
-#[derive(Accounts)]
-pub struct NewRewarder<'info> {
-    /// Base. Arbitrary key.
-    pub base: Signer<'info>,
-
-    /// [Rewarder] of mines.
-    #[account(
-        init,
-        seeds = [
-            b"Rewarder".as_ref(),
-            base.key().to_bytes().as_ref()
-        ],
-        bump,
-        payer = payer,
-        space = 8 + Rewarder::LEN
-    )]
-    pub rewarder: Account<'info, Rewarder>,
-
-    /// Initial authority of the rewarder.
-    /// CHECK: OK
-    pub initial_authority: UncheckedAccount<'info>,
-
-    /// Payer of the [Rewarder] initialization.
-    #[account(mut)]
-    pub payer: Signer<'info>,
-
-    /// System program.
-    pub system_program: Program<'info, System>,
-
-    /// Unused variable that held the [Clock]. Placeholder.
-    /// CHECK: OK
-    pub unused_clock: UncheckedAccount<'info>,
-
-    /// Mint wrapper.
-    pub mint_wrapper: Account<'info, quarry_mint_wrapper::MintWrapper>,
-
-    /// Rewards token mint.
-    pub rewards_token_mint: Account<'info, Mint>,
-
-    /// Token account in which the rewards token fees are collected.
-    pub claim_fee_token_account: Account<'info, TokenAccount>,
-}
-
 /// Accounts for [quarry_mine::set_pause_authority].
 #[derive(Accounts)]
 pub struct SetPauseAuthority<'info> {
@@ -624,7 +560,7 @@ pub struct AcceptAuthority<'info> {
 }
 
 /// Mutable [Rewarder] that requires the authority to be a signer.
-#[derive(Accounts)]
+#[derive(Accounts, Clone)]
 pub struct MutableRewarderWithAuthority<'info> {
     /// Authority of the rewarder.
     pub authority: Signer<'info>,
@@ -687,50 +623,6 @@ pub struct UpdateQuarryRewards<'info> {
 }
 
 /* Miner contexts */
-
-/// Accounts for [quarry_mine::create_miner].
-#[derive(Accounts)]
-pub struct CreateMiner<'info> {
-    /// Authority of the [Miner].
-    pub authority: Signer<'info>,
-
-    /// [Miner] to be created.
-    #[account(
-        init,
-        seeds = [
-            b"Miner".as_ref(),
-            quarry.key().to_bytes().as_ref(),
-            authority.key().to_bytes().as_ref()
-        ],
-        bump,
-        payer = payer,
-        space = 8 + Miner::LEN
-    )]
-    pub miner: Box<Account<'info, Miner>>,
-
-    /// [Quarry] to create a [Miner] for.
-    #[account(mut)]
-    pub quarry: Box<Account<'info, Quarry>>,
-
-    /// [Rewarder].
-    pub rewarder: Box<Account<'info, Rewarder>>,
-
-    /// System program.
-    pub system_program: Program<'info, System>,
-
-    /// Payer of [Miner] creation.
-    #[account(mut)]
-    pub payer: Signer<'info>,
-
-    /// [Mint] of the token to create a [Quarry] for.
-    pub token_mint: Account<'info, Mint>,
-
-    /// [TokenAccount] holding the token [Mint].
-    pub miner_vault: Account<'info, TokenAccount>,
-
-    /// SPL Token program.
-    pub token_program: Program<'info, Token>,
-}
 
 /// Staking accounts
 ///
@@ -801,16 +693,6 @@ pub struct MutableRewarderWithPauseAuthority<'info> {
 /// Events
 /// --------------------------------
 
-/// Emitted when a new rewarder is created
-#[event]
-pub struct NewRewarderEvent {
-    /// Authority of the rewarder
-    #[index]
-    pub authority: Pubkey,
-    /// When the event occurred.
-    pub timestamp: i64,
-}
-
 /// Emitted when reward tokens are claimed.
 #[event]
 pub struct ClaimEvent {
@@ -860,7 +742,7 @@ pub struct WithdrawEvent {
     pub timestamp: i64,
 }
 
-/// Triggered when the daily rewards rate is updated.
+/// Emitted when the daily rewards rate is updated.
 #[event]
 pub struct RewarderAnnualRewardsUpdateEvent {
     /// Previous rate of rewards.
@@ -871,20 +753,7 @@ pub struct RewarderAnnualRewardsUpdateEvent {
     pub timestamp: i64,
 }
 
-/// Triggered when a new miner is created.
-#[event]
-pub struct MinerCreateEvent {
-    /// Authority of the miner.
-    #[index]
-    pub authority: Pubkey,
-    /// Quarry the miner was created on.
-    #[index]
-    pub quarry: Pubkey,
-    /// The [Miner].
-    pub miner: Pubkey,
-}
-
-/// Triggered when a new quarry is created.
+/// Emitted when a new quarry is created.
 #[event]
 pub struct QuarryCreateEvent {
     /// [Mint] of the [Quarry] token.
@@ -893,7 +762,7 @@ pub struct QuarryCreateEvent {
     pub timestamp: i64,
 }
 
-/// Triggered when a quarry's reward share is updated.
+/// Emitted when a quarry's reward share is updated.
 #[event]
 pub struct QuarryRewardsUpdateEvent {
     /// [Mint] of the [Quarry] token.

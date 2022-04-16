@@ -7,7 +7,10 @@ use quarry_mine::{Quarry, Rewarder};
 use vipers::prelude::*;
 
 mod account_validators;
+mod instructions;
 mod macros;
+
+use instructions::*;
 
 declare_id!("QoP6NfrQbaGnccXQrMLUkog2tQZ4C1RFgJcwDnT8Kmz");
 
@@ -115,30 +118,16 @@ pub mod quarry_operator {
         Ok(())
     }
 
-    /// Calls [quarry_mine::quarry_mine::create_quarry].
+    /// Calls [quarry_mine::quarry_mine::create_quarry_v2].
     #[access_control(ctx.accounts.validate())]
-    pub fn delegate_create_quarry(ctx: Context<DelegateCreateQuarry>, bump: u8) -> Result<()> {
-        let operator = &ctx.accounts.with_delegate.operator;
-        let signer_seeds: &[&[&[u8]]] = &[gen_operator_signer_seeds!(operator)];
-        quarry_mine::cpi::create_quarry(
-            CpiContext::new_with_signer(
-                ctx.accounts
-                    .with_delegate
-                    .quarry_mine_program
-                    .to_account_info(),
-                quarry_mine::cpi::accounts::CreateQuarry {
-                    quarry: ctx.accounts.quarry.to_account_info(),
-                    auth: ctx.accounts.with_delegate.to_auth_accounts(),
-                    token_mint: ctx.accounts.token_mint.to_account_info(),
-                    payer: ctx.accounts.payer.to_account_info(),
-                    unused_clock: ctx.accounts.unused_clock.to_account_info(),
-                    system_program: ctx.accounts.system_program.to_account_info(),
-                },
-                signer_seeds,
-            ),
-            bump,
-        )?;
-        Ok(())
+    pub fn delegate_create_quarry(ctx: Context<DelegateCreateQuarry>, _bump: u8) -> Result<()> {
+        instructions::delegate_create_quarry::handler(ctx)
+    }
+
+    /// Calls [quarry_mine::quarry_mine::create_quarry_v2].
+    #[access_control(ctx.accounts.validate())]
+    pub fn delegate_create_quarry_v2(ctx: Context<DelegateCreateQuarryV2>) -> Result<()> {
+        instructions::delegate_create_quarry_v2::handler(ctx)
     }
 
     /// Calls [quarry_mine::quarry_mine::set_rewards_share].
@@ -287,26 +276,6 @@ pub struct DelegateSetAnnualRewards<'info> {
     pub with_delegate: WithDelegate<'info>,
 }
 
-/// Accounts for [crate::quarry_operator::delegate_create_quarry].
-#[derive(Accounts)]
-pub struct DelegateCreateQuarry<'info> {
-    pub with_delegate: WithDelegate<'info>,
-    #[account(mut)]
-    pub quarry: SystemAccount<'info>,
-    pub token_mint: Box<Account<'info, anchor_spl::token::Mint>>,
-
-    /// Payer of [Quarry] creation.
-    #[account(mut)]
-    pub payer: Signer<'info>,
-
-    /// Unused variable that held the clock. Placeholder.
-    /// CHECK: OK
-    pub unused_clock: UncheckedAccount<'info>,
-
-    /// System program.
-    pub system_program: Program<'info, System>,
-}
-
 /// Accounts for [crate::quarry_operator::delegate_set_rewards_share].
 #[derive(Accounts)]
 pub struct DelegateSetRewardsShare<'info> {
@@ -333,16 +302,19 @@ pub struct DelegateSetFamine<'info> {
     pub quarry: Box<Account<'info, Quarry>>,
 }
 
-/// Delegate accounts.
-#[derive(Accounts)]
+/// Accounts struct for instructions that must be signed by one of the delegates on the [Operator].
+#[derive(Accounts, Clone)]
 pub struct WithDelegate<'info> {
     /// The [Operator] of the [Rewarder].
     #[account(mut)]
     pub operator: Account<'info, Operator>,
-    /// The account to give the role to.
+    /// The delegated account in one of the [Operator] roles.
     pub delegate: Signer<'info>,
     /// The [Rewarder].
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = rewarder.authority == operator.key()
+    )]
     pub rewarder: Box<Account<'info, Rewarder>>,
     /// Quarry mine
     pub quarry_mine_program: Program<'info, quarry_mine::program::QuarryMine>,

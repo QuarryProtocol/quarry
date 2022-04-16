@@ -166,7 +166,7 @@ export class MergePool {
 
     const stake = await this.getReplicaStakeAccounts(rewarder, mergeMiner);
     const [quarry] = await findQuarryAddress(rewarder, poolData.replicaMint);
-    const [miner, minerBump] = await findMinerAddress(quarry, mergeMiner);
+    const [miner] = await findMinerAddress(quarry, mergeMiner);
 
     const mmReplicaMintTokenAccount = await getOrCreateATA({
       provider: this.provider,
@@ -195,7 +195,7 @@ export class MergePool {
         owner: miner,
       });
       txEnv.instructions.unshift(
-        this.program.instruction.initMiner(minerBump, {
+        this.program.instruction.initMinerV2({
           accounts: {
             pool: this.key,
             mm: mergeMiner,

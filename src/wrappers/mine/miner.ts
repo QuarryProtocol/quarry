@@ -60,8 +60,8 @@ export class MinerWrapper {
   /**
    * Creates the miner of the provided wallet.
    */
-  initialize(bump: number): PendingMiner {
-    const instruction = this.program.instruction.createMiner(bump, {
+  initialize(): PendingMiner {
+    const instruction = this.program.instruction.createMinerV2({
       accounts: {
         authority: this.authority,
         miner: this.minerKey,

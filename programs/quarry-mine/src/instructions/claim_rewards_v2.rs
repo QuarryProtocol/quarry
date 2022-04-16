@@ -114,7 +114,7 @@ pub struct ClaimRewardsV2<'info> {
 
     /// Mint of the rewards token.
     #[account(mut)]
-    pub rewards_token_mint: Account<'info, Mint>,
+    pub rewards_token_mint: Box<Account<'info, Mint>>,
 
     /// Account to claim rewards for.
     #[account(mut)]

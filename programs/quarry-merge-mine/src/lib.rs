@@ -1,6 +1,7 @@
 //! Holds tokens to allow one depositor to mine multiple quarries at the same time.
 #![deny(rustdoc::all)]
 #![allow(rustdoc::missing_doc_code_examples)]
+#![allow(deprecated)]
 
 #[macro_use]
 mod macros;
@@ -55,9 +56,16 @@ pub mod quarry_merge_mine {
     }
 
     /// Initializes a [quarry_mine::Miner] owned by the [MergeMiner].
+    #[deprecated(since = "5.0.0", note = "Use `init_miner_v2` instead.")]
     #[access_control(ctx.accounts.validate())]
-    pub fn init_miner(ctx: Context<InitMiner>, bump: u8) -> Result<()> {
-        processor::init::init_miner(ctx, bump)
+    pub fn init_miner(ctx: Context<InitMiner>, _bump: u8) -> Result<()> {
+        processor::init::init_miner(ctx)
+    }
+
+    /// Initializes a [quarry_mine::Miner] owned by the [MergeMiner].
+    #[access_control(ctx.accounts.validate())]
+    pub fn init_miner_v2(ctx: Context<InitMiner>) -> Result<()> {
+        processor::init::init_miner(ctx)
     }
 
     // --------------------------------

@@ -241,7 +241,7 @@ export class MergeMine {
     ixs: TransactionInstruction[];
   }> {
     const [quarryKey] = await findQuarryAddress(rewarder, mint);
-    const [minerKey, minerBump] = await findMinerAddress(quarryKey, mm);
+    const [minerKey] = await findMinerAddress(quarryKey, mm);
 
     const ixs: TransactionInstruction[] = [];
     const minerAccountInfo = await this.sdk.provider.connection.getAccountInfo(
@@ -260,7 +260,7 @@ export class MergeMine {
       ixs.push(minerATA.instruction);
     }
     ixs.push(
-      this.program.instruction.initMiner(minerBump, {
+      this.program.instruction.initMinerV2({
         accounts: {
           mineProgram: this.sdk.mine.program.programId,
           pool,
@@ -297,13 +297,13 @@ export class MergeMine {
     rewarder: PublicKey;
   }): Promise<{ tx: TransactionEnvelope; miner: PublicKey }> {
     const [quarryKey] = await findQuarryAddress(rewarder, mint);
-    const [minerKey, minerBump] = await findMinerAddress(quarryKey, mm);
+    const [minerKey] = await findMinerAddress(quarryKey, mm);
     const minerATA = await getOrCreateATA({
       provider: this.provider,
       mint,
       owner: minerKey,
     });
-    const initMinerIX = this.program.instruction.initMiner(minerBump, {
+    const initMinerIX = this.program.instruction.initMinerV2({
       accounts: {
         mineProgram: this.sdk.mine.program.programId,
         pool,

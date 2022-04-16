@@ -117,7 +117,7 @@ export class MergeMiner {
   async stakeReplicaMiner(rewarder: PublicKey): Promise<TransactionEnvelope> {
     const stake = await this.getReplicaStakeAccounts(rewarder);
     const [quarry] = await findQuarryAddress(rewarder, this.replicaMint);
-    const [miner, minerBump] = await findMinerAddress(quarry, this.mm.key);
+    const [miner] = await findMinerAddress(quarry, this.mm.key);
 
     const mmReplicaMintTokenAccount = await getOrCreateATA({
       provider: this.provider,
@@ -146,7 +146,7 @@ export class MergeMiner {
         owner: miner,
       });
       txEnv.instructions.unshift(
-        this.program.instruction.initMiner(minerBump, {
+        this.program.instruction.initMinerV2({
           accounts: {
             pool: this.pool.key,
             mm: this.mm.key,

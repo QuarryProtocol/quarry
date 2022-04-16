@@ -34,7 +34,7 @@ pub mod quarry_redeemer {
         let redeemer = &mut ctx.accounts.redeemer;
         redeemer.iou_mint = ctx.accounts.iou_mint.key();
         redeemer.redemption_mint = ctx.accounts.redemption_mint.key();
-        redeemer.bump = *unwrap_int!(ctx.bumps.get("redeemer"));
+        redeemer.bump = unwrap_bump!(ctx, "redeemer");
 
         redeemer.total_tokens_redeemed = 0;
         Ok(())

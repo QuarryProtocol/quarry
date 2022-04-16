@@ -5,34 +5,14 @@ use vipers::prelude::*;
 
 use crate::addresses;
 use crate::{
-    AcceptAuthority, CreateMiner, ExtractFees, MutableRewarderWithAuthority,
-    MutableRewarderWithPauseAuthority, NewRewarder, ReadOnlyRewarderWithAuthority,
-    SetAnnualRewards, SetFamine, SetPauseAuthority, SetRewardsShare, TransferAuthority,
-    UpdateQuarryRewards, UserStake,
+    AcceptAuthority, ExtractFees, MutableRewarderWithAuthority, MutableRewarderWithPauseAuthority,
+    ReadOnlyRewarderWithAuthority, SetAnnualRewards, SetFamine, SetPauseAuthority, SetRewardsShare,
+    TransferAuthority, UpdateQuarryRewards, UserStake,
 };
 
 // --------------------------------
 // Rewarder Functions
 // --------------------------------
-
-impl<'info> Validate<'info> for NewRewarder<'info> {
-    fn validate(&self) -> Result<()> {
-        invariant!(self.base.is_signer, Unauthorized);
-
-        assert_keys_eq!(self.mint_wrapper.token_mint, self.rewards_token_mint);
-        assert_keys_eq!(
-            self.rewards_token_mint.mint_authority.unwrap(),
-            self.mint_wrapper
-        );
-
-        assert_keys_eq!(self.claim_fee_token_account.owner, self.rewarder);
-        assert_keys_eq!(self.claim_fee_token_account.mint, self.rewards_token_mint);
-        invariant!(self.claim_fee_token_account.delegate.is_none());
-        invariant!(self.claim_fee_token_account.close_authority.is_none());
-
-        Ok(())
-    }
-}
 
 impl<'info> Validate<'info> for SetPauseAuthority<'info> {
     fn validate(&self) -> Result<()> {
@@ -120,25 +100,6 @@ impl<'info> Validate<'info> for UpdateQuarryRewards<'info> {
 /// --------------------------------
 /// Miner functions
 /// --------------------------------
-
-impl<'info> Validate<'info> for CreateMiner<'info> {
-    fn validate(&self) -> Result<()> {
-        invariant!(!self.rewarder.is_paused, Paused);
-        assert_keys_eq!(self.miner_vault.owner, self.miner);
-        assert_keys_eq!(self.miner_vault.mint, self.token_mint);
-        invariant!(self.miner_vault.delegate.is_none());
-        invariant!(self.miner_vault.close_authority.is_none());
-
-        assert_keys_eq!(
-            self.miner_vault.mint,
-            self.quarry.token_mint_key,
-            "miner vault mint must match quarry mint"
-        );
-        assert_keys_eq!(self.quarry.rewarder, self.rewarder, "rewarder");
-
-        Ok(())
-    }
-}
 
 impl<'info> Validate<'info> for UserStake<'info> {
     /// Validates the UserStake.

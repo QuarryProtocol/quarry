@@ -1,30 +1,18 @@
-use crate::*;
+use crate::{utils::execute_ix_handler, *};
 
 pub fn handler(ctx: Context<CreateQuarry>) -> Result<()> {
-    let rewarder = &mut ctx.accounts.auth.rewarder;
-    // Update rewarder's quarry stats
-    let index = rewarder.num_quarries;
-    rewarder.num_quarries = unwrap_int!(rewarder.num_quarries.checked_add(1));
-
-    let quarry = &mut ctx.accounts.quarry;
-    quarry.bump = unwrap_bump!(ctx, "quarry");
-
-    // Set quarry params
-    quarry.index = index;
-    quarry.famine_ts = i64::MAX;
-    quarry.rewarder = rewarder.key();
-    quarry.annual_rewards_rate = 0;
-    quarry.rewards_share = 0;
-    quarry.token_mint_decimals = ctx.accounts.token_mint.decimals;
-    quarry.token_mint_key = ctx.accounts.token_mint.key();
-
-    let current_ts = Clock::get()?.unix_timestamp;
-    emit!(QuarryCreateEvent {
-        token_mint: quarry.token_mint_key,
-        timestamp: current_ts,
-    });
-
-    Ok(())
+    execute_ix_handler(
+        ctx.program_id,
+        vec![
+            ctx.accounts.quarry.to_account_info(),
+            ctx.accounts.auth.authority.to_account_info(),
+            ctx.accounts.auth.rewarder.to_account_info(),
+            ctx.accounts.token_mint.to_account_info(),
+            ctx.accounts.payer.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+        ],
+        instructions::create_quarry_v2::handler,
+    )
 }
 
 /// Accounts for [quarry_mine::create_quarry].
