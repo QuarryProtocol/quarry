@@ -192,7 +192,7 @@ __metadata:
     "@saberhq/solana-contrib": ^1.12.61
     "@saberhq/token-utils": ^1.12.61
     "@saberhq/tsconfig": ^1.12.61
-    "@solana/web3.js": ^1.38.0
+    "@solana/web3.js": ^1.39.0
     "@types/bn.js": ^5.1.0
     "@types/chai": ^4.3.1
     "@types/mocha": ^9.1.0
@@ -411,9 +411,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@solana/web3.js@npm:^1.38.0":
-  version: 1.38.0
-  resolution: "@solana/web3.js@npm:1.38.0"
+"@solana/web3.js@npm:^1.39.0":
+  version: 1.39.0
+  resolution: "@solana/web3.js@npm:1.39.0"
   dependencies:
     "@babel/runtime": ^7.12.5
     "@ethersproject/sha2": ^5.5.0
@@ -429,7 +429,7 @@ __metadata:
     secp256k1: ^4.0.2
     superstruct: ^0.14.2
     tweetnacl: ^1.0.0
-  checksum: 8195ef0eac8499dac878e2c795e485a01e83d779f15a7d4399179193ae5ba67c729f4f311a2599d2723a03d3e8a9fc60636e057795bdddde4a813239590cb903
+  checksum: 9b7da2d46b5c87cae354d451f3fdb850928ec0ac8486ac3c83afb80f725aff48076a3d447ce8c177d56256df44083d6ee95af9b8a830420ffcce6562f4a069ec
   languageName: node
   linkType: hard
 
