@@ -31,6 +31,39 @@ export class MintWrapper {
     return this.sdk.provider;
   }
 
+  async newWrapperAndMintV1({
+    mintKP = Keypair.generate(),
+    decimals = 6,
+    ...newWrapperArgs
+  }: {
+    mintKP?: Signer;
+    decimals?: number;
+
+    hardcap: u64;
+    baseKP?: Signer;
+    tokenProgram?: PublicKey;
+    admin?: PublicKey;
+    payer?: PublicKey;
+  }): Promise<PendingMintAndWrapper> {
+    const provider = this.provider;
+    const { mintWrapper, tx: initMintProxyTX } = await this.newWrapperV1({
+      ...newWrapperArgs,
+      tokenMint: mintKP.publicKey,
+    });
+    const initMintTX = await createInitMintInstructions({
+      provider,
+      mintAuthority: mintWrapper,
+      freezeAuthority: mintWrapper,
+      mintKP,
+      decimals,
+    });
+    return {
+      mintWrapper,
+      mint: mintKP.publicKey,
+      tx: initMintTX.combine(initMintProxyTX),
+    };
+  }
+
   async newWrapperV1({
     hardcap,
     tokenMint,

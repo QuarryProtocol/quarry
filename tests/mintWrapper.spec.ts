@@ -1,5 +1,5 @@
 import * as anchor from "@project-serum/anchor";
-import { expectTX } from "@saberhq/chai-solana";
+import { assertTXSuccess, expectTX } from "@saberhq/chai-solana";
 import type { Provider } from "@saberhq/solana-contrib";
 import { PendingTransaction } from "@saberhq/solana-contrib";
 import {
@@ -64,11 +64,10 @@ describe("MintWrapper", () => {
   });
 
   it("init mint wrapper v1", async () => {
-    const { tx } = await mintWrapper.newWrapperV1({
+    const { tx } = await mintWrapper.newWrapperAndMintV1({
       hardcap: hardCap.toU64(),
-      tokenMint: rewardsMint,
     });
-    await expectTX(tx).to.be.fulfilled;
+    await assertTXSuccess(tx, "init mint wrapper v1");
   });
 
   it("Check MintWrapper", async () => {
