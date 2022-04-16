@@ -9,7 +9,7 @@ impl<'info> RedeemTokens<'info> {
             self.token_program.to_account_info(),
             token::Burn {
                 mint: self.iou_mint.to_account_info(),
-                to: self.iou_source.to_account_info(),
+                from: self.iou_source.to_account_info(),
                 authority: self.source_authority.to_account_info(),
             },
         );
