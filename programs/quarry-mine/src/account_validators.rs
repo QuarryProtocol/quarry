@@ -93,7 +93,7 @@ impl<'info> Validate<'info> for SetAnnualRewards<'info> {
 
 impl<'info> Validate<'info> for SetRewardsShare<'info> {
     fn validate(&self) -> Result<()> {
-        assert_keys_eq!(self.quarry.rewarder_key, self.auth.rewarder);
+        assert_keys_eq!(self.quarry.rewarder, self.auth.rewarder);
         self.auth.rewarder.assert_not_paused()?;
         self.auth.validate()?;
         Ok(())
@@ -102,7 +102,7 @@ impl<'info> Validate<'info> for SetRewardsShare<'info> {
 
 impl<'info> Validate<'info> for SetFamine<'info> {
     fn validate(&self) -> Result<()> {
-        assert_keys_eq!(self.quarry.rewarder_key, self.auth.rewarder);
+        assert_keys_eq!(self.quarry.rewarder, self.auth.rewarder);
         self.auth.rewarder.assert_not_paused()?;
         self.auth.validate()?;
         Ok(())
@@ -111,7 +111,7 @@ impl<'info> Validate<'info> for SetFamine<'info> {
 
 impl<'info> Validate<'info> for UpdateQuarryRewards<'info> {
     fn validate(&self) -> Result<()> {
-        assert_keys_eq!(self.quarry.rewarder_key, self.rewarder);
+        assert_keys_eq!(self.quarry.rewarder, self.rewarder);
         self.rewarder.assert_not_paused()?;
         Ok(())
     }
@@ -134,7 +134,7 @@ impl<'info> Validate<'info> for CreateMiner<'info> {
             self.quarry.token_mint_key,
             "miner vault mint must match quarry mint"
         );
-        assert_keys_eq!(self.quarry.rewarder_key, self.rewarder, "rewarder");
+        assert_keys_eq!(self.quarry.rewarder, self.rewarder, "rewarder");
 
         Ok(())
     }
@@ -162,7 +162,7 @@ impl<'info> Validate<'info> for UserStake<'info> {
         assert_keys_eq!(self.token_account.mint, staked_mint);
 
         // rewarder
-        assert_keys_eq!(self.quarry.rewarder_key, self.rewarder);
+        assert_keys_eq!(self.quarry.rewarder, self.rewarder);
 
         Ok(())
     }

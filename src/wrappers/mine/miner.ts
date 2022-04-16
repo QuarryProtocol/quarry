@@ -69,7 +69,7 @@ export class MinerWrapper {
         systemProgram: SystemProgram.programId,
         payer: this.provider.wallet.publicKey,
         minerVault: this.tokenVaultKey,
-        rewarder: this.quarry.quarryData.rewarderKey,
+        rewarder: this.quarry.quarryData.rewarder,
         tokenProgram: TOKEN_PROGRAM_ID,
         tokenMint: this.quarry.token.mintAccount,
       },
@@ -107,7 +107,7 @@ export class MinerWrapper {
       miner,
       quarry: this.quarry.key,
       tokenProgram: TOKEN_PROGRAM_ID,
-      rewarder: this.quarry.quarryData.rewarderKey,
+      rewarder: this.quarry.quarryData.rewarder,
 
       // dummies for backwards compatibility
       unusedMinerVault: randomMut,
@@ -189,7 +189,7 @@ export class MinerWrapper {
 
     const [minter] = await findMinterAddress(
       this.quarry.rewarderData.mintWrapper,
-      this.quarry.quarryData.rewarderKey,
+      this.quarry.quarryData.rewarder,
       this.sdk.mintWrapper.program.programId
     );
 
@@ -227,7 +227,7 @@ export class MinerWrapper {
 
     const [minter] = await findMinterAddress(
       this.quarry.rewarderData.mintWrapper,
-      this.quarry.quarryData.rewarderKey,
+      this.quarry.quarryData.rewarder,
       this.sdk.mintWrapper.program.programId
     );
 

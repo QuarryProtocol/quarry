@@ -346,14 +346,14 @@ pub struct QuarryStake<'info> {
     pub pool: Account<'info, MergePool>,
 
     /// The [MergeMiner] (also the [quarry_mine::Miner] authority).
-    #[account(mut)]
+    #[account(mut, has_one = pool)]
     pub mm: Account<'info, MergeMiner>,
 
     /// The [quarry_mine::Rewarder] to stake into.
     pub rewarder: Box<Account<'info, quarry_mine::Rewarder>>,
 
     /// The [quarry_mine::Quarry] to claim from.
-    #[account(mut)]
+    #[account(mut, has_one = rewarder)]
     pub quarry: Box<Account<'info, quarry_mine::Quarry>>,
 
     /// The [quarry_mine::Miner].
@@ -361,7 +361,7 @@ pub struct QuarryStake<'info> {
     pub miner: Box<Account<'info, quarry_mine::Miner>>,
 
     /// The [TokenAccount] of the [quarry_mine::Miner] that holds the staked tokens.
-    #[account(mut)]
+    #[account(mut, constraint = miner_vault.key() == miner.token_vault_key)]
     pub miner_vault: Account<'info, TokenAccount>,
 
     /// [anchor_spl::token] program.
@@ -369,12 +369,6 @@ pub struct QuarryStake<'info> {
 
     /// [quarry_mine] program.
     pub mine_program: Program<'info, quarry_mine::program::QuarryMine>,
-
-    /// Unused variable used as a filler for deprecated accounts. Handled by [quarry_mine].
-    /// One should pass in a randomly generated Keypair for this account.
-    /// CHECK: OK
-    #[account(mut)]
-    pub unused_account: UncheckedAccount<'info>,
 }
 
 /// Error Codes
@@ -390,4 +384,8 @@ pub enum ErrorCode {
     CannotWithdrawReplicaMint,
     #[msg("User must first withdraw from all replica quarries.")]
     OutstandingReplicaTokens,
+    #[msg("The replica mint must have the same number of decimals as the primary mint.")]
+    ReplicaDecimalsMismatch,
+    #[msg("The replica mint must have zero supply.")]
+    ReplicaNonZeroSupply,
 }

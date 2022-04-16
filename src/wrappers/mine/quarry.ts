@@ -95,7 +95,7 @@ export class QuarryWrapper {
     const program = sdk.programs.Mine;
     const quarryData = await program.account.quarry.fetch(key);
     const rewarderData = await program.account.rewarder.fetch(
-      quarryData.rewarderKey
+      quarryData.rewarder
     );
     return new QuarryWrapper(sdk, token, rewarderData, quarryData, key);
   }
@@ -206,7 +206,7 @@ export class QuarryWrapper {
         accounts: {
           auth: {
             authority: this.provider.wallet.publicKey,
-            rewarder: this.quarryData.rewarderKey,
+            rewarder: this.quarryData.rewarder,
           },
           quarry: this.key,
         },
@@ -223,7 +223,7 @@ export class QuarryWrapper {
         accounts: {
           auth: {
             authority: this.provider.wallet.publicKey,
-            rewarder: this.quarryData.rewarderKey,
+            rewarder: this.quarryData.rewarder,
           },
           quarry: this.key,
         },

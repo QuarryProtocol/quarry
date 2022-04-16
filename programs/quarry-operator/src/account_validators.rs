@@ -55,7 +55,7 @@ impl<'info> Validate<'info> for DelegateCreateQuarry<'info> {
 impl<'info> Validate<'info> for DelegateSetRewardsShare<'info> {
     fn validate(&self) -> Result<()> {
         assert_keys_eq!(
-            self.quarry.rewarder_key,
+            self.quarry.rewarder,
             self.with_delegate.rewarder,
             Unauthorized
         );
@@ -72,7 +72,7 @@ impl<'info> Validate<'info> for DelegateSetRewardsShare<'info> {
 impl<'info> Validate<'info> for DelegateSetFamine<'info> {
     fn validate(&self) -> Result<()> {
         assert_keys_eq!(
-            self.quarry.rewarder_key,
+            self.quarry.rewarder,
             self.with_delegate.rewarder,
             Unauthorized
         );

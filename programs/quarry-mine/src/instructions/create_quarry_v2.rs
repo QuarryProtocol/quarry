@@ -12,7 +12,7 @@ pub fn handler(ctx: Context<CreateQuarryV2>) -> Result<()> {
     // Set quarry params
     quarry.index = index;
     quarry.famine_ts = i64::MAX;
-    quarry.rewarder_key = rewarder.key();
+    quarry.rewarder = rewarder.key();
     quarry.annual_rewards_rate = 0;
     quarry.rewards_share = 0;
     quarry.token_mint_decimals = ctx.accounts.token_mint.decimals;

@@ -467,8 +467,8 @@ impl Rewarder {
 #[account]
 #[derive(Copy, Default)]
 pub struct Quarry {
-    /// Rewarder who owns this quarry
-    pub rewarder_key: Pubkey,
+    /// Rewarder which manages this quarry
+    pub rewarder: Pubkey,
     /// LP token this quarry is designated to
     pub token_mint_key: Pubkey,
     /// Bump.

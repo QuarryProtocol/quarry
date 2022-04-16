@@ -315,7 +315,7 @@ pub struct DelegateSetRewardsShare<'info> {
     /// [Quarry].
     #[account(
         mut,
-        constraint = quarry.rewarder_key == with_delegate.rewarder.key()
+        constraint = quarry.rewarder == with_delegate.rewarder.key()
     )]
     pub quarry: Box<Account<'info, Quarry>>,
 }
@@ -328,7 +328,7 @@ pub struct DelegateSetFamine<'info> {
     /// [Quarry].
     #[account(
         mut,
-        constraint = quarry.rewarder_key == with_delegate.rewarder.key()
+        constraint = quarry.rewarder == with_delegate.rewarder.key()
     )]
     pub quarry: Box<Account<'info, Quarry>>,
 }
