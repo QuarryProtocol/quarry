@@ -27,7 +27,7 @@ pub mod quarry;
 pub mod rewarder;
 
 mod instructions;
-use instructions::*;
+pub use instructions::*;
 
 use crate::quarry::StakeAction;
 
@@ -170,30 +170,14 @@ pub mod quarry_mine {
     /// This may only be called by the [Rewarder]::authority.
     #[access_control(ctx.accounts.validate())]
     pub fn create_quarry(ctx: Context<CreateQuarry>, _bump: u8) -> Result<()> {
-        let rewarder = &mut ctx.accounts.auth.rewarder;
-        // Update rewarder's quarry stats
-        let index = rewarder.num_quarries;
-        rewarder.num_quarries = unwrap_int!(rewarder.num_quarries.checked_add(1));
+        instructions::create_quarry::handler(ctx)
+    }
 
-        let quarry = &mut ctx.accounts.quarry;
-        quarry.bump = *unwrap_int!(ctx.bumps.get("quarry"));
-
-        // Set quarry params
-        quarry.index = index;
-        quarry.famine_ts = i64::MAX;
-        quarry.rewarder_key = *rewarder.to_account_info().key;
-        quarry.annual_rewards_rate = 0;
-        quarry.rewards_share = 0;
-        quarry.token_mint_decimals = ctx.accounts.token_mint.decimals;
-        quarry.token_mint_key = *ctx.accounts.token_mint.to_account_info().key;
-
-        let current_ts = Clock::get()?.unix_timestamp;
-        emit!(QuarryCreateEvent {
-            token_mint: quarry.token_mint_key,
-            timestamp: current_ts,
-        });
-
-        Ok(())
+    /// Creates a new [Quarry].
+    /// This may only be called by the [Rewarder]::authority.
+    #[access_control(ctx.accounts.validate())]
+    pub fn create_quarry_v2(ctx: Context<CreateQuarryV2>) -> Result<()> {
+        instructions::create_quarry_v2::handler(ctx)
     }
 
     /// Sets the rewards share of a quarry.
@@ -266,7 +250,7 @@ pub mod quarry_mine {
         let miner = &mut ctx.accounts.miner;
         miner.authority = ctx.accounts.authority.key();
         miner.bump = *unwrap_int!(ctx.bumps.get("miner"));
-        miner.quarry_key = ctx.accounts.quarry.key();
+        miner.quarry = ctx.accounts.quarry.key();
         miner.token_vault_key = ctx.accounts.miner_vault.key();
         miner.rewards_earned = 0;
         miner.rewards_per_token_paid = 0;
@@ -275,7 +259,7 @@ pub mod quarry_mine {
 
         emit!(MinerCreateEvent {
             authority: miner.authority,
-            quarry: miner.quarry_key,
+            quarry: miner.quarry,
             miner: miner.key(),
         });
 
@@ -358,7 +342,7 @@ pub mod quarry_mine {
         // Sign a transfer instruction as the [Miner]
         let miner_seeds = &[
             b"Miner".as_ref(),
-            ctx.accounts.miner.quarry_key.as_ref(),
+            ctx.accounts.miner.quarry.as_ref(),
             ctx.accounts.miner.authority.as_ref(),
             &[ctx.accounts.miner.bump],
         ];
@@ -520,7 +504,7 @@ impl Quarry {
 #[derive(Copy, Default, Debug)]
 pub struct Miner {
     /// Key of the [Quarry] this [Miner] works on.
-    pub quarry_key: Pubkey,
+    pub quarry: Pubkey,
     /// Authority who manages this [Miner].
     /// All withdrawals of tokens must accrue to [TokenAccount]s owned by this account.
     pub authority: Pubkey,
@@ -646,7 +630,7 @@ pub struct MutableRewarderWithAuthority<'info> {
     pub authority: Signer<'info>,
 
     /// Rewarder of the farm.
-    #[account(mut)]
+    #[account(mut, has_one = authority)]
     pub rewarder: Account<'info, Rewarder>,
 }
 
@@ -668,41 +652,6 @@ pub struct SetAnnualRewards<'info> {
 }
 
 /* Quarry contexts */
-
-/// Accounts for [quarry_mine::create_quarry].
-#[derive(Accounts)]
-pub struct CreateQuarry<'info> {
-    /// [Quarry].
-    #[account(
-        init,
-        seeds = [
-            b"Quarry".as_ref(),
-            auth.rewarder.key().to_bytes().as_ref(),
-            token_mint.key().to_bytes().as_ref()
-        ],
-        bump,
-        payer = payer,
-        space = 8 + Quarry::LEN
-    )]
-    pub quarry: Account<'info, Quarry>,
-
-    /// [Rewarder] authority.
-    pub auth: MutableRewarderWithAuthority<'info>,
-
-    /// [Mint] of the token to create a [Quarry] for.
-    pub token_mint: Account<'info, Mint>,
-
-    /// Payer of [Quarry] creation.
-    #[account(mut)]
-    pub payer: Signer<'info>,
-
-    /// Unused variable that held the clock. Placeholder.
-    /// CHECK: OK
-    pub unused_clock: UncheckedAccount<'info>,
-
-    /// System program.
-    pub system_program: Program<'info, System>,
-}
 
 /// Accounts for [quarry_mine::set_famine].
 #[derive(Accounts)]

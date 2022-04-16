@@ -198,7 +198,7 @@ impl<'info> Validate<'info> for UserClaimV2<'info> {
         assert_keys_eq!(self.authority, self.miner.authority);
 
         // quarry
-        assert_keys_eq!(self.miner.quarry_key, self.quarry);
+        assert_keys_eq!(self.miner.quarry, self.quarry);
 
         // rewarder
         assert_keys_eq!(self.quarry.rewarder_key, self.rewarder);

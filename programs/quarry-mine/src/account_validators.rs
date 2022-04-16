@@ -5,7 +5,7 @@ use vipers::prelude::*;
 
 use crate::addresses;
 use crate::{
-    AcceptAuthority, CreateMiner, CreateQuarry, ExtractFees, MutableRewarderWithAuthority,
+    AcceptAuthority, CreateMiner, ExtractFees, MutableRewarderWithAuthority,
     MutableRewarderWithPauseAuthority, NewRewarder, ReadOnlyRewarderWithAuthority,
     SetAnnualRewards, SetFamine, SetPauseAuthority, SetRewardsShare, TransferAuthority,
     UpdateQuarryRewards, UserStake,
@@ -91,14 +91,6 @@ impl<'info> Validate<'info> for SetAnnualRewards<'info> {
 // Quarry functions
 // --------------------------------
 
-impl<'info> Validate<'info> for CreateQuarry<'info> {
-    fn validate(&self) -> Result<()> {
-        self.auth.validate()?;
-        invariant!(!self.auth.rewarder.is_paused, Paused);
-        Ok(())
-    }
-}
-
 impl<'info> Validate<'info> for SetRewardsShare<'info> {
     fn validate(&self) -> Result<()> {
         assert_keys_eq!(self.quarry.rewarder_key, self.auth.rewarder);
@@ -158,7 +150,7 @@ impl<'info> Validate<'info> for UserStake<'info> {
         assert_keys_eq!(self.authority, self.miner.authority);
 
         // quarry
-        assert_keys_eq!(self.miner.quarry_key, self.quarry);
+        assert_keys_eq!(self.miner.quarry, self.quarry);
 
         // miner_vault
         let staked_mint = self.quarry.token_mint_key;

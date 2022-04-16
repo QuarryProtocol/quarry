@@ -174,7 +174,7 @@ impl<'info> Validate<'info> for QuarryStake<'info> {
         assert_keys_eq!(self.pool, self.mm.pool);
 
         // Quarry validations
-        assert_keys_eq!(self.quarry, self.miner.quarry_key);
+        assert_keys_eq!(self.quarry, self.miner.quarry);
         assert_keys_eq!(self.rewarder, self.quarry.rewarder_key);
 
         assert_keys_eq!(self.miner_vault, self.miner.token_vault_key);
