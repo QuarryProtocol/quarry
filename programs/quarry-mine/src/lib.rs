@@ -296,6 +296,14 @@ pub mod quarry_mine {
         Ok(())
     }
 
+    /// Claims rewards for the [Miner].
+    ///
+    /// This removes 2 accounts from the [crate::quarry_mine::claim_rewards] instruction.
+    #[access_control(ctx.accounts.validate())]
+    pub fn claim_rewards_v2(ctx: Context<ClaimRewardsV2>) -> Result<()> {
+        instructions::claim_rewards_v2::handler(ctx)
+    }
+
     /// Stakes tokens into the [Miner].
     #[access_control(ctx.accounts.validate())]
     pub fn stake_tokens(ctx: Context<UserStake>, amount: u64) -> Result<()> {
