@@ -110,6 +110,14 @@ describe("Mine", () => {
     await expectTX(tx, "Initialize mint").to.be.fulfilled;
   });
 
+  it("rewarder v1", async () => {
+    const { tx } = await mine.createRewarderV1({
+      mintWrapper: mintWrapperKey,
+      authority: provider.wallet.publicKey,
+    });
+    await expectTX(tx, "Create new rewarder").to.be.fulfilled;
+  });
+
   describe("Rewarder", () => {
     let rewarderKey: PublicKey;
 
