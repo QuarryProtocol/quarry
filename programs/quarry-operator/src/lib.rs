@@ -316,7 +316,7 @@ pub struct WithDelegate<'info> {
         mut,
         constraint = rewarder.authority == operator.key() @ ErrorCode::OperatorNotRewarderAuthority
     )]
-    pub rewarder: Box<Account<'info, Rewarder>>,
+    pub rewarder: Account<'info, Rewarder>,
     /// Quarry mine
     pub quarry_mine_program: Program<'info, quarry_mine::program::QuarryMine>,
 }
