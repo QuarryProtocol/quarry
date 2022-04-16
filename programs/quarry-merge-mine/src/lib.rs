@@ -312,6 +312,7 @@ pub struct ClaimRewards<'info> {
 #[derive(Accounts)]
 pub struct QuarryStakePrimary<'info> {
     /// The [MergeMiner::owner].
+    #[account(constraint = mm_owner.key() == stake.mm.owner)]
     pub mm_owner: Signer<'info>,
 
     /// The [TokenAccount] holding the [MergeMiner]'s primary tokens.
@@ -326,6 +327,7 @@ pub struct QuarryStakePrimary<'info> {
 #[derive(Accounts)]
 pub struct QuarryStakeReplica<'info> {
     /// The [MergeMiner::owner].
+    #[account(constraint = mm_owner.key() == stake.mm.owner)]
     pub mm_owner: Signer<'info>,
 
     /// [Mint] of a token that can be staked into a farming program.

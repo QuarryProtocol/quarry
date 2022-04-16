@@ -576,7 +576,7 @@ pub struct ReadOnlyRewarderWithAuthority<'info> {
     /// Authority of the rewarder.
     pub authority: Signer<'info>,
 
-    /// Rewarder of the farm.
+    /// [Rewarder].
     #[account(has_one = authority)]
     pub rewarder: Account<'info, Rewarder>,
 }
@@ -597,7 +597,7 @@ pub struct SetFamine<'info> {
     pub auth: ReadOnlyRewarderWithAuthority<'info>,
 
     /// [Quarry] updated.
-    #[account(mut)]
+    #[account(mut, constraint = quarry.key() == auth.rewarder.key())]
     pub quarry: Account<'info, Quarry>,
 }
 
