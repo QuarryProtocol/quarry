@@ -15,7 +15,11 @@ import {
   u64,
 } from "@saberhq/token-utils";
 import type { PublicKey } from "@solana/web3.js";
-import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import {
+  Keypair,
+  LAMPORTS_PER_SOL,
+  SYSVAR_CLOCK_PUBKEY,
+} from "@solana/web3.js";
 import * as assert from "assert";
 import { BN } from "bn.js";
 import { expect } from "chai";
@@ -438,7 +442,7 @@ describe("Mine", () => {
                 },
                 tokenMint: nextMint,
                 payer: fakeAuthority.publicKey,
-                unusedClock: web3.SYSVAR_CLOCK_PUBKEY,
+                unusedAccount: SYSVAR_CLOCK_PUBKEY,
                 systemProgram: web3.SystemProgram.programId,
               },
               signers: [fakeAuthority],
@@ -499,7 +503,7 @@ describe("Mine", () => {
               },
               tokenMint: stakeTokenMint,
               payer: provider.wallet.publicKey,
-              unusedClock: web3.SYSVAR_CLOCK_PUBKEY,
+              unusedAccount: SYSVAR_CLOCK_PUBKEY,
               systemProgram: web3.SystemProgram.programId,
             },
           });
