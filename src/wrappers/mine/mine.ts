@@ -1,6 +1,10 @@
 import type { Provider, TransactionEnvelope } from "@saberhq/solana-contrib";
 import { getOrCreateATA, TOKEN_PROGRAM_ID } from "@saberhq/token-utils";
-import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
+import type {
+  PublicKey,
+  Signer,
+  TransactionInstruction,
+} from "@solana/web3.js";
 import { Keypair, SystemProgram, SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
 
 import type { MintWrapperData } from "../../programs";
@@ -23,10 +27,10 @@ export class MineWrapper {
   async createRewarder({
     mintWrapper,
     baseKP = Keypair.generate(),
-    authority = this.program.provider.wallet.publicKey,
+    authority = this.provider.wallet.publicKey,
   }: {
     mintWrapper: PublicKey;
-    baseKP?: Keypair;
+    baseKP?: Signer;
     authority?: PublicKey;
   }): Promise<{
     key: PublicKey;
@@ -67,7 +71,7 @@ export class MineWrapper {
               base: baseKP.publicKey,
               initialAuthority: authority,
               rewarder: rewarderKey,
-              payer: this.program.provider.wallet.publicKey,
+              payer: this.provider.wallet.publicKey,
               systemProgram: SystemProgram.programId,
               unusedClock: SYSVAR_CLOCK_PUBKEY,
               mintWrapper,

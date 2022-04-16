@@ -93,7 +93,7 @@ impl<'info> QuarryStakeReplica<'info> {
     pub fn to_burn_accounts(&self) -> token::Burn<'info> {
         token::Burn {
             mint: self.replica_mint.to_account_info(),
-            to: self.replica_mint_token_account.to_account_info(),
+            from: self.replica_mint_token_account.to_account_info(),
             authority: self.stake.mm.to_account_info(),
         }
     }

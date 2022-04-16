@@ -1,4 +1,4 @@
-import type { Provider } from "@saberhq/solana-contrib";
+import type { AugmentedProvider, Provider } from "@saberhq/solana-contrib";
 import { TransactionEnvelope } from "@saberhq/solana-contrib";
 import type { ProgramAccount, Token, u64 } from "@saberhq/token-utils";
 import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
@@ -22,6 +22,10 @@ export class RewarderWrapper {
   ) {
     this.sdk = mineWrapper.sdk;
     this.program = mineWrapper.program;
+  }
+
+  get provider(): AugmentedProvider {
+    return this.sdk.provider;
   }
 
   static fromData(
@@ -79,7 +83,7 @@ export class RewarderWrapper {
    */
   async createQuarry({
     token,
-    authority = this.program.provider.wallet.publicKey,
+    authority = this.provider.wallet.publicKey,
   }: {
     token: Token;
     authority?: PublicKey;
@@ -97,7 +101,7 @@ export class RewarderWrapper {
           rewarder: this.rewarderKey,
         },
         tokenMint: token.mintAccount,
-        payer: this.program.provider.wallet.publicKey,
+        payer: this.provider.wallet.publicKey,
         unusedClock: SYSVAR_CLOCK_PUBKEY,
         systemProgram: SystemProgram.programId,
       },
@@ -117,7 +121,7 @@ export class RewarderWrapper {
    */
   setAnnualRewards({
     newAnnualRate,
-    authority = this.program.provider.wallet.publicKey,
+    authority = this.provider.wallet.publicKey,
   }: {
     newAnnualRate: u64;
     authority?: PublicKey;

@@ -1,4 +1,4 @@
-import { getProvider } from "@project-serum/anchor";
+import { AnchorProvider } from "@project-serum/anchor";
 import { expectTX } from "@saberhq/chai-solana";
 import type { Token } from "@saberhq/token-utils";
 import {
@@ -6,7 +6,7 @@ import {
   SPLToken,
   TOKEN_PROGRAM_ID,
 } from "@saberhq/token-utils";
-import type { Keypair, PublicKey, Signer } from "@solana/web3.js";
+import type { PublicKey, Signer } from "@solana/web3.js";
 import { Transaction } from "@solana/web3.js";
 
 import type { QuarrySDK, QuarryWrapper } from "../src";
@@ -18,7 +18,7 @@ export const newUserStakeTokenAccount = async (
   sdk: QuarrySDK,
   quarry: QuarryWrapper,
   stakeToken: Token,
-  stakedMintAuthority: Keypair,
+  stakedMintAuthority: Signer,
   amount: number
 ): Promise<PublicKey> => {
   const minerActions = await quarry.getMinerActions(
@@ -69,7 +69,7 @@ export const initATA = async (
       token.mintAccount,
       account,
       owner.publicKey,
-      getProvider().wallet.publicKey
+      AnchorProvider.env().wallet.publicKey
     )
   );
 
@@ -86,8 +86,12 @@ export const initATA = async (
     );
   }
   // mint tokens
-  await getProvider().send(tx, mint ? [mint.minter] : undefined, {
-    commitment: "confirmed",
-  });
+  await AnchorProvider.env().sendAndConfirm(
+    tx,
+    mint ? [mint.minter] : undefined,
+    {
+      commitment: "confirmed",
+    }
+  );
   return account;
 };
