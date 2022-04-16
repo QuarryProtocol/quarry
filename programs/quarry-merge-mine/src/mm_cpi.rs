@@ -157,12 +157,12 @@ impl MergeMiner {
     pub fn claim_rewards(&self, claim: &ClaimRewards) -> Result<()> {
         let seeds = gen_merge_miner_signer_seeds!(self);
         let signer_seeds = &[&seeds[..]];
-        let cpi_ctx: CpiContext<quarry_mine::cpi::accounts::ClaimRewards> =
+        let cpi_ctx: CpiContext<quarry_mine::cpi::accounts::ClaimRewardsV2> =
             CpiContext::new_with_signer(
                 claim.stake.mine_program.to_account_info(),
                 claim.to_claim_rewards_accounts(),
                 signer_seeds,
             );
-        quarry_mine::cpi::claim_rewards(cpi_ctx)
+        quarry_mine::cpi::claim_rewards_v2(cpi_ctx)
     }
 }

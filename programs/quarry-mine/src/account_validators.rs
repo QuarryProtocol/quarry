@@ -5,10 +5,10 @@ use vipers::prelude::*;
 
 use crate::addresses;
 use crate::{
-    AcceptAuthority, ClaimRewards, CreateMiner, CreateQuarry, ExtractFees,
-    MutableRewarderWithAuthority, MutableRewarderWithPauseAuthority, NewRewarder,
-    ReadOnlyRewarderWithAuthority, SetAnnualRewards, SetFamine, SetPauseAuthority, SetRewardsShare,
-    TransferAuthority, UpdateQuarryRewards, UserClaim, UserStake,
+    AcceptAuthority, CreateMiner, CreateQuarry, ExtractFees, MutableRewarderWithAuthority,
+    MutableRewarderWithPauseAuthority, NewRewarder, ReadOnlyRewarderWithAuthority,
+    SetAnnualRewards, SetFamine, SetPauseAuthority, SetRewardsShare, TransferAuthority,
+    UpdateQuarryRewards, UserStake,
 };
 
 // --------------------------------
@@ -142,59 +142,6 @@ impl<'info> Validate<'info> for CreateMiner<'info> {
             self.quarry.token_mint_key,
             "miner vault mint must match quarry mint"
         );
-        assert_keys_eq!(self.quarry.rewarder_key, self.rewarder, "rewarder");
-
-        Ok(())
-    }
-}
-
-impl<'info> Validate<'info> for ClaimRewards<'info> {
-    /// Validates a [ClaimRewards] accounts struct.
-    fn validate(&self) -> Result<()> {
-        self.stake.validate()?;
-        self.stake.rewarder.assert_not_paused()?;
-
-        assert_keys_eq!(self.mint_wrapper, self.stake.rewarder.mint_wrapper);
-        assert_keys_eq!(self.mint_wrapper.token_mint, self.rewards_token_mint);
-
-        assert_keys_eq!(self.minter.mint_wrapper, self.mint_wrapper);
-        assert_keys_eq!(self.minter.minter_authority, self.stake.rewarder);
-
-        // rewards_token_mint validate
-        assert_keys_eq!(
-            self.rewards_token_mint,
-            self.stake.rewarder.rewards_token_mint
-        );
-        assert_keys_eq!(
-            self.rewards_token_mint.mint_authority.unwrap(),
-            self.mint_wrapper
-        );
-
-        // rewards_token_account validate
-        assert_keys_eq!(self.rewards_token_account.mint, self.rewards_token_mint);
-
-        // claim_fee_token_account validate
-        assert_keys_eq!(
-            self.claim_fee_token_account,
-            self.stake.rewarder.claim_fee_token_account
-        );
-        assert_keys_eq!(self.claim_fee_token_account.mint, self.rewards_token_mint);
-
-        Ok(())
-    }
-}
-
-impl<'info> Validate<'info> for UserClaim<'info> {
-    fn validate(&self) -> Result<()> {
-        invariant!(!self.rewarder.is_paused, Paused);
-        // authority
-        invariant!(self.authority.is_signer, Unauthorized);
-        assert_keys_eq!(self.authority, self.miner.authority, "miner authority");
-
-        // quarry
-        assert_keys_eq!(self.miner.quarry_key, self.quarry.key(), "quarry");
-
-        // rewarder
         assert_keys_eq!(self.quarry.rewarder_key, self.rewarder, "rewarder");
 
         Ok(())

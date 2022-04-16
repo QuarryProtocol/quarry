@@ -285,15 +285,7 @@ pub mod quarry_mine {
     /// Claims rewards for the [Miner].
     #[access_control(ctx.accounts.validate())]
     pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
-        let miner = &mut ctx.accounts.stake.miner;
-
-        let now = Clock::get()?.unix_timestamp;
-        let quarry = &mut ctx.accounts.stake.quarry;
-        quarry.update_rewards_and_miner(miner, &ctx.accounts.stake.rewarder, now)?;
-
-        ctx.accounts.calculate_and_claim_rewards()?;
-
-        Ok(())
+        instructions::claim_rewards::handler(ctx)
     }
 
     /// Claims rewards for the [Miner].
@@ -789,70 +781,6 @@ pub struct CreateMiner<'info> {
 
     /// SPL Token program.
     pub token_program: Program<'info, Token>,
-}
-
-/// ClaimRewards accounts
-#[derive(Accounts)]
-pub struct ClaimRewards<'info> {
-    /// Mint wrapper.
-    #[account(mut)]
-    pub mint_wrapper: Box<Account<'info, quarry_mint_wrapper::MintWrapper>>,
-    /// Mint wrapper program.
-    pub mint_wrapper_program: Program<'info, quarry_mint_wrapper::program::QuarryMintWrapper>,
-    /// [quarry_mint_wrapper::Minter] information.
-    #[account(mut)]
-    pub minter: Box<Account<'info, quarry_mint_wrapper::Minter>>,
-
-    /// Mint of the rewards token.
-    #[account(mut)]
-    pub rewards_token_mint: Account<'info, Mint>,
-
-    /// Account to claim rewards for.
-    #[account(mut)]
-    pub rewards_token_account: Box<Account<'info, TokenAccount>>,
-
-    /// Account to send claim fees to.
-    #[account(mut)]
-    pub claim_fee_token_account: Box<Account<'info, TokenAccount>>,
-
-    /// Claim accounts
-    pub stake: UserClaim<'info>,
-}
-
-/// Claim accounts
-///
-/// This accounts struct is always used in the context of the user authority
-/// staking into an account. This is NEVER used by an admin.
-///
-/// Validation should be extremely conservative.
-#[derive(Accounts, Clone)]
-pub struct UserClaim<'info> {
-    /// Miner authority (i.e. the user).
-    pub authority: Signer<'info>,
-
-    /// Miner.
-    #[account(mut)]
-    pub miner: Account<'info, Miner>,
-
-    /// Quarry to claim from.
-    #[account(mut)]
-    pub quarry: Account<'info, Quarry>,
-
-    /// Placeholder for the miner vault.
-    /// CHECK: OK
-    #[account(mut)]
-    pub unused_miner_vault: UncheckedAccount<'info>,
-
-    /// Placeholder for the user's staked token account.
-    /// CHECK: OK
-    #[account(mut)]
-    pub unused_token_account: UncheckedAccount<'info>,
-
-    /// Token program
-    pub token_program: Program<'info, Token>,
-
-    /// Rewarder
-    pub rewarder: Account<'info, Rewarder>,
 }
 
 /// Staking accounts
