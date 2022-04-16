@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+### Features
+
+- Update to Anchor v0.24.
+- Add support for Neodyme's [security.txt](https://github.com/neodyme-labs/solana-security-txt) standard.
+
 ## [v4.2.0]
 
 ### Features
