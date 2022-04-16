@@ -458,7 +458,7 @@ describe("Mine", () => {
           },
           (err: Error) => {
             console.error(err);
-            expect(err.message).to.include("custom program error: 0x1"); // mut constraint
+            expect(err.message).to.include("Error Code: Unauthorized"); // mut constraint
             return true;
           }
         );
@@ -490,7 +490,7 @@ describe("Mine", () => {
           },
           (err: Error) => {
             console.error(err);
-            expect(err.message).to.include("custom program error: 0x1"); // mut constraint
+            expect(err.message).to.include("Error Code: Unauthorized");
             return true;
           }
         );

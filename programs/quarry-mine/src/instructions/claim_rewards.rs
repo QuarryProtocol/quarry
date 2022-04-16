@@ -16,7 +16,7 @@ pub fn handler(ctx: Context<ClaimRewards>) -> Result<()> {
             ctx.accounts.claim.token_program.to_account_info(),
             ctx.accounts.claim.rewarder.to_account_info(),
         ],
-        instructions::claim_rewards_v2::handler,
+        crate::quarry_mine::claim_rewards_v2,
     )
 }
 

@@ -13,7 +13,7 @@ pub fn handler(ctx: Context<DelegateCreateQuarry>) -> Result<()> {
             payer: ctx.accounts.payer.clone(),
             system_program: ctx.accounts.system_program.clone(),
         },
-        instructions::delegate_create_quarry_v2::handler,
+        crate::quarry_operator::delegate_create_quarry_v2,
     )
 }
 

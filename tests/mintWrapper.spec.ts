@@ -63,6 +63,14 @@ describe("MintWrapper", () => {
     await expectTX(tx, "Initialize mint").to.be.fulfilled;
   });
 
+  it("init mint wrapper v1", async () => {
+    const { tx } = await mintWrapper.newWrapperV1({
+      hardcap: hardCap.toU64(),
+      tokenMint: rewardsMint,
+    });
+    await expectTX(tx).to.be.fulfilled;
+  });
+
   it("Check MintWrapper", async () => {
     const mintInfo = await getMintInfo(provider, rewardsMint);
     assert.ok(mintInfo.mintAuthority?.equals(mintWrapperKey));
@@ -142,6 +150,14 @@ describe("MintWrapper", () => {
       expect(mintWrapperState.pendingAdmin).to.eqAddress(
         web3.PublicKey.default
       );
+    });
+
+    it("new minter v1", async () => {
+      const id = Keypair.generate().publicKey;
+      await expectTX(
+        mintWrapper.newMinterV1(mintWrapperKey, id),
+        "new minter v1"
+      ).to.be.fulfilled;
     });
 
     it("Adds a Minter", async () => {

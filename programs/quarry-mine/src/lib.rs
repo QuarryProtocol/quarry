@@ -70,6 +70,7 @@ pub mod quarry_mine {
     #[deprecated(since = "5.0.0", note = "Use `new_rewarder_v2` instead.")]
     #[access_control(ctx.accounts.validate())]
     pub fn new_rewarder(ctx: Context<NewRewarder>, _bump: u8) -> Result<()> {
+        msg!("pt 1");
         instructions::new_rewarder::handler(ctx)
     }
 
@@ -566,7 +567,7 @@ pub struct MutableRewarderWithAuthority<'info> {
     pub authority: Signer<'info>,
 
     /// Rewarder of the farm.
-    #[account(mut, has_one = authority)]
+    #[account(mut, has_one = authority @ ErrorCode::Unauthorized)]
     pub rewarder: Account<'info, Rewarder>,
 }
 

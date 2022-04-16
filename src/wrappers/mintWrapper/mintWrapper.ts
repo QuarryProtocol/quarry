@@ -1,5 +1,7 @@
-import type { AugmentedProvider } from "@saberhq/solana-contrib";
-import { TransactionEnvelope } from "@saberhq/solana-contrib";
+import type {
+  AugmentedProvider,
+  TransactionEnvelope,
+} from "@saberhq/solana-contrib";
 import type { TokenAmount, u64 } from "@saberhq/token-utils";
 import {
   createInitMintInstructions,
@@ -29,6 +31,46 @@ export class MintWrapper {
     return this.sdk.provider;
   }
 
+  async newWrapperV1({
+    hardcap,
+    tokenMint,
+    baseKP = Keypair.generate(),
+    tokenProgram = TOKEN_PROGRAM_ID,
+    admin = this.provider.wallet.publicKey,
+    payer = this.provider.wallet.publicKey,
+  }: {
+    hardcap: u64;
+    tokenMint: PublicKey;
+    baseKP?: Signer;
+    tokenProgram?: PublicKey;
+    admin?: PublicKey;
+    payer?: PublicKey;
+  }): Promise<PendingMintWrapper> {
+    const [mintWrapper, bump] = await findMintWrapperAddress(
+      baseKP.publicKey,
+      this.program.programId
+    );
+    return {
+      mintWrapper,
+      tx: this.provider.newTX(
+        [
+          this.program.instruction.newWrapper(bump, hardcap, {
+            accounts: {
+              base: baseKP.publicKey,
+              mintWrapper,
+              admin,
+              tokenMint,
+              tokenProgram,
+              payer,
+              systemProgram: SystemProgram.programId,
+            },
+          }),
+        ],
+        [baseKP]
+      ),
+    };
+  }
+
   async newWrapper({
     hardcap,
     tokenMint,
@@ -50,10 +92,9 @@ export class MintWrapper {
     );
     return {
       mintWrapper,
-      tx: new TransactionEnvelope(
-        this.provider,
+      tx: this.provider.newTX(
         [
-          this.program.instruction.newWrapper(hardcap, {
+          this.program.instruction.newWrapperV2(hardcap, {
             accounts: {
               base: baseKP.publicKey,
               mintWrapper,
@@ -143,6 +184,31 @@ export class MintWrapper {
       "Minter",
       accountInfo.data
     );
+  }
+
+  async newMinterV1(
+    wrapper: PublicKey,
+    authority: PublicKey
+  ): Promise<TransactionEnvelope> {
+    const [minter, bump] = await findMinterAddress(
+      wrapper,
+      authority,
+      this.program.programId
+    );
+    return this.provider.newTX([
+      this.program.instruction.newMinter(bump, {
+        accounts: {
+          auth: {
+            mintWrapper: wrapper,
+            admin: this.provider.wallet.publicKey,
+          },
+          newMinterAuthority: authority,
+          minter,
+          payer: this.provider.wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+      }),
+    ]);
   }
 
   async newMinter(

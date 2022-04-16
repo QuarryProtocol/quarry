@@ -1,6 +1,7 @@
 use crate::*;
 
 pub fn handler(ctx: Context<NewRewarder>) -> Result<()> {
+    msg!("pt 2");
     execute_ix_handler(
         ctx.program_id,
         vec![
@@ -13,7 +14,7 @@ pub fn handler(ctx: Context<NewRewarder>) -> Result<()> {
             ctx.accounts.rewards_token_mint.to_account_info(),
             ctx.accounts.claim_fee_token_account.to_account_info(),
         ],
-        instructions::new_rewarder_v2::handler,
+        crate::quarry_mine::new_rewarder_v2,
     )
 }
 
@@ -24,17 +25,8 @@ pub struct NewRewarder<'info> {
     pub base: Signer<'info>,
 
     /// [Rewarder] of mines.
-    #[account(
-        init,
-        seeds = [
-            b"Rewarder".as_ref(),
-            base.key().to_bytes().as_ref()
-        ],
-        bump,
-        payer = payer,
-        space = 8 + Rewarder::LEN
-    )]
-    pub rewarder: Account<'info, Rewarder>,
+    #[account(mut)]
+    pub rewarder: SystemAccount<'info>,
 
     /// Initial authority of the rewarder.
     /// CHECK: OK

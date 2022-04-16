@@ -1,4 +1,7 @@
-import type { Provider, TransactionEnvelope } from "@saberhq/solana-contrib";
+import type {
+  AugmentedProvider,
+  TransactionEnvelope,
+} from "@saberhq/solana-contrib";
 import { getOrCreateATA, TOKEN_PROGRAM_ID } from "@saberhq/token-utils";
 import type {
   PublicKey,
@@ -16,7 +19,7 @@ import { RewarderWrapper } from "./rewarder";
 export class MineWrapper {
   constructor(readonly sdk: QuarrySDK) {}
 
-  get provider(): Provider {
+  get provider(): AugmentedProvider {
     return this.sdk.provider;
   }
 
@@ -67,9 +70,9 @@ export class MineWrapper {
 
     return {
       key: rewarderKey,
-      tx: this.sdk.newTx(
+      tx: this.provider.newTX(
         [
-          ...(createATAInstruction ? [createATAInstruction] : []),
+          createATAInstruction,
           this.program.instruction.newRewarder(bump, {
             accounts: {
               base: baseKP.publicKey,
@@ -132,9 +135,9 @@ export class MineWrapper {
 
     return {
       key: rewarderKey,
-      tx: this.sdk.newTx(
+      tx: this.provider.newTX(
         [
-          ...(createATAInstruction ? [createATAInstruction] : []),
+          createATAInstruction,
           this.program.instruction.newRewarderV2({
             accounts: {
               base: baseKP.publicKey,

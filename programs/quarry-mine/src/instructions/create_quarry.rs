@@ -11,7 +11,7 @@ pub fn handler(ctx: Context<CreateQuarry>) -> Result<()> {
             ctx.accounts.payer.to_account_info(),
             ctx.accounts.system_program.to_account_info(),
         ],
-        instructions::create_quarry_v2::handler,
+        crate::quarry_mine::create_quarry_v2,
     )
 }
 
@@ -19,18 +19,8 @@ pub fn handler(ctx: Context<CreateQuarry>) -> Result<()> {
 #[derive(Accounts)]
 pub struct CreateQuarry<'info> {
     /// [Quarry].
-    #[account(
-        init,
-        seeds = [
-            b"Quarry".as_ref(),
-            auth.rewarder.key().to_bytes().as_ref(),
-            token_mint.key().to_bytes().as_ref()
-        ],
-        bump,
-        payer = payer,
-        space = 8 + Quarry::LEN
-    )]
-    pub quarry: Account<'info, Quarry>,
+    #[account(mut)]
+    pub quarry: SystemAccount<'info>,
 
     /// [Rewarder] authority.
     pub auth: MutableRewarderWithAuthority<'info>,
