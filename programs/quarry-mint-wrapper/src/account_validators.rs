@@ -2,24 +2,9 @@
 
 use crate::*;
 
-/// --------------------------------
-/// Instruction account structs
-/// --------------------------------
-
-impl<'info> Validate<'info> for NewWrapper<'info> {
-    fn validate(&self) -> Result<()> {
-        assert_keys_eq!(self.token_mint.mint_authority.unwrap(), self.mint_wrapper);
-        assert_keys_eq!(self.token_mint.freeze_authority.unwrap(), self.mint_wrapper);
-        Ok(())
-    }
-}
-
-impl<'info> Validate<'info> for NewMinter<'info> {
-    fn validate(&self) -> Result<()> {
-        self.auth.validate()?;
-        Ok(())
-    }
-}
+// --------------------------------
+// Instruction account structs
+// --------------------------------
 
 impl<'info> Validate<'info> for MinterUpdate<'info> {
     fn validate(&self) -> Result<()> {

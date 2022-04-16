@@ -44,7 +44,7 @@ export class MintWrapper {
     admin?: PublicKey;
     payer?: PublicKey;
   }): Promise<PendingMintWrapper> {
-    const [mintWrapper, nonce] = await findMintWrapperAddress(
+    const [mintWrapper] = await findMintWrapperAddress(
       baseKP.publicKey,
       this.program.programId
     );
@@ -53,7 +53,7 @@ export class MintWrapper {
       tx: new TransactionEnvelope(
         this.provider,
         [
-          this.program.instruction.newWrapper(nonce, hardcap, {
+          this.program.instruction.newWrapper(hardcap, {
             accounts: {
               base: baseKP.publicKey,
               mintWrapper,
@@ -149,13 +149,13 @@ export class MintWrapper {
     wrapper: PublicKey,
     authority: PublicKey
   ): Promise<TransactionEnvelope> {
-    const [minter, bump] = await findMinterAddress(
+    const [minter] = await findMinterAddress(
       wrapper,
       authority,
       this.program.programId
     );
     return this.provider.newTX([
-      this.program.instruction.newMinter(bump, {
+      this.program.instruction.newMinterV2({
         accounts: {
           auth: {
             mintWrapper: wrapper,

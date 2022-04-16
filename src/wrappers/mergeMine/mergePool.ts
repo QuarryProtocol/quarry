@@ -71,7 +71,7 @@ export class MergePool {
     if (instruction) {
       throw new Error("User has no tokens to deposit");
     }
-    const [mmKey, bump] = await findMergeMinerAddress({
+    const [mmKey] = await findMergeMinerAddress({
       pool: this.key,
       owner: mmOwner,
     });
@@ -87,7 +87,7 @@ export class MergePool {
     // Initialize mergeMiner if it does not exist
     if (!mmAccount) {
       allInstructions.push(
-        this.program.instruction.initMergeMiner(bump, {
+        this.program.instruction.initMergeMinerV2({
           accounts: {
             pool: this.key,
             owner: mmOwner,

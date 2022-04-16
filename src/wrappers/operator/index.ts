@@ -63,7 +63,7 @@ export class Operator {
     key: PublicKey;
     tx: TransactionEnvelope;
   }> {
-    const [operatorKey, bump] = await findOperatorAddress(
+    const [operatorKey] = await findOperatorAddress(
       baseKP.publicKey,
       sdk.programs.Operator.programId
     );
@@ -72,7 +72,7 @@ export class Operator {
       tx: new TransactionEnvelope(
         sdk.provider,
         [
-          sdk.programs.Operator.instruction.createOperator(bump, {
+          sdk.programs.Operator.instruction.createOperatorV2({
             accounts: {
               base: baseKP.publicKey,
               operator: operatorKey,

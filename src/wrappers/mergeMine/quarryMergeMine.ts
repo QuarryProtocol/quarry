@@ -69,16 +69,16 @@ export class MergeMine {
 
     const parsedMint = deserializeMint(primaryMintRaw.accountInfo.data);
 
-    const [pool, bump] = await findPoolAddress({
+    const [pool] = await findPoolAddress({
       programId: this.program.programId,
       primaryMint,
     });
-    const [replicaMint, mintBump] = await findReplicaMintAddress({
+    const [replicaMint] = await findReplicaMintAddress({
       programId: this.program.programId,
       primaryMint,
     });
 
-    const newPoolIx = this.program.instruction.newPool(bump, mintBump, {
+    const newPoolIx = this.program.instruction.newPoolV2({
       accounts: {
         pool,
         payer,
@@ -174,7 +174,7 @@ export class MergeMine {
      */
     rewardsMint: PublicKey;
   }): Promise<{ key: PublicKey; tx: TransactionEnvelope | null }> {
-    const [mm, bump] = await findMergeMinerAddress({
+    const [mm] = await findMergeMinerAddress({
       programId: this.program.programId,
       pool: poolKey,
       owner,
@@ -195,7 +195,7 @@ export class MergeMine {
       await this.sdk.provider.connection.getAccountInfo(mm);
     if (!mergeMinerAccountInfo) {
       allInstructions.push(
-        this.program.instruction.initMergeMiner(bump, {
+        this.program.instruction.initMergeMinerV2({
           accounts: {
             pool: poolKey,
             owner,

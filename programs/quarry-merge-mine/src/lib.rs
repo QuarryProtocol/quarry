@@ -43,15 +43,35 @@ pub mod quarry_merge_mine {
 
     /// Creates a new [MergePool].
     /// Anyone can call this.
+    #[deprecated(since = "5.0.0", note = "Use `new_pool_v2` instead.")]
     #[access_control(ctx.accounts.validate())]
     pub fn new_pool(ctx: Context<NewPool>, _bump: u8, _mint_bump: u8) -> Result<()> {
         processor::init::new_pool(ctx)
     }
 
+    /// Creates a new [MergePool].
+    /// Anyone can call this.
+    ///
+    /// The V2 variant removes the need for supplying the bump.
+    #[access_control(ctx.accounts.validate())]
+    pub fn new_pool_v2(ctx: Context<NewPool>) -> Result<()> {
+        processor::init::new_pool(ctx)
+    }
+
     /// Creates a new [MergeMiner].
     /// Anyone can call this.
+    #[deprecated(since = "5.0.0", note = "Use `init_merge_miner_v2` instead.")]
     #[access_control(ctx.accounts.validate())]
     pub fn init_merge_miner(ctx: Context<InitMergeMiner>, _bump: u8) -> Result<()> {
+        processor::init::init_merge_miner(ctx)
+    }
+
+    /// Creates a new [MergeMiner].
+    /// Anyone can call this.
+    ///
+    /// The V2 variant removes the need for supplying the bump.
+    #[access_control(ctx.accounts.validate())]
+    pub fn init_merge_miner_v2(ctx: Context<InitMergeMiner>) -> Result<()> {
         processor::init::init_merge_miner(ctx)
     }
 
