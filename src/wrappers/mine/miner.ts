@@ -193,13 +193,13 @@ export class MinerWrapper {
       this.sdk.mintWrapper.program.programId
     );
 
-    const ix = this.quarry.program.instruction.claimRewards({
+    const ix = this.quarry.program.instruction.claimRewardsV2({
       accounts: {
         mintWrapper: this.quarry.rewarderData.mintWrapper,
         minter,
         rewardsTokenMint: this.quarry.rewarderData.rewardsTokenMint,
         rewardsTokenAccount,
-        stake: this.userClaimAccounts,
+        claim: this.userClaimAccounts,
         mintWrapperProgram: this.sdk.programs.MintWrapper.programId,
         claimFeeTokenAccount: this.quarry.rewarderData.claimFeeTokenAccount,
       },
