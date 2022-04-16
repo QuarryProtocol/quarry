@@ -770,6 +770,7 @@ pub struct UserStake<'info> {
 #[derive(Accounts)]
 pub struct ExtractFees<'info> {
     /// Rewarder to extract fees from.
+    #[account(has_one = claim_fee_token_account)]
     pub rewarder: Account<'info, Rewarder>,
 
     /// [TokenAccount] which receives claim fees.
