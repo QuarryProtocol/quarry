@@ -23,4 +23,5 @@ default = []
 anchor-lang = ">=0.22, <=0.24"
 anchor-spl = ">=0.22, <=0.24"
 quarry-mine = { path = "../quarry-mine", version = "4.1.0", features = ["cpi"] }
+solana-security-txt = "1.0.1"
 vipers = "^2.0"

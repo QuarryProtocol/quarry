@@ -10,6 +10,17 @@ mod account_validators;
 
 declare_id!("QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc");
 
+#[cfg(not(feature = "cpi"))]
+solana_security_txt::security_txt! {
+    name: "Quarry Registry",
+    project_url: "https://quarry.so",
+    contacts: "email:team@quarry.so",
+    policy: "https://github.com/QuarryProtocol/quarry/blob/master/SECURITY.md",
+
+    source_code: "https://github.com/QuarryProtocol/quarry",
+    auditors: "Quantstamp"
+}
+
 /// Registry to help frontends quickly locate all active quarries.
 #[program]
 pub mod quarry_registry {

@@ -11,6 +11,17 @@ mod macros;
 
 declare_id!("QoP6NfrQbaGnccXQrMLUkog2tQZ4C1RFgJcwDnT8Kmz");
 
+#[cfg(not(feature = "cpi"))]
+solana_security_txt::security_txt! {
+    name: "Quarry Operator",
+    project_url: "https://quarry.so",
+    contacts: "email:team@quarry.so",
+    policy: "https://github.com/QuarryProtocol/quarry/blob/master/SECURITY.md",
+
+    source_code: "https://github.com/QuarryProtocol/quarry",
+    auditors: "Quantstamp"
+}
+
 /// Quarry Operator program.
 #[program]
 pub mod quarry_operator {

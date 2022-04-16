@@ -43,6 +43,17 @@ pub const DEFAULT_CLAIM_FEE_MILLIBPS: u64 = 1_000;
 /// The maximum number of basis points possible.
 pub const MAX_BPS: u64 = 10_000;
 
+#[cfg(not(feature = "cpi"))]
+solana_security_txt::security_txt! {
+    name: "Quarry Mine",
+    project_url: "https://quarry.so",
+    contacts: "email:team@quarry.so",
+    policy: "https://github.com/QuarryProtocol/quarry/blob/master/SECURITY.md",
+
+    source_code: "https://github.com/QuarryProtocol/quarry",
+    auditors: "Quantstamp"
+}
+
 /// Program for [quarry_mine].
 #[program]
 pub mod quarry_mine {

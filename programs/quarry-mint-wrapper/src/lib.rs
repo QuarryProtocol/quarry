@@ -14,6 +14,17 @@ mod account_validators;
 
 declare_id!("QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV");
 
+#[cfg(not(feature = "cpi"))]
+solana_security_txt::security_txt! {
+    name: "Quarry Mint Wrapper",
+    project_url: "https://quarry.so",
+    contacts: "email:team@quarry.so",
+    policy: "https://github.com/QuarryProtocol/quarry/blob/master/SECURITY.md",
+
+    source_code: "https://github.com/QuarryProtocol/quarry",
+    auditors: "Quantstamp"
+}
+
 #[program]
 pub mod quarry_mint_wrapper {
     use super::*;

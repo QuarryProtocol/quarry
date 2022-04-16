@@ -21,6 +21,17 @@ use vipers::prelude::*;
 
 pub use state::*;
 
+#[cfg(not(feature = "cpi"))]
+solana_security_txt::security_txt! {
+    name: "Quarry Merge Mine",
+    project_url: "https://quarry.so",
+    contacts: "email:team@quarry.so",
+    policy: "https://github.com/QuarryProtocol/quarry/blob/master/SECURITY.md",
+
+    source_code: "https://github.com/QuarryProtocol/quarry",
+    auditors: "Quantstamp"
+}
+
 declare_id!("QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto");
 
 #[deny(clippy::integer_arithmetic, clippy::float_arithmetic)]

@@ -12,6 +12,17 @@ mod redeem_cpi;
 
 declare_id!("QRDxhMw1P2NEfiw5mYXG79bwfgHTdasY2xNP76XSea9");
 
+#[cfg(not(feature = "cpi"))]
+solana_security_txt::security_txt! {
+    name: "Quarry Redeemer",
+    project_url: "https://quarry.so",
+    contacts: "email:team@quarry.so",
+    policy: "https://github.com/QuarryProtocol/quarry/blob/master/SECURITY.md",
+
+    source_code: "https://github.com/QuarryProtocol/quarry",
+    auditors: "Quantstamp"
+}
+
 /// Quarry Redeemer program.
 #[program]
 pub mod quarry_redeemer {
