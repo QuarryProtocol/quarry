@@ -1,6 +1,7 @@
 //! Delegates Quarry Rewarder authority roles.
 #![deny(rustdoc::all)]
 #![allow(rustdoc::missing_doc_code_examples)]
+#![allow(deprecated)]
 
 use anchor_lang::prelude::*;
 use quarry_mine::{Quarry, Rewarder};
@@ -9,8 +10,10 @@ use vipers::prelude::*;
 mod account_validators;
 mod instructions;
 mod macros;
+mod state;
 
 use instructions::*;
+pub use state::*;
 
 declare_id!("QoP6NfrQbaGnccXQrMLUkog2tQZ4C1RFgJcwDnT8Kmz");
 
@@ -31,31 +34,18 @@ pub mod quarry_operator {
     use super::*;
 
     /// Creates a new [Operator].
+    #[deprecated(since = "5.0.0", note = "Use `create_operator_v2` instead.")]
     #[access_control(ctx.accounts.validate())]
     pub fn create_operator(ctx: Context<CreateOperator>, _bump: u8) -> Result<()> {
-        let operator = &mut ctx.accounts.operator;
-        operator.base = ctx.accounts.base.key();
-        operator.bump = unwrap_bump!(ctx, "operator");
+        instructions::create_operator::handler(ctx)
+    }
 
-        operator.rewarder = ctx.accounts.rewarder.key();
-        operator.admin = ctx.accounts.admin.key();
-
-        operator.rate_setter = operator.admin;
-        operator.quarry_creator = operator.admin;
-        operator.share_allocator = operator.admin;
-        operator.record_update()?;
-
-        let signer_seeds: &[&[&[u8]]] = &[gen_operator_signer_seeds!(operator)];
-        quarry_mine::cpi::accept_authority(CpiContext::new_with_signer(
-            ctx.accounts.quarry_mine_program.to_account_info(),
-            quarry_mine::cpi::accounts::AcceptAuthority {
-                authority: ctx.accounts.operator.to_account_info(),
-                rewarder: ctx.accounts.rewarder.to_account_info(),
-            },
-            signer_seeds,
-        ))?;
-
-        Ok(())
+    /// Creates a new [Operator].
+    ///
+    /// The V2 variant removes the need for supplying the bump.
+    #[access_control(ctx.accounts.validate())]
+    pub fn create_operator_v2(ctx: Context<CreateOperator>) -> Result<()> {
+        instructions::create_operator::handler(ctx)
     }
 
     /// Sets the account that can set roles.
@@ -178,85 +168,9 @@ pub mod quarry_operator {
     }
 }
 
-impl Operator {
-    fn record_update(&mut self) -> Result<()> {
-        self.last_modified_ts = Clock::get()?.unix_timestamp;
-        self.generation = unwrap_int!(self.generation.checked_add(1));
-        Ok(())
-    }
-}
-
-// --------------------------------
-// Accounts
-// --------------------------------
-
-/// Operator state
-#[account]
-#[derive(Copy, Default, Debug, PartialEq, Eq)]
-pub struct Operator {
-    /// The base.
-    pub base: Pubkey,
-    /// Bump seed.
-    pub bump: u8,
-
-    /// The [Rewarder].
-    pub rewarder: Pubkey,
-    /// Can modify the authorities below.
-    pub admin: Pubkey,
-
-    /// Can call [quarry_mine::quarry_mine::set_annual_rewards].
-    pub rate_setter: Pubkey,
-    /// Can call [quarry_mine::quarry_mine::create_quarry].
-    pub quarry_creator: Pubkey,
-    /// Can call [quarry_mine::quarry_mine::set_rewards_share].
-    pub share_allocator: Pubkey,
-
-    /// When the [Operator] was last modified.
-    pub last_modified_ts: i64,
-    /// Auto-incrementing sequence number of the set of authorities.
-    /// Useful for checking if things were updated.
-    pub generation: u64,
-}
-
-impl Operator {
-    /// Number of bytes in an [Operator].
-    pub const LEN: usize = 32 + 1 + 32 + 32 + 32 + 32 + 32 + 8 + 8;
-}
-
 // --------------------------------
 // Instructions
 // --------------------------------
-
-/// Accounts for [crate::quarry_operator::create_operator].
-#[derive(Accounts)]
-pub struct CreateOperator<'info> {
-    /// Base key used to create the [Operator].
-    pub base: Signer<'info>,
-    /// Operator PDA.
-    #[account(
-        init,
-        seeds = [
-            b"Operator".as_ref(),
-            base.key().to_bytes().as_ref()
-        ],
-        bump,
-        payer = payer,
-        space = 8 + Operator::LEN
-    )]
-    pub operator: Account<'info, Operator>,
-    /// [Rewarder] of the token.
-    #[account(mut)]
-    pub rewarder: Box<Account<'info, Rewarder>>,
-    /// CHECK: The admin to set.
-    pub admin: UncheckedAccount<'info>,
-    /// Payer.
-    #[account(mut)]
-    pub payer: Signer<'info>,
-    /// [System] program.
-    pub system_program: Program<'info, System>,
-    /// Quarry mine
-    pub quarry_mine_program: Program<'info, quarry_mine::program::QuarryMine>,
-}
 
 /// Accounts for setting roles.
 #[derive(Accounts)]

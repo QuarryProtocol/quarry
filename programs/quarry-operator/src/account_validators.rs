@@ -2,17 +2,6 @@
 
 use crate::*;
 
-impl<'info> Validate<'info> for CreateOperator<'info> {
-    fn validate(&self) -> Result<()> {
-        assert_keys_eq!(
-            self.operator,
-            self.rewarder.pending_authority,
-            PendingAuthorityNotSet
-        );
-        Ok(())
-    }
-}
-
 impl<'info> Validate<'info> for SetRole<'info> {
     fn validate(&self) -> Result<()> {
         assert_keys_eq!(self.operator.admin, self.admin, Unauthorized);
