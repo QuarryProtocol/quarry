@@ -416,7 +416,7 @@ describe("Mine", () => {
         });
       });
 
-      it("Unauthorized", async () => {
+      it("Unauthorized v1", async () => {
         const fakeAuthority = web3.Keypair.generate();
         const nextMint = await createMint(
           provider,
@@ -452,7 +452,39 @@ describe("Mine", () => {
         );
       });
 
-      it("Invalid PDA", async () => {
+      it("Unauthorized", async () => {
+        const fakeAuthority = web3.Keypair.generate();
+        const nextMint = await createMint(
+          provider,
+          provider.wallet.publicKey,
+          DEFAULT_DECIMALS
+        );
+        const [quarryKey] = await findQuarryAddress(rewarderKey, nextMint);
+        await assert.rejects(
+          async () => {
+            await mine.program.rpc.createQuarryV2({
+              accounts: {
+                quarry: quarryKey,
+                auth: {
+                  authority: fakeAuthority.publicKey,
+                  rewarder: rewarderKey,
+                },
+                tokenMint: nextMint,
+                payer: fakeAuthority.publicKey,
+                systemProgram: web3.SystemProgram.programId,
+              },
+              signers: [fakeAuthority],
+            });
+          },
+          (err: Error) => {
+            console.error(err);
+            expect(err.message).to.include("custom program error: 0x1"); // mut constraint
+            return true;
+          }
+        );
+      });
+
+      it("Invalid PDA v1", async () => {
         await assert.rejects(async () => {
           const [quarryKey, bump] = await findQuarryAddress(
             rewarderKey,
@@ -468,6 +500,27 @@ describe("Mine", () => {
               tokenMint: stakeTokenMint,
               payer: provider.wallet.publicKey,
               unusedClock: web3.SYSVAR_CLOCK_PUBKEY,
+              systemProgram: web3.SystemProgram.programId,
+            },
+          });
+        });
+      });
+
+      it("Invalid PDA", async () => {
+        await assert.rejects(async () => {
+          const [quarryKey] = await findQuarryAddress(
+            rewarderKey,
+            Keypair.generate().publicKey
+          );
+          await mine.program.rpc.createQuarryV2({
+            accounts: {
+              quarry: quarryKey,
+              auth: {
+                authority: provider.wallet.publicKey,
+                rewarder: rewarderKey,
+              },
+              tokenMint: stakeTokenMint,
+              payer: provider.wallet.publicKey,
               systemProgram: web3.SystemProgram.programId,
             },
           });
@@ -633,7 +686,7 @@ describe("Mine", () => {
         minerAccountInfo.data
       );
       expect(minerData.authority).to.eqAddress(provider.wallet.publicKey);
-      assert.strictEqual(minerData.quarryKey.toBase58(), quarry.key.toBase58());
+      assert.strictEqual(minerData.quarry.toBase58(), quarry.key.toBase58());
 
       const minerBalance = await getTokenAccount(
         provider,

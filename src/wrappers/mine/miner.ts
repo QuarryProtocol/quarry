@@ -17,7 +17,7 @@ type MineUserStakeAccounts = Parameters<
 
 type MineUserClaimAccounts = Parameters<
   MineProgram["instruction"]["claimRewards"]["accounts"]
->[0]["stake"];
+>[0]["claim"];
 
 export class MinerWrapper {
   /**
@@ -199,7 +199,7 @@ export class MinerWrapper {
         minter,
         rewardsTokenMint: this.quarry.rewarderData.rewardsTokenMint,
         rewardsTokenAccount,
-        stake: this.userClaimAccounts,
+        claim: this.userClaimAccounts,
         mintWrapperProgram: this.sdk.programs.MintWrapper.programId,
         claimFeeTokenAccount: this.quarry.rewarderData.claimFeeTokenAccount,
       },

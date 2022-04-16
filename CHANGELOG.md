@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `quarry_mine::claim_rewards_v2` instruction, which reduces the required accounts for claiming rewards by 2 (64 bytes).
 - Add `quarry_mine::create_quarry_v2` instruction, which reduces the required accounts for creating a new quarry by 1 (32 bytes).
 
+### Breaking
+
+- Rename `stake` to `claim` in `quarry_mine::claim_rewards`.
+- Rename `Miner.quarry_key` to `Miner.quarry` in `quarry_mine`.
+
 ## [v4.2.1]
 
 ### Features
