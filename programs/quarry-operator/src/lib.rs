@@ -273,6 +273,7 @@ pub struct SetRole<'info> {
 /// Accounts for [crate::quarry_operator::delegate_set_annual_rewards].
 #[derive(Accounts)]
 pub struct DelegateSetAnnualRewards<'info> {
+    /// Delegate accounts.
     pub with_delegate: WithDelegate<'info>,
 }
 
@@ -286,7 +287,7 @@ pub struct DelegateSetRewardsShare<'info> {
         mut,
         constraint = quarry.rewarder == with_delegate.rewarder.key()
     )]
-    pub quarry: Box<Account<'info, Quarry>>,
+    pub quarry: Account<'info, Quarry>,
 }
 
 /// Accounts for [crate::quarry_operator::delegate_set_famine].
@@ -299,21 +300,21 @@ pub struct DelegateSetFamine<'info> {
         mut,
         constraint = quarry.rewarder == with_delegate.rewarder.key()
     )]
-    pub quarry: Box<Account<'info, Quarry>>,
+    pub quarry: Account<'info, Quarry>,
 }
 
 /// Accounts struct for instructions that must be signed by one of the delegates on the [Operator].
 #[derive(Accounts, Clone)]
 pub struct WithDelegate<'info> {
     /// The [Operator] of the [Rewarder].
-    #[account(mut)]
+    #[account(mut, has_one = rewarder)]
     pub operator: Account<'info, Operator>,
     /// The delegated account in one of the [Operator] roles.
     pub delegate: Signer<'info>,
     /// The [Rewarder].
     #[account(
         mut,
-        constraint = rewarder.authority == operator.key()
+        constraint = rewarder.authority == operator.key() @ ErrorCode::OperatorNotRewarderAuthority
     )]
     pub rewarder: Box<Account<'info, Rewarder>>,
     /// Quarry mine
@@ -349,4 +350,6 @@ pub enum ErrorCode {
     Unauthorized,
     #[msg("Pending authority must be set to the created operator.")]
     PendingAuthorityNotSet,
+    #[msg("Operator is not the Rewarder authority.")]
+    OperatorNotRewarderAuthority,
 }

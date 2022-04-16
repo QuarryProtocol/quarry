@@ -24,6 +24,7 @@ pub fn handler(ctx: Context<DelegateCreateQuarryV2>) -> Result<()> {
 /// Accounts for [crate::quarry_operator::delegate_create_quarry_v2].
 #[derive(Accounts)]
 pub struct DelegateCreateQuarryV2<'info> {
+    /// Delegate information.
     pub with_delegate: WithDelegate<'info>,
 
     /// The Quarry to create.

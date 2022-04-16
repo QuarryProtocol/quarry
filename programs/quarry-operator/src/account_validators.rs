@@ -20,14 +20,6 @@ impl<'info> Validate<'info> for SetRole<'info> {
     }
 }
 
-impl<'info> Validate<'info> for WithDelegate<'info> {
-    fn validate(&self) -> Result<()> {
-        assert_keys_eq!(self.operator.rewarder, self.rewarder);
-        assert_keys_eq!(self.operator, self.rewarder.authority);
-        Ok(())
-    }
-}
-
 impl<'info> Validate<'info> for DelegateSetAnnualRewards<'info> {
     fn validate(&self) -> Result<()> {
         assert_keys_eq!(
@@ -70,6 +62,14 @@ impl<'info> Validate<'info> for DelegateSetFamine<'info> {
             Unauthorized
         );
         self.with_delegate.validate()?;
+        Ok(())
+    }
+}
+
+impl<'info> Validate<'info> for WithDelegate<'info> {
+    fn validate(&self) -> Result<()> {
+        assert_keys_eq!(self.operator.rewarder, self.rewarder);
+        assert_keys_eq!(self.operator, self.rewarder.authority);
         Ok(())
     }
 }
