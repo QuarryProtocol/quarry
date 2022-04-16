@@ -1,8 +1,8 @@
 use crate::*;
 
 /// Executes an instruction handler, given a slice of accounts.
-fn execute_ix_handler_raw<'a, 'b, 'c, 'info, T: Accounts<'info> + Validate<'info>>(
-    program_id: &'a Pubkey,
+fn execute_ix_handler_raw<'info, T: Accounts<'info> + Validate<'info>>(
+    program_id: &Pubkey,
     accounts_unchecked: &mut &[AccountInfo<'info>],
     ix_handler: fn(ctx: Context<T>) -> Result<()>,
 ) -> Result<()> {
@@ -19,15 +19,8 @@ fn execute_ix_handler_raw<'a, 'b, 'c, 'info, T: Accounts<'info> + Validate<'info
 }
 
 /// Executes an instruction handler, re-validating the accounts.
-pub fn execute_ix_handler<
-    'a,
-    'b,
-    'c,
-    'info,
-    T: Accounts<'info> + Validate<'info>,
-    V: ToAccountInfos<'info>,
->(
-    program_id: &'a Pubkey,
+pub fn execute_ix_handler<'info, T: Accounts<'info> + Validate<'info>, V: ToAccountInfos<'info>>(
+    program_id: &Pubkey,
     accounts_unchecked: V,
     ix_handler: fn(ctx: Context<T>) -> Result<()>,
 ) -> Result<()> {
