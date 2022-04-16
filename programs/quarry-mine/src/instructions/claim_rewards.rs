@@ -69,12 +69,10 @@ pub struct UserClaim<'info> {
 
     /// Placeholder for the miner vault.
     /// CHECK: OK
-    #[account(mut)]
     pub unused_miner_vault: UncheckedAccount<'info>,
 
     /// Placeholder for the user's staked token account.
     /// CHECK: OK
-    #[account(mut)]
     pub unused_token_account: UncheckedAccount<'info>,
 
     /// Token program
