@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+### Features
+
+- Introduces `quarry_mine::claim_rewards_v2` instruction, which reduces the required accounts for claiming rewards by 2 (64 bytes).
+
 ## [v4.2.1]
 
 ### Features

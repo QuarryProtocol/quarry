@@ -150,7 +150,7 @@ pub struct RedeemTokens<'info> {
     #[account(mut)]
     pub redemption_vault: Account<'info, TokenAccount>,
     /// Destination of the IOU tokens.
-    #[account(mut)]
+    #[account(mut, constraint = redemption_destination.key() != redemption_vault.key())]
     pub redemption_destination: Account<'info, TokenAccount>,
 
     /// The spl_token program corresponding to [Token].
