@@ -14,7 +14,7 @@ mod account_validators;
 
 declare_id!("QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV");
 
-#[cfg(not(feature = "cpi"))]
+#[cfg(not(feature = "no-entrypoint"))]
 solana_security_txt::security_txt! {
     name: "Quarry Mint Wrapper",
     project_url: "https://quarry.so",

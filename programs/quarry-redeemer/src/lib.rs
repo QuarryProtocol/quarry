@@ -12,7 +12,7 @@ mod redeem_cpi;
 
 declare_id!("QRDxhMw1P2NEfiw5mYXG79bwfgHTdasY2xNP76XSea9");
 
-#[cfg(not(feature = "cpi"))]
+#[cfg(not(feature = "no-entrypoint"))]
 solana_security_txt::security_txt! {
     name: "Quarry Redeemer",
     project_url: "https://quarry.so",

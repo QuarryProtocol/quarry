@@ -10,7 +10,7 @@ mod account_validators;
 
 declare_id!("QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc");
 
-#[cfg(not(feature = "cpi"))]
+#[cfg(not(feature = "no-entrypoint"))]
 solana_security_txt::security_txt! {
     name: "Quarry Registry",
     project_url: "https://quarry.so",

@@ -14,7 +14,7 @@ use instructions::*;
 
 declare_id!("QoP6NfrQbaGnccXQrMLUkog2tQZ4C1RFgJcwDnT8Kmz");
 
-#[cfg(not(feature = "cpi"))]
+#[cfg(not(feature = "no-entrypoint"))]
 solana_security_txt::security_txt! {
     name: "Quarry Operator",
     project_url: "https://quarry.so",
@@ -219,6 +219,7 @@ pub struct Operator {
 }
 
 impl Operator {
+    /// Number of bytes in an [Operator].
     pub const LEN: usize = 32 + 1 + 32 + 32 + 32 + 32 + 32 + 8 + 8;
 }
 

@@ -22,7 +22,7 @@ use vipers::prelude::*;
 
 pub use state::*;
 
-#[cfg(not(feature = "cpi"))]
+#[cfg(not(feature = "no-entrypoint"))]
 solana_security_txt::security_txt! {
     name: "Quarry Merge Mine",
     project_url: "https://quarry.so",

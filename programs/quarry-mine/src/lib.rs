@@ -46,7 +46,7 @@ pub const DEFAULT_CLAIM_FEE_MILLIBPS: u64 = 1_000;
 /// The maximum number of basis points possible.
 pub const MAX_BPS: u64 = 10_000;
 
-#[cfg(not(feature = "cpi"))]
+#[cfg(not(feature = "no-entrypoint"))]
 solana_security_txt::security_txt! {
     name: "Quarry Mine",
     project_url: "https://quarry.so",
