@@ -597,7 +597,7 @@ pub struct SetFamine<'info> {
     pub auth: ReadOnlyRewarderWithAuthority<'info>,
 
     /// [Quarry] updated.
-    #[account(mut, constraint = quarry.key() == auth.rewarder.key())]
+    #[account(mut, constraint = quarry.rewarder == auth.rewarder.key())]
     pub quarry: Account<'info, Quarry>,
 }
 
