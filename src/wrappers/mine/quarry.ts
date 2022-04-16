@@ -155,7 +155,7 @@ export class QuarryWrapper {
    * @returns
    */
   async getMinerActions(
-    authority: PublicKey = this.program.provider.wallet.publicKey
+    authority: PublicKey = this.provider.wallet.publicKey
   ): Promise<MinerWrapper> {
     const miner = await this.getMinerAddress(authority);
     const stakedTokenATA = await getATAAddress({
@@ -235,7 +235,7 @@ export class QuarryWrapper {
    * Creates the miner of the provided wallet.
    */
   async createMiner({
-    authority = this.program.provider.wallet.publicKey,
+    authority = this.provider.wallet.publicKey,
   }: {
     authority?: PublicKey;
   } = {}): Promise<PendingMiner> {

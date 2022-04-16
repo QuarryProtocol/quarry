@@ -6,7 +6,7 @@ import {
   getOrCreateATA,
   TOKEN_PROGRAM_ID,
 } from "@saberhq/token-utils";
-import type { AccountInfo, PublicKey } from "@solana/web3.js";
+import type { AccountInfo, PublicKey, Signer } from "@solana/web3.js";
 import { Keypair, SystemProgram } from "@solana/web3.js";
 
 import type {
@@ -34,12 +34,12 @@ export class MintWrapper {
     tokenMint,
     baseKP = Keypair.generate(),
     tokenProgram = TOKEN_PROGRAM_ID,
-    admin = this.program.provider.wallet.publicKey,
-    payer = this.program.provider.wallet.publicKey,
+    admin = this.provider.wallet.publicKey,
+    payer = this.provider.wallet.publicKey,
   }: {
     hardcap: u64;
     tokenMint: PublicKey;
-    baseKP?: Keypair;
+    baseKP?: Signer;
     tokenProgram?: PublicKey;
     admin?: PublicKey;
     payer?: PublicKey;
@@ -75,11 +75,11 @@ export class MintWrapper {
     decimals = 6,
     ...newWrapperArgs
   }: {
-    mintKP?: Keypair;
+    mintKP?: Signer;
     decimals?: number;
 
     hardcap: u64;
-    baseKP?: Keypair;
+    baseKP?: Signer;
     tokenProgram?: PublicKey;
     admin?: PublicKey;
     payer?: PublicKey;
@@ -109,9 +109,7 @@ export class MintWrapper {
    * @returns
    */
   async fetchMintWrapper(wrapper: PublicKey): Promise<MintWrapperData | null> {
-    const accountInfo = await this.program.provider.connection.getAccountInfo(
-      wrapper
-    );
+    const accountInfo = await this.provider.connection.getAccountInfo(wrapper);
     if (!accountInfo) {
       return null;
     }
@@ -135,7 +133,7 @@ export class MintWrapper {
       authority,
       this.program.programId
     );
-    const accountInfo = await this.program.provider.connection.getAccountInfo(
+    const accountInfo = await this.provider.connection.getAccountInfo(
       minterAddress
     );
     if (!accountInfo) {
@@ -161,11 +159,11 @@ export class MintWrapper {
         accounts: {
           auth: {
             mintWrapper: wrapper,
-            admin: this.program.provider.wallet.publicKey,
+            admin: this.provider.wallet.publicKey,
           },
           newMinterAuthority: authority,
           minter,
-          payer: this.program.provider.wallet.publicKey,
+          payer: this.provider.wallet.publicKey,
           systemProgram: SystemProgram.programId,
         },
       }),
@@ -193,7 +191,7 @@ export class MintWrapper {
         accounts: {
           auth: {
             mintWrapper: wrapper,
-            admin: this.program.provider.wallet.publicKey,
+            admin: this.provider.wallet.publicKey,
           },
           minter,
         },
@@ -227,7 +225,7 @@ export class MintWrapper {
       this.program.instruction.transferAdmin({
         accounts: {
           mintWrapper: wrapper,
-          admin: this.program.provider.wallet.publicKey,
+          admin: this.provider.wallet.publicKey,
           nextAdmin,
         },
       }),
@@ -239,7 +237,7 @@ export class MintWrapper {
       this.program.instruction.acceptAdmin({
         accounts: {
           mintWrapper: wrapper,
-          pendingAdmin: this.program.provider.wallet.publicKey,
+          pendingAdmin: this.provider.wallet.publicKey,
         },
       }),
     ]);

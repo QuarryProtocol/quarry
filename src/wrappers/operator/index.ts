@@ -1,6 +1,6 @@
 import { TransactionEnvelope } from "@saberhq/solana-contrib";
 import { u64 } from "@saberhq/token-utils";
-import type { PublicKey } from "@solana/web3.js";
+import type { PublicKey, Signer } from "@solana/web3.js";
 import { Keypair, SystemProgram, SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
 
 import type { OperatorData, QuarryOperatorProgram, QuarrySDK } from "../..";
@@ -57,7 +57,7 @@ export class Operator {
     sdk: QuarrySDK;
     rewarder: PublicKey;
     admin?: PublicKey;
-    baseKP?: Keypair;
+    baseKP?: Signer;
     payer?: PublicKey;
   }): Promise<{
     key: PublicKey;
