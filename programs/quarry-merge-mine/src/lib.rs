@@ -357,7 +357,11 @@ pub struct QuarryStake<'info> {
     pub quarry: Box<Account<'info, quarry_mine::Quarry>>,
 
     /// The [quarry_mine::Miner].
-    #[account(mut, has_one = quarry)]
+    #[account(
+        mut,
+        has_one = quarry,
+        constraint = miner.authority == mm.key()
+    )]
     pub miner: Box<Account<'info, quarry_mine::Miner>>,
 
     /// The [TokenAccount] of the [quarry_mine::Miner] that holds the staked tokens.

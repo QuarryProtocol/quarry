@@ -30,6 +30,7 @@ pub struct RescueTokens<'info> {
     /// The [MergePool].
     pub merge_pool: Account<'info, MergePool>,
     /// The [MergeMiner] (also the [quarry_mine::Miner] authority).
+    #[account(constraint = mm.pool == merge_pool.key() && mm.owner == mm_owner.key())]
     pub mm: Account<'info, MergeMiner>,
 
     /// Miner holding tokens (owned by the [MergeMiner]).
