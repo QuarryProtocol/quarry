@@ -105,6 +105,7 @@ pub struct Registry {
 }
 
 impl Registry {
+    /// Number of bytes a [Registry] takes up when serialized.
     pub fn byte_length(max_quarries: u16) -> usize {
         (1 + 32 + 4 + 32 * max_quarries) as usize
     }
