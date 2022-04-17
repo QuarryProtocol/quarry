@@ -1,6 +1,7 @@
 //! Proxy program for interacting with the token mint.
 #![deny(rustdoc::all)]
 #![allow(rustdoc::missing_doc_code_examples)]
+#![allow(deprecated)]
 
 #[macro_use]
 mod macros;
@@ -11,10 +12,15 @@ use anchor_spl::token::{self, Mint, TokenAccount};
 use vipers::prelude::*;
 
 mod account_validators;
+mod instructions;
+mod state;
+
+use instructions::*;
+pub use state::*;
 
 declare_id!("QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV");
 
-#[cfg(not(feature = "cpi"))]
+#[cfg(not(feature = "no-entrypoint"))]
 solana_security_txt::security_txt! {
     name: "Quarry Mint Wrapper",
     project_url: "https://quarry.so",
@@ -29,33 +35,23 @@ solana_security_txt::security_txt! {
 pub mod quarry_mint_wrapper {
     use super::*;
 
-    /// --------------------------------
-    /// [MintWrapper] instructions
-    /// --------------------------------
+    // --------------------------------
+    // [MintWrapper] instructions
+    // --------------------------------
 
     /// Creates a new [MintWrapper].
+    #[deprecated(since = "5.0.0", note = "Use `new_wrapper_v2` instead.")]
     #[access_control(ctx.accounts.validate())]
     pub fn new_wrapper(ctx: Context<NewWrapper>, _bump: u8, hard_cap: u64) -> Result<()> {
-        let mint_wrapper = &mut ctx.accounts.mint_wrapper;
-        mint_wrapper.base = ctx.accounts.base.key();
-        mint_wrapper.bump = unwrap_bump!(ctx, "mint_wrapper");
-        mint_wrapper.hard_cap = hard_cap;
-        mint_wrapper.admin = ctx.accounts.admin.key();
-        mint_wrapper.pending_admin = Pubkey::default();
-        mint_wrapper.token_mint = ctx.accounts.token_mint.key();
-        mint_wrapper.num_minters = 0;
+        instructions::new_wrapper::handler(ctx, hard_cap)
+    }
 
-        mint_wrapper.total_allowance = 0;
-        mint_wrapper.total_minted = 0;
-
-        emit!(NewMintWrapperEvent {
-            mint_wrapper: mint_wrapper.key(),
-            hard_cap,
-            admin: ctx.accounts.admin.key(),
-            token_mint: ctx.accounts.token_mint.key()
-        });
-
-        Ok(())
+    /// Creates a new [MintWrapper].
+    ///
+    /// The V2 variant removes the need for supplying the bump.
+    #[access_control(ctx.accounts.validate())]
+    pub fn new_wrapper_v2(ctx: Context<NewWrapper>, hard_cap: u64) -> Result<()> {
+        instructions::new_wrapper::handler(ctx, hard_cap)
     }
 
     /// Transfers admin to another account.
@@ -88,36 +84,23 @@ pub mod quarry_mint_wrapper {
         Ok(())
     }
 
-    /// --------------------------------
-    /// [Minter] instructions
-    /// --------------------------------
+    // --------------------------------
+    // [Minter] instructions
+    // --------------------------------
 
     /// Creates a new [Minter].
+    #[deprecated(since = "5.0.0", note = "Use `new_minter_v2` instead.")]
     #[access_control(ctx.accounts.validate())]
     pub fn new_minter(ctx: Context<NewMinter>, _bump: u8) -> Result<()> {
-        let minter = &mut ctx.accounts.minter;
+        instructions::new_minter::handler(ctx)
+    }
 
-        minter.mint_wrapper = ctx.accounts.auth.mint_wrapper.key();
-        minter.minter_authority = ctx.accounts.new_minter_authority.key();
-        minter.bump = unwrap_bump!(ctx, "minter");
-
-        let index = ctx.accounts.auth.mint_wrapper.num_minters;
-        minter.index = index;
-
-        // update num minters
-        let mint_wrapper = &mut ctx.accounts.auth.mint_wrapper;
-        mint_wrapper.num_minters = unwrap_int!(index.checked_add(1));
-
-        minter.allowance = 0;
-        minter.total_minted = 0;
-
-        emit!(NewMinterEvent {
-            mint_wrapper: minter.mint_wrapper,
-            minter: minter.key(),
-            index: minter.index,
-            minter_authority: minter.minter_authority,
-        });
-        Ok(())
+    /// Creates a new [Minter].
+    ///
+    /// The V2 variant removes the need for supplying the bump.
+    #[access_control(ctx.accounts.validate())]
+    pub fn new_minter_v2(ctx: Context<NewMinter>) -> Result<()> {
+        instructions::new_minter::handler(ctx)
     }
 
     /// Updates a [Minter]'s allowance.
@@ -187,75 +170,9 @@ pub mod quarry_mint_wrapper {
     }
 }
 
-/// --------------------------------
-/// Instructions
-/// --------------------------------
-
-#[derive(Accounts)]
-pub struct NewWrapper<'info> {
-    /// Base account.
-    pub base: Signer<'info>,
-
-    #[account(
-        init,
-        seeds = [
-            b"MintWrapper".as_ref(),
-            base.key().to_bytes().as_ref()
-        ],
-        bump,
-        payer = payer,
-        space = 8 + MintWrapper::LEN
-    )]
-    pub mint_wrapper: Account<'info, MintWrapper>,
-
-    /// CHECK: Admin-to-be of the [MintWrapper].
-    pub admin: UncheckedAccount<'info>,
-
-    /// Token mint to mint.
-    pub token_mint: Account<'info, Mint>,
-
-    /// Token program.
-    pub token_program: Program<'info, Token>,
-
-    /// Payer.
-    #[account(mut)]
-    pub payer: Signer<'info>,
-
-    /// System program.
-    pub system_program: Program<'info, System>,
-}
-
-/// Adds a minter.
-#[derive(Accounts)]
-pub struct NewMinter<'info> {
-    /// Owner of the [MintWrapper].
-    pub auth: OnlyAdmin<'info>,
-
-    /// Account to authorize as a minter.
-    /// CHECK: Can be any Solana account.
-    pub new_minter_authority: UncheckedAccount<'info>,
-
-    /// Information about the minter.
-    #[account(
-        init,
-        seeds = [
-            b"MintWrapperMinter".as_ref(),
-            auth.mint_wrapper.key().to_bytes().as_ref(),
-            new_minter_authority.key().to_bytes().as_ref()
-        ],
-        bump,
-        payer = payer,
-        space = 8 + Minter::LEN
-    )]
-    pub minter: Account<'info, Minter>,
-
-    /// Payer for creating the minter.
-    #[account(mut)]
-    pub payer: Signer<'info>,
-
-    /// System program.
-    pub system_program: Program<'info, System>,
-}
+// --------------------------------
+// Instructions
+// --------------------------------
 
 /// Updates a minter.
 #[derive(Accounts)]
@@ -317,100 +234,25 @@ pub struct PerformMint<'info> {
     pub token_program: Program<'info, Token>,
 }
 
-/// --------------------------------
-/// Account structs
-/// --------------------------------
+// --------------------------------
+// Account structs
+// --------------------------------
 
+/// Only an admin is allowed to use instructions containing this struct.
 #[derive(Accounts)]
 pub struct OnlyAdmin<'info> {
     /// The [MintWrapper].
-    #[account(mut)]
+    #[account(mut, has_one = admin @ ErrorCode::Unauthorized)]
     pub mint_wrapper: Account<'info, MintWrapper>,
     /// [MintWrapper::admin].
     pub admin: Signer<'info>,
 }
 
-/// --------------------------------
-/// PDA structs
-/// --------------------------------
+// --------------------------------
+// Events
+// --------------------------------
 
-/// Mint wrapper
-///
-/// ```ignore
-/// seeds = [
-///     b"MintWrapper",
-///     base.key().to_bytes().as_ref(),
-///     &[bump]
-/// ],
-///
-#[account]
-#[derive(Default)]
-pub struct MintWrapper {
-    /// Base account.
-    pub base: Pubkey,
-    /// Bump for allowing the proxy mint authority to sign.
-    pub bump: u8,
-    /// Maximum number of tokens that can be issued.
-    pub hard_cap: u64,
-
-    /// Admin account.
-    pub admin: Pubkey,
-    /// Next admin account.
-    pub pending_admin: Pubkey,
-
-    /// Mint of the token.
-    pub token_mint: Pubkey,
-    /// Number of [Minter]s.
-    pub num_minters: u64,
-
-    /// Total allowance outstanding.
-    pub total_allowance: u64,
-    /// Total amount of tokens minted through the [MintWrapper].
-    pub total_minted: u64,
-}
-
-impl MintWrapper {
-    pub const LEN: usize = 32 + 1 + 8 + 32 + 32 + 32 + 8 + 8 + 8;
-}
-
-/// One who can mint.
-///
-/// ```ignore
-/// seeds = [
-///     b"MintWrapperMinter",
-///     auth.mint_wrapper.key().to_bytes().as_ref(),
-///     minter_authority.key().to_bytes().as_ref(),
-///     &[bump]
-/// ],
-/// ```
-#[account]
-#[derive(Default)]
-pub struct Minter {
-    /// The mint wrapper.
-    pub mint_wrapper: Pubkey,
-    /// Address that can mint.
-    pub minter_authority: Pubkey,
-    /// Bump seed.
-    pub bump: u8,
-
-    /// Auto-incrementing index of the [Minter].
-    pub index: u64,
-
-    /// Limit of number of tokens that this [Minter] can mint.
-    pub allowance: u64,
-    /// Cumulative sum of the number of tokens ever minted by this [Minter].
-    pub total_minted: u64,
-}
-
-impl Minter {
-    pub const LEN: usize = 32 + 32 + 1 + 8 + 8 + 8;
-}
-
-/// --------------------------------
-/// Events
-/// --------------------------------
-
-/// Triggered when a [MintWrapper] is created.
+/// Emitted when a [MintWrapper] is created.
 #[event]
 pub struct NewMintWrapperEvent {
     /// The [MintWrapper].
@@ -425,7 +267,7 @@ pub struct NewMintWrapperEvent {
     pub token_mint: Pubkey,
 }
 
-/// Triggered when a [MintWrapper]'s admin is proposed.
+/// Emitted when a [MintWrapper]'s admin is proposed.
 #[event]
 pub struct MintWrapperAdminProposeEvent {
     /// The [MintWrapper].
@@ -438,7 +280,7 @@ pub struct MintWrapperAdminProposeEvent {
     pub pending_admin: Pubkey,
 }
 
-/// Triggered when a [MintWrapper]'s admin is transferred.
+/// Emitted when a [MintWrapper]'s admin is transferred.
 #[event]
 pub struct MintWrapperAdminUpdateEvent {
     /// The [MintWrapper].
@@ -451,7 +293,7 @@ pub struct MintWrapperAdminUpdateEvent {
     pub admin: Pubkey,
 }
 
-/// Triggered when a [Minter] is created.
+/// Emitted when a [Minter] is created.
 #[event]
 pub struct NewMinterEvent {
     /// The [MintWrapper].
@@ -467,7 +309,7 @@ pub struct NewMinterEvent {
     pub minter_authority: Pubkey,
 }
 
-/// Triggered when a [Minter]'s allowance is updated.
+/// Emitted when a [Minter]'s allowance is updated.
 #[event]
 pub struct MinterAllowanceUpdateEvent {
     /// The [MintWrapper].
@@ -483,7 +325,7 @@ pub struct MinterAllowanceUpdateEvent {
     pub allowance: u64,
 }
 
-/// Triggered when a [Minter] performs a mint.
+/// Emitted when a [Minter] performs a mint.
 #[event]
 pub struct MinterMintEvent {
     /// The [MintWrapper].
@@ -499,10 +341,7 @@ pub struct MinterMintEvent {
     pub destination: Pubkey,
 }
 
-/// --------------------------------
 /// Error Codes
-/// --------------------------------
-
 #[error_code]
 pub enum ErrorCode {
     #[msg("You are not authorized to perform this action.")]

@@ -21,12 +21,9 @@ impl<'info> Validate<'info> for NewPool<'info> {
         invariant!(self.replica_mint.freeze_authority.is_none());
         invariant!(
             self.replica_mint.decimals == self.primary_mint.decimals,
-            "decimals mismatch"
+            ReplicaDecimalsMismatch
         );
-        invariant!(
-            self.replica_mint.supply == 0,
-            "replica must have zero supply"
-        );
+        invariant!(self.replica_mint.supply == 0, ReplicaNonZeroSupply);
 
         Ok(())
     }
@@ -47,7 +44,7 @@ impl<'info> Validate<'info> for InitMiner<'info> {
         );
 
         assert_keys_eq!(self.mm.pool, self.pool);
-        assert_keys_eq!(self.quarry.rewarder_key, self.rewarder);
+        assert_keys_eq!(self.quarry.rewarder, self.rewarder);
 
         assert_keys_eq!(self.miner_vault.owner, self.miner);
         assert_keys_eq!(self.miner_vault.mint, self.quarry.token_mint_key);
@@ -174,8 +171,8 @@ impl<'info> Validate<'info> for QuarryStake<'info> {
         assert_keys_eq!(self.pool, self.mm.pool);
 
         // Quarry validations
-        assert_keys_eq!(self.quarry, self.miner.quarry_key);
-        assert_keys_eq!(self.rewarder, self.quarry.rewarder_key);
+        assert_keys_eq!(self.quarry, self.miner.quarry);
+        assert_keys_eq!(self.rewarder, self.quarry.rewarder);
 
         assert_keys_eq!(self.miner_vault, self.miner.token_vault_key);
         assert_keys_eq!(self.miner_vault.owner, self.miner);

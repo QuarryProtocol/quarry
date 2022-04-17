@@ -9,7 +9,7 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@saberhq/token-utils";
 import type { PublicKey } from "@solana/web3.js";
-import { Keypair, SystemProgram } from "@solana/web3.js";
+import { SystemProgram } from "@solana/web3.js";
 
 import { QUARRY_ADDRESSES } from "../..";
 import type {
@@ -117,7 +117,7 @@ export class MergeMiner {
   async stakeReplicaMiner(rewarder: PublicKey): Promise<TransactionEnvelope> {
     const stake = await this.getReplicaStakeAccounts(rewarder);
     const [quarry] = await findQuarryAddress(rewarder, this.replicaMint);
-    const [miner, minerBump] = await findMinerAddress(quarry, this.mm.key);
+    const [miner] = await findMinerAddress(quarry, this.mm.key);
 
     const mmReplicaMintTokenAccount = await getOrCreateATA({
       provider: this.provider,
@@ -146,7 +146,7 @@ export class MergeMiner {
         owner: miner,
       });
       txEnv.instructions.unshift(
-        this.program.instruction.initMiner(minerBump, {
+        this.program.instruction.initMinerV2({
           accounts: {
             pool: this.pool.key,
             mm: this.mm.key,
@@ -424,20 +424,18 @@ export class MergeMiner {
       quarry,
       miner,
       minerVault,
-      unusedAccount: Keypair.generate().publicKey,
     };
   }
 
   get commonStakeAccounts(): Pick<
     QuarryStakeAccounts,
-    "pool" | "mm" | "tokenProgram" | "mineProgram" | "unusedAccount"
+    "pool" | "mm" | "tokenProgram" | "mineProgram"
   > {
     return {
       pool: this.mm.data.pool,
       mm: this.mm.key,
       tokenProgram: TOKEN_PROGRAM_ID,
       mineProgram: this.mergeMine.sdk.mine.program.programId,
-      unusedAccount: Keypair.generate().publicKey,
     };
   }
 }

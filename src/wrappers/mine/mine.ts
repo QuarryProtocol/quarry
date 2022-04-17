@@ -1,4 +1,7 @@
-import type { Provider, TransactionEnvelope } from "@saberhq/solana-contrib";
+import type {
+  AugmentedProvider,
+  TransactionEnvelope,
+} from "@saberhq/solana-contrib";
 import { getOrCreateATA, TOKEN_PROGRAM_ID } from "@saberhq/token-utils";
 import type {
   PublicKey,
@@ -7,7 +10,7 @@ import type {
 } from "@solana/web3.js";
 import { Keypair, SystemProgram, SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
 
-import type { MintWrapperData } from "../../programs";
+import { QUARRY_CODERS } from "../../constants";
 import type { MineProgram } from "../../programs/mine";
 import type { QuarrySDK } from "../../sdk";
 import { findRewarderAddress } from "./pda";
@@ -16,7 +19,7 @@ import { RewarderWrapper } from "./rewarder";
 export class MineWrapper {
   constructor(readonly sdk: QuarrySDK) {}
 
-  get provider(): Provider {
+  get provider(): AugmentedProvider {
     return this.sdk.provider;
   }
 
@@ -24,7 +27,13 @@ export class MineWrapper {
     return this.sdk.programs.Mine;
   }
 
-  async createRewarder({
+  /**
+   *
+   * @deprecated Use {@link createRewarder}.
+   * @param param0
+   * @returns
+   */
+  async createRewarderV1({
     mintWrapper,
     baseKP = Keypair.generate(),
     authority = this.provider.wallet.publicKey,
@@ -47,10 +56,8 @@ export class MineWrapper {
         `mint wrapper does not exist at ${mintWrapper.toString()}`
       );
     }
-
     const mintWrapperData =
-      this.sdk.programs.MintWrapper.coder.accounts.decode<MintWrapperData>(
-        "MintWrapper",
+      QUARRY_CODERS.MintWrapper.accounts.mintWrapper.parse(
         mintWrapperDataRaw.accountInfo.data
       );
 
@@ -63,9 +70,9 @@ export class MineWrapper {
 
     return {
       key: rewarderKey,
-      tx: this.sdk.newTx(
+      tx: this.provider.newTX(
         [
-          ...(createATAInstruction ? [createATAInstruction] : []),
+          createATAInstruction,
           this.program.instruction.newRewarder(bump, {
             accounts: {
               base: baseKP.publicKey,
@@ -73,7 +80,71 @@ export class MineWrapper {
               rewarder: rewarderKey,
               payer: this.provider.wallet.publicKey,
               systemProgram: SystemProgram.programId,
-              unusedClock: SYSVAR_CLOCK_PUBKEY,
+              unusedAccount: SYSVAR_CLOCK_PUBKEY,
+              mintWrapper,
+              rewardsTokenMint: mintWrapperData.tokenMint,
+              claimFeeTokenAccount,
+            },
+          }),
+        ],
+        [baseKP]
+      ),
+    };
+  }
+
+  /**
+   * Creates a new Rewarder.
+   * @param param0
+   * @returns
+   */
+  async createRewarder({
+    mintWrapper,
+    baseKP = Keypair.generate(),
+    authority = this.provider.wallet.publicKey,
+  }: {
+    mintWrapper: PublicKey;
+    baseKP?: Signer;
+    authority?: PublicKey;
+  }): Promise<{
+    key: PublicKey;
+    tx: TransactionEnvelope;
+  }> {
+    const [rewarderKey] = await findRewarderAddress(
+      baseKP.publicKey,
+      this.program.programId
+    );
+
+    const mintWrapperDataRaw = await this.provider.getAccountInfo(mintWrapper);
+    if (!mintWrapperDataRaw) {
+      throw new Error(
+        `mint wrapper does not exist at ${mintWrapper.toString()}`
+      );
+    }
+
+    const mintWrapperData =
+      QUARRY_CODERS.MintWrapper.accounts.mintWrapper.parse(
+        mintWrapperDataRaw.accountInfo.data
+      );
+
+    const { address: claimFeeTokenAccount, instruction: createATAInstruction } =
+      await getOrCreateATA({
+        provider: this.provider,
+        mint: mintWrapperData.tokenMint,
+        owner: rewarderKey,
+      });
+
+    return {
+      key: rewarderKey,
+      tx: this.provider.newTX(
+        [
+          createATAInstruction,
+          this.program.instruction.newRewarderV2({
+            accounts: {
+              base: baseKP.publicKey,
+              initialAuthority: authority,
+              rewarder: rewarderKey,
+              payer: this.provider.wallet.publicKey,
+              systemProgram: SystemProgram.programId,
               mintWrapper,
               rewardsTokenMint: mintWrapperData.tokenMint,
               claimFeeTokenAccount,

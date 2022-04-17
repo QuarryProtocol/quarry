@@ -1,5 +1,6 @@
 //! Macros.
 
+/// Generates the signer seeds for the [crate::Operator].
 #[macro_export]
 macro_rules! gen_operator_signer_seeds {
     ($operator:expr) => {

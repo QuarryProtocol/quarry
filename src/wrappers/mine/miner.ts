@@ -17,7 +17,7 @@ type MineUserStakeAccounts = Parameters<
 
 type MineUserClaimAccounts = Parameters<
   MineProgram["instruction"]["claimRewards"]["accounts"]
->[0]["stake"];
+>[0]["claim"];
 
 export class MinerWrapper {
   /**
@@ -60,8 +60,8 @@ export class MinerWrapper {
   /**
    * Creates the miner of the provided wallet.
    */
-  initialize(bump: number): PendingMiner {
-    const instruction = this.program.instruction.createMiner(bump, {
+  initialize(): PendingMiner {
+    const instruction = this.program.instruction.createMinerV2({
       accounts: {
         authority: this.authority,
         miner: this.minerKey,
@@ -69,7 +69,7 @@ export class MinerWrapper {
         systemProgram: SystemProgram.programId,
         payer: this.provider.wallet.publicKey,
         minerVault: this.tokenVaultKey,
-        rewarder: this.quarry.quarryData.rewarderKey,
+        rewarder: this.quarry.quarryData.rewarder,
         tokenProgram: TOKEN_PROGRAM_ID,
         tokenMint: this.quarry.token.mintAccount,
       },
@@ -107,7 +107,7 @@ export class MinerWrapper {
       miner,
       quarry: this.quarry.key,
       tokenProgram: TOKEN_PROGRAM_ID,
-      rewarder: this.quarry.quarryData.rewarderKey,
+      rewarder: this.quarry.quarryData.rewarder,
 
       // dummies for backwards compatibility
       unusedMinerVault: randomMut,
@@ -175,6 +175,44 @@ export class MinerWrapper {
    * Claims an amount of tokens.
    * @returns
    */
+  async claimV1(): Promise<TransactionEnvelope> {
+    const instructions: TransactionInstruction[] = [];
+    const { address: rewardsTokenAccount, instruction: ataInstruction } =
+      await getOrCreateATA({
+        provider: this.provider,
+        mint: this.quarry.rewarderData.rewardsTokenMint,
+        owner: this.authority,
+      });
+    if (ataInstruction) {
+      instructions.push(ataInstruction);
+    }
+
+    const [minter] = await findMinterAddress(
+      this.quarry.rewarderData.mintWrapper,
+      this.quarry.quarryData.rewarder,
+      this.sdk.mintWrapper.program.programId
+    );
+
+    const ix = this.quarry.program.instruction.claimRewards({
+      accounts: {
+        mintWrapper: this.quarry.rewarderData.mintWrapper,
+        minter,
+        rewardsTokenMint: this.quarry.rewarderData.rewardsTokenMint,
+        rewardsTokenAccount,
+        claim: this.userClaimAccounts,
+        mintWrapperProgram: this.sdk.programs.MintWrapper.programId,
+        claimFeeTokenAccount: this.quarry.rewarderData.claimFeeTokenAccount,
+      },
+    });
+    instructions.push(ix);
+
+    return this.sdk.newTx(instructions);
+  }
+
+  /**
+   * Claims an amount of tokens.
+   * @returns
+   */
   async claim(): Promise<TransactionEnvelope> {
     const instructions: TransactionInstruction[] = [];
     const { address: rewardsTokenAccount, instruction: ataInstruction } =
@@ -189,17 +227,17 @@ export class MinerWrapper {
 
     const [minter] = await findMinterAddress(
       this.quarry.rewarderData.mintWrapper,
-      this.quarry.quarryData.rewarderKey,
+      this.quarry.quarryData.rewarder,
       this.sdk.mintWrapper.program.programId
     );
 
-    const ix = this.quarry.program.instruction.claimRewards({
+    const ix = this.quarry.program.instruction.claimRewardsV2({
       accounts: {
         mintWrapper: this.quarry.rewarderData.mintWrapper,
         minter,
         rewardsTokenMint: this.quarry.rewarderData.rewardsTokenMint,
         rewardsTokenAccount,
-        stake: this.userClaimAccounts,
+        claim: this.userClaimAccounts,
         mintWrapperProgram: this.sdk.programs.MintWrapper.programId,
         claimFeeTokenAccount: this.quarry.rewarderData.claimFeeTokenAccount,
       },

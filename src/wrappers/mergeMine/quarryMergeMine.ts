@@ -69,16 +69,16 @@ export class MergeMine {
 
     const parsedMint = deserializeMint(primaryMintRaw.accountInfo.data);
 
-    const [pool, bump] = await findPoolAddress({
+    const [pool] = await findPoolAddress({
       programId: this.program.programId,
       primaryMint,
     });
-    const [replicaMint, mintBump] = await findReplicaMintAddress({
+    const [replicaMint] = await findReplicaMintAddress({
       programId: this.program.programId,
       primaryMint,
     });
 
-    const newPoolIx = this.program.instruction.newPool(bump, mintBump, {
+    const newPoolIx = this.program.instruction.newPoolV2({
       accounts: {
         pool,
         payer,
@@ -174,7 +174,7 @@ export class MergeMine {
      */
     rewardsMint: PublicKey;
   }): Promise<{ key: PublicKey; tx: TransactionEnvelope | null }> {
-    const [mm, bump] = await findMergeMinerAddress({
+    const [mm] = await findMergeMinerAddress({
       programId: this.program.programId,
       pool: poolKey,
       owner,
@@ -195,7 +195,7 @@ export class MergeMine {
       await this.sdk.provider.connection.getAccountInfo(mm);
     if (!mergeMinerAccountInfo) {
       allInstructions.push(
-        this.program.instruction.initMergeMiner(bump, {
+        this.program.instruction.initMergeMinerV2({
           accounts: {
             pool: poolKey,
             owner,
@@ -241,7 +241,7 @@ export class MergeMine {
     ixs: TransactionInstruction[];
   }> {
     const [quarryKey] = await findQuarryAddress(rewarder, mint);
-    const [minerKey, minerBump] = await findMinerAddress(quarryKey, mm);
+    const [minerKey] = await findMinerAddress(quarryKey, mm);
 
     const ixs: TransactionInstruction[] = [];
     const minerAccountInfo = await this.sdk.provider.connection.getAccountInfo(
@@ -260,7 +260,7 @@ export class MergeMine {
       ixs.push(minerATA.instruction);
     }
     ixs.push(
-      this.program.instruction.initMiner(minerBump, {
+      this.program.instruction.initMinerV2({
         accounts: {
           mineProgram: this.sdk.mine.program.programId,
           pool,
@@ -297,13 +297,13 @@ export class MergeMine {
     rewarder: PublicKey;
   }): Promise<{ tx: TransactionEnvelope; miner: PublicKey }> {
     const [quarryKey] = await findQuarryAddress(rewarder, mint);
-    const [minerKey, minerBump] = await findMinerAddress(quarryKey, mm);
+    const [minerKey] = await findMinerAddress(quarryKey, mm);
     const minerATA = await getOrCreateATA({
       provider: this.provider,
       mint,
       owner: minerKey,
     });
-    const initMinerIX = this.program.instruction.initMiner(minerBump, {
+    const initMinerIX = this.program.instruction.initMinerV2({
       accounts: {
         mineProgram: this.sdk.mine.program.programId,
         pool,

@@ -18,7 +18,7 @@ macro_rules! gen_miner_signer_seeds {
     ($miner:expr) => {
         &[
             b"Miner".as_ref(),
-            $miner.quarry_key.as_ref(),
+            $miner.quarry.as_ref(),
             $miner.authority.as_ref(),
             &[$miner.bump],
         ]

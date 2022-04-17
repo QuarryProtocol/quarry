@@ -2,7 +2,7 @@ import type { AugmentedProvider, Provider } from "@saberhq/solana-contrib";
 import { TransactionEnvelope } from "@saberhq/solana-contrib";
 import type { ProgramAccount, Token, u64 } from "@saberhq/token-utils";
 import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
-import { SystemProgram, SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
+import { SystemProgram } from "@solana/web3.js";
 
 import type { MineProgram, RewarderData } from "../../programs/mine";
 import { QuarrySDK } from "../../sdk";
@@ -88,12 +88,12 @@ export class RewarderWrapper {
     token: Token;
     authority?: PublicKey;
   }): Promise<PendingQuarry> {
-    const [quarryKey, bump] = await findQuarryAddress(
+    const [quarryKey] = await findQuarryAddress(
       this.rewarderKey,
       token.mintAccount,
       this.program.programId
     );
-    const ix = this.program.instruction.createQuarry(bump, {
+    const ix = this.program.instruction.createQuarryV2({
       accounts: {
         quarry: quarryKey,
         auth: {
@@ -102,7 +102,6 @@ export class RewarderWrapper {
         },
         tokenMint: token.mintAccount,
         payer: this.provider.wallet.publicKey,
-        unusedClock: SYSVAR_CLOCK_PUBKEY,
         systemProgram: SystemProgram.programId,
       },
     });

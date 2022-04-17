@@ -2,28 +2,9 @@
 
 use crate::*;
 
-impl<'info> Validate<'info> for CreateOperator<'info> {
-    fn validate(&self) -> Result<()> {
-        assert_keys_eq!(
-            self.operator,
-            self.rewarder.pending_authority,
-            PendingAuthorityNotSet
-        );
-        Ok(())
-    }
-}
-
 impl<'info> Validate<'info> for SetRole<'info> {
     fn validate(&self) -> Result<()> {
         assert_keys_eq!(self.operator.admin, self.admin, Unauthorized);
-        Ok(())
-    }
-}
-
-impl<'info> Validate<'info> for WithDelegate<'info> {
-    fn validate(&self) -> Result<()> {
-        assert_keys_eq!(self.operator.rewarder, self.rewarder);
-        assert_keys_eq!(self.operator, self.rewarder.authority);
         Ok(())
     }
 }
@@ -40,22 +21,10 @@ impl<'info> Validate<'info> for DelegateSetAnnualRewards<'info> {
     }
 }
 
-impl<'info> Validate<'info> for DelegateCreateQuarry<'info> {
-    fn validate(&self) -> Result<()> {
-        assert_keys_eq!(
-            self.with_delegate.operator.quarry_creator,
-            self.with_delegate.delegate,
-            Unauthorized
-        );
-        self.with_delegate.validate()?;
-        Ok(())
-    }
-}
-
 impl<'info> Validate<'info> for DelegateSetRewardsShare<'info> {
     fn validate(&self) -> Result<()> {
         assert_keys_eq!(
-            self.quarry.rewarder_key,
+            self.quarry.rewarder,
             self.with_delegate.rewarder,
             Unauthorized
         );
@@ -72,7 +41,7 @@ impl<'info> Validate<'info> for DelegateSetRewardsShare<'info> {
 impl<'info> Validate<'info> for DelegateSetFamine<'info> {
     fn validate(&self) -> Result<()> {
         assert_keys_eq!(
-            self.quarry.rewarder_key,
+            self.quarry.rewarder,
             self.with_delegate.rewarder,
             Unauthorized
         );
@@ -82,6 +51,14 @@ impl<'info> Validate<'info> for DelegateSetFamine<'info> {
             Unauthorized
         );
         self.with_delegate.validate()?;
+        Ok(())
+    }
+}
+
+impl<'info> Validate<'info> for WithDelegate<'info> {
+    fn validate(&self) -> Result<()> {
+        assert_keys_eq!(self.operator.rewarder, self.rewarder);
+        assert_keys_eq!(self.operator, self.rewarder.authority);
         Ok(())
     }
 }

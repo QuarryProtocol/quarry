@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+### Features
+
+- New variants of many instructions reduce the number of accounts and the need to supply the bump.
+  - Add `quarry_mine::claim_rewards_v2` instruction, which reduces the required accounts for claiming rewards by 2 (64 bytes).
+  - Add `quarry_mine::create_quarry_v2` instruction, which reduces the required accounts for creating a new quarry by 1 (32 bytes).
+  - Add `quarry_mine::create_miner_v2` instruction, which removes the need to supply the bump seed.
+  - Add `quarry_mine::create_rewarder_v2` instruction, which removes the need to supply the bump seed and clock (32 bytes).
+  - Add `quarry_operator::delegate_create_quarry_v2` instruction, which calls `create_quarry_v2`.
+  - And more
+
+### Breaking
+
+- Rename `stake` to `claim` in `quarry_mine::claim_rewards`.
+- Rename `Miner.quarry_key` to `Miner.quarry` in `quarry_mine`.
+- Rename `Quarry.rewarder_key` to `Quarry.rewarder` in `quarry_mine`.
+
 ## [v4.2.1]
 
 ### Features
