@@ -24,6 +24,8 @@ fn execute_ix_handler_raw<'info, T: Accounts<'info>>(
 }
 
 /// Executes an instruction handler, re-validating the accounts.
+///
+/// Be careful to not initialize accounts multiple times.
 pub fn execute_ix_handler<'info, T: Accounts<'info> + Validate<'info>, V: ToAccountInfos<'info>>(
     program_id: &Pubkey,
     accounts_unchecked: V,
