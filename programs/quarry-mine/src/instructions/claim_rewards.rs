@@ -58,19 +58,17 @@ impl<'info> ClaimRewards<'info> {
 
     /// Mints the claimed tokens.
     fn mint_claimed_tokens(&self, amount_claimable_minus_fees: u64) -> Result<()> {
-        let rewards_token_account = (*self.rewards_token_account).clone();
-        self.perform_mint(rewards_token_account, amount_claimable_minus_fees)
+        self.perform_mint(&self.rewards_token_account, amount_claimable_minus_fees)
     }
 
     /// Mints the fee tokens.
     fn mint_fees(&self, claim_fee: u64) -> Result<()> {
-        let claim_fee_token_account = (*self.claim_fee_token_account).clone();
-        self.perform_mint(claim_fee_token_account, claim_fee)
+        self.perform_mint(&self.claim_fee_token_account, claim_fee)
     }
 
     fn create_perform_mint_accounts(
         &self,
-        destination: Account<'info, TokenAccount>,
+        destination: &Account<'info, TokenAccount>,
     ) -> quarry_mint_wrapper::cpi::accounts::PerformMint<'info> {
         quarry_mint_wrapper::cpi::accounts::PerformMint {
             mint_wrapper: self.mint_wrapper.to_account_info(),
@@ -82,7 +80,7 @@ impl<'info> ClaimRewards<'info> {
         }
     }
 
-    fn perform_mint(&self, destination: Account<'info, TokenAccount>, amount: u64) -> Result<()> {
+    fn perform_mint(&self, destination: &Account<'info, TokenAccount>, amount: u64) -> Result<()> {
         let claim_mint_accounts = self.create_perform_mint_accounts(destination);
 
         // Create the signer seeds.
