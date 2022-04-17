@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+## [v5.0.0]
+
 ### Features
 
 - New variants of many instructions reduce the number of accounts and the need to supply the bump.
