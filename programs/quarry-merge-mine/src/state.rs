@@ -81,3 +81,24 @@ pub struct MergeMiner {
 impl MergeMiner {
     pub const LEN: usize = 32 + 32 + 1 + 8 + 8 + 8;
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_pool_len() {
+        assert_eq!(
+            MergePool::default().try_to_vec().unwrap().len(),
+            MergePool::LEN
+        );
+    }
+
+    #[test]
+    fn test_miner_len() {
+        assert_eq!(
+            MergeMiner::default().try_to_vec().unwrap().len(),
+            MergeMiner::LEN
+        );
+    }
+}

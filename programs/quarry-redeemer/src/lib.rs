@@ -9,6 +9,9 @@ use vipers::prelude::*;
 mod account_validators;
 mod macros;
 mod redeem_cpi;
+mod state;
+
+pub use state::*;
 
 declare_id!("QRDxhMw1P2NEfiw5mYXG79bwfgHTdasY2xNP76XSea9");
 
@@ -81,25 +84,6 @@ pub mod quarry_redeemer {
 // --------------------------------
 // Accounts
 // --------------------------------
-
-/// Redeemer state
-#[account]
-#[derive(Copy, Default, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Redeemer {
-    /// [Mint] of the IOU token.
-    pub iou_mint: Pubkey,
-    /// [Mint] of the token to redeem.
-    pub redemption_mint: Pubkey,
-    /// Bump seed.
-    pub bump: u8,
-
-    /// Lifetime number of IOU tokens redeemed for redemption tokens.
-    pub total_tokens_redeemed: u64,
-}
-
-impl Redeemer {
-    pub const LEN: usize = 32 + 32 + 1 + 8;
-}
 
 // --------------------------------
 // Instructions

@@ -103,3 +103,28 @@ pub struct Registry {
     /// Tokens
     pub tokens: Vec<Pubkey>,
 }
+
+impl Registry {
+    pub fn byte_length(max_quarries: u16) -> usize {
+        (1 + 32 + 4 + 32 * max_quarries) as usize
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use anchor_lang::system_program;
+
+    use super::*;
+
+    #[test]
+    fn test_registry_len() {
+        let registry = Registry {
+            tokens: vec![system_program::ID, system_program::ID],
+            ..Default::default()
+        };
+        assert_eq!(
+            registry.try_to_vec().unwrap().len(),
+            Registry::byte_length(2)
+        );
+    }
+}

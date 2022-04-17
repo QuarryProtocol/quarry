@@ -75,3 +75,21 @@ impl Minter {
     /// Number of bytes that a [Minter] struct takes up.
     pub const LEN: usize = 32 + 32 + 1 + 8 + 8 + 8;
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_mint_wrapper_len() {
+        assert_eq!(
+            MintWrapper::default().try_to_vec().unwrap().len(),
+            MintWrapper::LEN
+        );
+    }
+
+    #[test]
+    fn test_minter_len() {
+        assert_eq!(Minter::default().try_to_vec().unwrap().len(), Minter::LEN);
+    }
+}

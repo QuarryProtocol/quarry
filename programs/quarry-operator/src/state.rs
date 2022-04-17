@@ -40,3 +40,16 @@ impl Operator {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_operator_len() {
+        assert_eq!(
+            Operator::default().try_to_vec().unwrap().len(),
+            Operator::LEN
+        );
+    }
+}
