@@ -110,12 +110,180 @@ describe("Mine", () => {
     await expectTX(tx, "Initialize mint").to.be.fulfilled;
   });
 
-  it("rewarder v1", async () => {
-    const { tx } = await mine.createRewarderV1({
-      mintWrapper: mintWrapperKey,
-      authority: provider.wallet.publicKey,
+  describe("Rewarder (v1)", () => {
+    let rewarderKey: PublicKey;
+
+    beforeEach("rewarder", async () => {
+      const { tx, key: rewarder } = await mine.createRewarderV1({
+        mintWrapper: mintWrapperKey,
+        authority: provider.wallet.publicKey,
+      });
+      await expectTX(tx, "Create new rewarder").to.be.fulfilled;
+      rewarderKey = rewarder;
     });
-    await expectTX(tx, "Create new rewarder").to.be.fulfilled;
+
+    describe("DAO fees", () => {
+      it("anyone can claim", async () => {
+        const claimFeeTokenAccount = await getATAAddress({
+          mint: rewardsMint,
+          owner: rewarderKey,
+        });
+        const ata = await getOrCreateATA({
+          owner: QUARRY_FEE_TO,
+          mint: rewardsMint,
+          provider,
+        });
+
+        assert.ok(ata.instruction);
+        await expectTX(new TransactionEnvelope(provider, [ata.instruction])).to
+          .be.fulfilled;
+        await expect(
+          mine.program.rpc.extractFees({
+            accounts: {
+              rewarder: rewarderKey,
+              claimFeeTokenAccount,
+              feeToTokenAccount: ata.address,
+              tokenProgram: TOKEN_PROGRAM_ID,
+            },
+          })
+        ).to.be.fulfilled;
+      });
+
+      it("fail if token account does not exist", async () => {
+        const claimFeeTokenAccount = await getATAAddress({
+          mint: rewardsMint,
+          owner: rewarderKey,
+        });
+        const ata = await getOrCreateATA({
+          owner: QUARRY_FEE_TO,
+          mint: rewardsMint,
+          provider,
+        });
+        try {
+          await mine.program.rpc.extractFees({
+            accounts: {
+              rewarder: rewarderKey,
+              claimFeeTokenAccount,
+              feeToTokenAccount: ata.address,
+              tokenProgram: TOKEN_PROGRAM_ID,
+            },
+          });
+          assert.fail("passed");
+        } catch (e) {
+          console.error(e);
+        }
+      });
+
+      it("fail if not fee to", async () => {
+        const claimFeeTokenAccount = await getATAAddress({
+          mint: rewardsMint,
+          owner: rewarderKey,
+        });
+        const ata = await getOrCreateATA({
+          owner: Keypair.generate().publicKey,
+          mint: rewardsMint,
+          provider,
+        });
+        assert.ok(ata.instruction);
+        await expectTX(new TransactionEnvelope(provider, [ata.instruction])).to
+          .be.fulfilled;
+        try {
+          await mine.program.rpc.extractFees({
+            accounts: {
+              rewarder: rewarderKey,
+              claimFeeTokenAccount,
+              feeToTokenAccount: ata.address,
+              tokenProgram: TOKEN_PROGRAM_ID,
+            },
+          });
+          assert.fail("passed");
+        } catch (e) {
+          console.error(e);
+        }
+      });
+    });
+
+    it("Is initialized!", async () => {
+      const rewarder = await mine.program.account.rewarder.fetch(rewarderKey);
+      expect(rewarder.authority).to.eqAddress(provider.wallet.publicKey);
+      expect(rewarder.annualRewardsRate.toString()).to.eql(ZERO.toString());
+      expect(rewarder.numQuarries).to.eq(ZERO.toNumber());
+      expect(rewarder.totalRewardsShares.toString()).to.bignumber.eq(
+        ZERO.toString()
+      );
+    });
+
+    it("Set daily rewards rate", async () => {
+      await assert.doesNotReject(async () => {
+        await mine.program.rpc.setAnnualRewards(ANNUAL_REWARDS_RATE, {
+          accounts: {
+            auth: {
+              authority: provider.wallet.publicKey,
+              rewarder: rewarderKey,
+            },
+          },
+        });
+      });
+
+      const rewarder = await mine.program.account.rewarder.fetch(rewarderKey);
+      expect(rewarder.annualRewardsRate).bignumber.to.eq(ANNUAL_REWARDS_RATE);
+    });
+
+    it("Transfer authority and accept authority", async () => {
+      const newAuthority = web3.Keypair.generate();
+
+      await assert.doesNotReject(async () => {
+        await mine.program.rpc.transferAuthority(newAuthority.publicKey, {
+          accounts: {
+            authority: provider.wallet.publicKey,
+            rewarder: rewarderKey,
+          },
+        });
+      });
+
+      let rewarder = await mine.program.account.rewarder.fetch(rewarderKey);
+      expect(rewarder.authority).to.eqAddress(provider.wallet.publicKey);
+      expect(rewarder.pendingAuthority).to.eqAddress(newAuthority.publicKey);
+
+      const ix = mine.program.instruction.acceptAuthority({
+        accounts: {
+          authority: newAuthority.publicKey,
+          rewarder: rewarderKey,
+        },
+      });
+      let tx = sdk.newTx([ix], [newAuthority]);
+      await expectTX(tx, "accept authority").to.be.fulfilled;
+      rewarder = await mine.program.account.rewarder.fetch(rewarderKey);
+      expect(rewarder.authority).to.eqAddress(newAuthority.publicKey);
+      expect(rewarder.pendingAuthority).to.eqAddress(web3.PublicKey.default);
+
+      // Transfer back
+      const instructions = [];
+      instructions.push(
+        mine.program.instruction.transferAuthority(provider.wallet.publicKey, {
+          accounts: {
+            authority: newAuthority.publicKey,
+            rewarder: rewarderKey,
+          },
+        })
+      );
+      instructions.push(
+        mine.program.instruction.acceptAuthority({
+          accounts: {
+            authority: provider.wallet.publicKey,
+            rewarder: rewarderKey,
+          },
+        })
+      );
+
+      tx = sdk.newTx(instructions, [newAuthority]);
+      await expectTX(tx, "transfer authority back to original authority").to.be
+        .fulfilled;
+
+      rewarder = await mine.program.account.rewarder.fetch(rewarderKey);
+      expect(rewarder.authority).to.eqAddress(provider.wallet.publicKey);
+      expect(rewarder.pendingAuthority).to.eqAddress(web3.PublicKey.default);
+    });
   });
 
   describe("Rewarder", () => {
@@ -291,6 +459,368 @@ describe("Mine", () => {
       rewarder = await mine.program.account.rewarder.fetch(rewarderKey);
       expect(rewarder.authority).to.eqAddress(provider.wallet.publicKey);
       expect(rewarder.pendingAuthority).to.eqAddress(web3.PublicKey.default);
+    });
+  });
+
+  describe("Quarry (v1)", () => {
+    const quarryRewardsShare = ANNUAL_REWARDS_RATE.div(new BN(10));
+    let quarryData: QuarryData;
+    let quarryKey: anchor.web3.PublicKey;
+    let rewarderKey: anchor.web3.PublicKey;
+    let rewarder: RewarderWrapper;
+
+    beforeEach(async () => {
+      const { tx, key: theRewarderKey } = await mine.createRewarderV1({
+        mintWrapper: mintWrapperKey,
+        authority: provider.wallet.publicKey,
+      });
+      await expectTX(tx, "Create new rewarder").to.be.fulfilled;
+      rewarderKey = theRewarderKey;
+      rewarder = await mine.loadRewarderWrapper(rewarderKey);
+      await expectTX(
+        await rewarder.setAndSyncAnnualRewards(ANNUAL_REWARDS_RATE, []),
+        "set annual rewards"
+      );
+    });
+
+    describe("Single quarry", () => {
+      beforeEach("Create a new quarry", async () => {
+        const { quarry, tx } = await rewarder.createQuarryV1({
+          token: stakeToken,
+        });
+        await expectTX(tx, "Create new quarry").to.be.fulfilled;
+
+        const rewarderData = await mine.program.account.rewarder.fetch(
+          rewarderKey
+        );
+        assert.strictEqual(rewarderData.numQuarries, 1);
+        const quarryAccountInfo = await provider.connection.getAccountInfo(
+          quarry
+        );
+        expect(quarryAccountInfo?.owner).to.eqAddress(mine.program.programId);
+
+        assert.ok(quarryAccountInfo);
+        quarryData = mine.program.coder.accounts.decode<QuarryData>(
+          "Quarry",
+          quarryAccountInfo.data
+        );
+        assert.strictEqual(
+          quarryData.famineTs.toString(),
+          "9223372036854775807"
+        );
+        assert.strictEqual(
+          quarryData.tokenMintKey.toBase58(),
+          stakeTokenMint.toBase58()
+        );
+        assert.strictEqual(
+          quarryData.annualRewardsRate.toString(),
+          ZERO.toString()
+        );
+        assert.strictEqual(quarryData.rewardsShare.toString(), ZERO.toString());
+
+        quarryKey = quarry;
+      });
+
+      it("Set rewards share", async () => {
+        const currentTime = Math.floor(new Date().getTime() / 1000);
+
+        await assert.doesNotReject(async () => {
+          await mine.program.rpc.setRewardsShare(quarryRewardsShare, {
+            accounts: {
+              auth: {
+                authority: provider.wallet.publicKey,
+                rewarder: rewarderKey,
+              },
+              quarry: quarryKey,
+            },
+          });
+        });
+
+        const rewarderData = await mine.program.account.rewarder.fetch(
+          rewarderKey
+        );
+        expect(rewarderData.totalRewardsShares.toString()).to.equal(
+          quarryRewardsShare.toString()
+        );
+
+        const quarry = await rewarder.getQuarry(stakeToken);
+        expect(quarry.key).to.eqAddress(quarryKey);
+        expect(
+          quarry.quarryData.lastUpdateTs
+            .sub(new BN(currentTime))
+            .abs()
+            .lte(new BN(1))
+        ).to.be.true;
+        const expectedRewardsRate = quarry.computeAnnualRewardsRate();
+        expect(quarry.quarryData.annualRewardsRate.toString()).to.equal(
+          expectedRewardsRate.toString()
+        );
+        expect(quarry.quarryData.rewardsShare.toString()).to.eq(
+          quarryRewardsShare.toString()
+        );
+      });
+
+      it("Set famine", async () => {
+        const now = new BN(Date.now());
+        await assert.doesNotReject(async () => {
+          await mine.program.rpc.setFamine(now, {
+            accounts: {
+              auth: {
+                authority: provider.wallet.publicKey,
+                rewarder: rewarderKey,
+              },
+              quarry: quarryKey,
+            },
+          });
+        });
+        const quarryAccountInfo = await provider.connection.getAccountInfo(
+          quarryKey
+        );
+        assert.ok(quarryAccountInfo);
+        const quarryData = mine.program.coder.accounts.decode<QuarryData>(
+          "Quarry",
+          quarryAccountInfo?.data
+        );
+        assert.strictEqual(quarryData.famineTs.toString(), now.toString());
+
+        await assert.doesNotReject(async () => {
+          await mine.program.rpc.setFamine(quarryData.famineTs, {
+            accounts: {
+              auth: {
+                authority: provider.wallet.publicKey,
+                rewarder: rewarderKey,
+              },
+              quarry: quarryKey,
+            },
+          });
+        });
+      });
+
+      it("Unauthorized v1", async () => {
+        const fakeAuthority = web3.Keypair.generate();
+        const nextMint = await createMint(
+          provider,
+          provider.wallet.publicKey,
+          DEFAULT_DECIMALS
+        );
+        const [quarryKey, bump] = await findQuarryAddress(
+          rewarderKey,
+          nextMint
+        );
+        await assert.rejects(
+          async () => {
+            await mine.program.rpc.createQuarry(bump, {
+              accounts: {
+                quarry: quarryKey,
+                auth: {
+                  authority: fakeAuthority.publicKey,
+                  rewarder: rewarderKey,
+                },
+                tokenMint: nextMint,
+                payer: fakeAuthority.publicKey,
+                unusedAccount: SYSVAR_CLOCK_PUBKEY,
+                systemProgram: web3.SystemProgram.programId,
+              },
+              signers: [fakeAuthority],
+            });
+          },
+          (err: Error) => {
+            console.error(err);
+            expect(err.message).to.include("Error Code: Unauthorized"); // mut constraint
+            return true;
+          }
+        );
+      });
+
+      it("Unauthorized", async () => {
+        const fakeAuthority = web3.Keypair.generate();
+        const nextMint = await createMint(
+          provider,
+          provider.wallet.publicKey,
+          DEFAULT_DECIMALS
+        );
+        const [quarryKey] = await findQuarryAddress(rewarderKey, nextMint);
+        await assert.rejects(
+          async () => {
+            await mine.program.rpc.createQuarryV2({
+              accounts: {
+                quarry: quarryKey,
+                auth: {
+                  authority: fakeAuthority.publicKey,
+                  rewarder: rewarderKey,
+                },
+                tokenMint: nextMint,
+                payer: fakeAuthority.publicKey,
+                systemProgram: web3.SystemProgram.programId,
+              },
+              signers: [fakeAuthority],
+            });
+          },
+          (err: Error) => {
+            console.error(err);
+            expect(err.message).to.include("Error Code: Unauthorized");
+            return true;
+          }
+        );
+      });
+
+      it("Invalid PDA v1", async () => {
+        await assert.rejects(async () => {
+          const [quarryKey, bump] = await findQuarryAddress(
+            rewarderKey,
+            Keypair.generate().publicKey
+          );
+          await mine.program.rpc.createQuarry(bump, {
+            accounts: {
+              quarry: quarryKey,
+              auth: {
+                authority: provider.wallet.publicKey,
+                rewarder: rewarderKey,
+              },
+              tokenMint: stakeTokenMint,
+              payer: provider.wallet.publicKey,
+              unusedAccount: SYSVAR_CLOCK_PUBKEY,
+              systemProgram: web3.SystemProgram.programId,
+            },
+          });
+        });
+      });
+
+      it("Invalid PDA", async () => {
+        await assert.rejects(async () => {
+          const [quarryKey] = await findQuarryAddress(
+            rewarderKey,
+            Keypair.generate().publicKey
+          );
+          await mine.program.rpc.createQuarryV2({
+            accounts: {
+              quarry: quarryKey,
+              auth: {
+                authority: provider.wallet.publicKey,
+                rewarder: rewarderKey,
+              },
+              tokenMint: stakeTokenMint,
+              payer: provider.wallet.publicKey,
+              systemProgram: web3.SystemProgram.programId,
+            },
+          });
+        });
+      });
+    });
+
+    describe("Multiple quarries", () => {
+      const tokens: Token[] = [];
+
+      beforeEach("Create quarries", async () => {
+        let totalRewardsShare = ZERO;
+        const numQuarries = 5;
+        for (let i = 0; i < numQuarries; i++) {
+          const mint = await createMint(provider);
+          const token = Token.fromMint(mint, DEFAULT_DECIMALS, {
+            name: "stake token",
+          });
+
+          tokens.push(token);
+          const rewardsShare = new BN(i + 1);
+          const { tx } = await rewarder.createQuarryV1({
+            token,
+          });
+          await expectTX(tx, "create quarry").to.be.fulfilled;
+
+          const quarry = await rewarder.getQuarry(token);
+          await expectTX(quarry.setRewardsShare(rewardsShare)).to.be.fulfilled;
+          totalRewardsShare = totalRewardsShare.add(rewardsShare);
+        }
+
+        const rewarderData = await mine.program.account.rewarder.fetch(
+          rewarderKey
+        );
+        expect(rewarderData.numQuarries).to.eq(numQuarries);
+        expect(rewarderData.totalRewardsShares).to.bignumber.eq(
+          totalRewardsShare
+        );
+
+        const mints = tokens.map((tok) => tok.mintAccount);
+        const tx = await rewarder.syncQuarryRewards(mints);
+        await expectTX(tx, "sync quarries").to.be.fulfilled;
+      });
+
+      it("Set annual rewards and make sure quarries update", async () => {
+        const multiplier = new BN(10);
+        let rewarderData = await mine.program.account.rewarder.fetch(
+          rewarderKey
+        );
+        const nextAnnualRewardsRate = ANNUAL_REWARDS_RATE.mul(multiplier);
+        const prevRates = await Promise.all(
+          tokens.map(async (t) => {
+            const quarry = await rewarder.getQuarry(t);
+            return { token: t, rate: quarry.quarryData.annualRewardsRate };
+          })
+        );
+
+        const tx = await rewarder.setAndSyncAnnualRewards(
+          nextAnnualRewardsRate,
+          tokens.map((t) => t.mintAccount)
+        );
+        console.log(await tx.simulate());
+        await expectTX(tx, "set annual rewards and update quarry rewards").to.be
+          .fulfilled;
+
+        rewarderData = await mine.program.account.rewarder.fetch(rewarderKey);
+        expect(rewarderData.annualRewardsRate).to.bignumber.eq(
+          nextAnnualRewardsRate
+        );
+
+        let sumRewardsPerAnnum = new BN(0);
+        for (const token of tokens) {
+          const nextRate = (await rewarder.getQuarry(token)).quarryData
+            .annualRewardsRate;
+          sumRewardsPerAnnum = sumRewardsPerAnnum.add(nextRate);
+          const prevRate = prevRates.find((r) => r.token.equals(token))?.rate;
+          invariant(
+            prevRate,
+            `prev rate not found for token ${token.toString()}`
+          );
+
+          // Epsilon is 10
+          // check to see difference is less than 10
+          const expectedRate = prevRate.mul(multiplier);
+          expect(
+            nextRate,
+            `mul rate: ${multiplier.toString()}; expected: ${expectedRate.toString()}; got: ${nextRate.toString()}`
+          ).to.bignumber.closeTo(expectedRate, "10");
+        }
+        // Check on day multiple
+        expect(
+          sumRewardsPerAnnum,
+          "rewards rate within one day multiple"
+        ).bignumber.closeTo(
+          nextAnnualRewardsRate,
+          new BN(2) // precision lost
+        );
+
+        // Restore daily rewards rate
+        const txRestore = await rewarder.setAndSyncAnnualRewards(
+          ANNUAL_REWARDS_RATE,
+          tokens.map((t) => t.mintAccount)
+        );
+        await expectTX(txRestore, "revert daily rewards to previous amount").to
+          .be.fulfilled;
+
+        for (const token of tokens) {
+          const lastRate = (
+            await rewarder.getQuarry(token)
+          ).computeAnnualRewardsRate();
+          const prevRate = prevRates.find((r) => r.token.equals(token))?.rate;
+          invariant(
+            prevRate,
+            `prev rate not found for token ${token.toString()}`
+          );
+          expect(lastRate, `revert rate ${token.toString()}`).bignumber.to.eq(
+            prevRate
+          );
+        }
+      });
     });
   });
 

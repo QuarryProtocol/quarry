@@ -78,6 +78,45 @@ export class RewarderWrapper {
 
   /**
    * Creates a new quarry. Only the rewarder can call this.
+   * @deprecated Use {@link createQuarry}.
+   * @param param0
+   * @returns
+   */
+  async createQuarryV1({
+    token,
+    authority = this.provider.wallet.publicKey,
+  }: {
+    token: Token;
+    authority?: PublicKey;
+  }): Promise<PendingQuarry> {
+    const [quarryKey, bump] = await findQuarryAddress(
+      this.rewarderKey,
+      token.mintAccount,
+      this.program.programId
+    );
+    const ix = this.program.instruction.createQuarry(bump, {
+      accounts: {
+        quarry: quarryKey,
+        auth: {
+          authority,
+          rewarder: this.rewarderKey,
+        },
+        tokenMint: token.mintAccount,
+        payer: this.provider.wallet.publicKey,
+        systemProgram: SystemProgram.programId,
+        unusedAccount: SystemProgram.programId,
+      },
+    });
+
+    return {
+      rewarder: this.rewarderKey,
+      quarry: quarryKey,
+      tx: this.sdk.newTx([ix]),
+    };
+  }
+
+  /**
+   * Creates a new quarry. Only the rewarder can call this.
    * @param param0
    * @returns
    */
