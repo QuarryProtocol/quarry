@@ -6,6 +6,7 @@ import {
   createMint,
   getATAAddress,
   getTokenAccount,
+  sleep,
   Token,
   TokenAmount,
   u64,
@@ -208,6 +209,9 @@ describe("Mine Rewards", () => {
       "Minter add"
     ).to.be.fulfilled;
 
+    // wait some time so we can earn some tokens
+    await sleep(3_000);
+
     const tx = await minerActions.claim();
     const claimSent = await tx.send();
     await expectTX(tx, "Claim").to.be.fulfilled;
@@ -279,6 +283,9 @@ describe("Mine Rewards", () => {
       ),
       "Minter add"
     ).to.be.fulfilled;
+
+    // wait some time so we can earn some tokens
+    await sleep(3_000);
 
     const tx = await minerActions.claimV1();
     const claimSent = await tx.send();
