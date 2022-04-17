@@ -3,7 +3,7 @@ import { TransactionEnvelope } from "@saberhq/solana-contrib";
 import type { TokenAmount } from "@saberhq/token-utils";
 import { getOrCreateATA, TOKEN_PROGRAM_ID } from "@saberhq/token-utils";
 import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
-import { Keypair, SystemProgram } from "@solana/web3.js";
+import { SystemProgram } from "@solana/web3.js";
 
 import type { MineProgram, MinerData } from "../../programs/mine";
 import type { QuarrySDK } from "../../sdk";
@@ -101,7 +101,6 @@ export class MinerWrapper {
   get userClaimAccounts(): MineUserClaimAccounts {
     const authority = this.authority;
     const miner = this.minerKey;
-    const randomMut = Keypair.generate().publicKey;
     return {
       authority,
       miner,
@@ -110,8 +109,8 @@ export class MinerWrapper {
       rewarder: this.quarry.quarryData.rewarder,
 
       // dummies for backwards compatibility
-      unusedMinerVault: randomMut,
-      unusedTokenAccount: randomMut,
+      unusedMinerVault: TOKEN_PROGRAM_ID,
+      unusedTokenAccount: TOKEN_PROGRAM_ID,
     };
   }
 

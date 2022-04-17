@@ -1,21 +1,34 @@
 use crate::*;
 
 pub fn handler(ctx: Context<NewRewarder>) -> Result<()> {
-    msg!("pt 2");
-    execute_ix_handler(
-        ctx.program_id,
-        vec![
-            ctx.accounts.base.to_account_info(),
-            ctx.accounts.rewarder.to_account_info(),
-            ctx.accounts.initial_authority.to_account_info(),
-            ctx.accounts.payer.to_account_info(),
-            ctx.accounts.system_program.to_account_info(),
-            ctx.accounts.mint_wrapper.to_account_info(),
-            ctx.accounts.rewards_token_mint.to_account_info(),
-            ctx.accounts.claim_fee_token_account.to_account_info(),
-        ],
-        crate::quarry_mine::new_rewarder_v2,
-    )
+    let rewarder = &mut ctx.accounts.rewarder;
+
+    rewarder.base = ctx.accounts.base.key();
+    rewarder.bump = unwrap_bump!(ctx, "rewarder");
+
+    rewarder.authority = ctx.accounts.initial_authority.key();
+    rewarder.pending_authority = Pubkey::default();
+
+    rewarder.annual_rewards_rate = 0;
+    rewarder.num_quarries = 0;
+    rewarder.total_rewards_shares = 0;
+    rewarder.mint_wrapper = ctx.accounts.mint_wrapper.key();
+
+    rewarder.rewards_token_mint = ctx.accounts.rewards_token_mint.key();
+
+    rewarder.claim_fee_token_account = ctx.accounts.claim_fee_token_account.key();
+    rewarder.max_claim_fee_millibps = DEFAULT_CLAIM_FEE_MILLIBPS;
+
+    rewarder.pause_authority = Pubkey::default();
+    rewarder.is_paused = false;
+
+    let current_ts = Clock::get()?.unix_timestamp;
+    emit!(NewRewarderEvent {
+        authority: rewarder.authority,
+        timestamp: current_ts,
+    });
+
+    Ok(())
 }
 
 /// Accounts for [quarry_mine::new_rewarder].
@@ -25,8 +38,17 @@ pub struct NewRewarder<'info> {
     pub base: Signer<'info>,
 
     /// [Rewarder] of mines.
-    #[account(mut)]
-    pub rewarder: SystemAccount<'info>,
+    #[account(
+        init,
+        seeds = [
+            b"Rewarder".as_ref(),
+            base.key().to_bytes().as_ref()
+        ],
+        bump,
+        payer = payer,
+        space = 8 + Rewarder::LEN
+    )]
+    pub rewarder: Account<'info, Rewarder>,
 
     /// Initial authority of the rewarder.
     /// CHECK: OK

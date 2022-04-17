@@ -287,11 +287,37 @@ describe("Mine Rewards", () => {
     // wait some time so we can earn some tokens
     await sleep(3_000);
 
+    const initRewardsPerTokenPaid = miner.rewardsPerTokenPaid;
+
+    const mintWrapperBefore = await mintWrapper.fetchMintWrapper(
+      mintWrapperKey
+    );
+    invariant(mintWrapperBefore);
+
     const tx = await minerActions.claimV1();
+
     const claimSent = await tx.send();
     await expectTX(tx, "Claim").to.be.fulfilled;
     const receipt = await claimSent.wait();
     receipt.printLogs();
+
+    const mintWrapperAfter = await mintWrapper.fetchMintWrapper(mintWrapperKey);
+    invariant(mintWrapperAfter);
+
+    const minerAfter = await quarry.getMiner(provider.wallet.publicKey);
+    invariant(minerAfter);
+    const nextRewardsPerTokenPaid = minerAfter.rewardsPerTokenPaid;
+
+    // check that rewards have changed
+    const rewardsPerTokenPaidDiff = nextRewardsPerTokenPaid.sub(
+      initRewardsPerTokenPaid
+    );
+    expect(rewardsPerTokenPaidDiff).to.not.bignumber.zero;
+
+    const numMinted = mintWrapperAfter.totalMinted.sub(
+      mintWrapperBefore.totalMinted
+    );
+    expect(numMinted).to.not.bignumber.zero;
 
     const claimEvent = QUARRY_CODERS.Mine.parseProgramLogEvents(
       receipt.response.meta?.logMessages ?? []
@@ -314,6 +340,8 @@ describe("Mine Rewards", () => {
 
     const fees = expectedWagesEarned.mul(new BN(1)).div(new BN(10_000));
     const rewardsAfterFees = expectedWagesEarned.sub(fees);
+
+    expect(numMinted, "minted amount").to.bignumber.eq(expectedWagesEarned);
 
     expect(claimEvent.data.amount.isZero()).to.be.false;
     expect(claimEvent.data.amount).to.bignumber.eq(rewardsAfterFees);

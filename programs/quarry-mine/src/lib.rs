@@ -14,7 +14,6 @@
 #[macro_use]
 mod macros;
 mod state;
-pub mod utils;
 
 use anchor_lang::prelude::*;
 use anchor_spl::token::Token;
@@ -34,7 +33,6 @@ mod instructions;
 pub use instructions::*;
 
 use crate::quarry::StakeAction;
-pub use utils::*;
 
 declare_id!("QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB");
 
@@ -72,7 +70,6 @@ pub mod quarry_mine {
     #[deprecated(since = "5.0.0", note = "Use `new_rewarder_v2` instead.")]
     #[access_control(ctx.accounts.validate())]
     pub fn new_rewarder(ctx: Context<NewRewarder>, _bump: u8) -> Result<()> {
-        msg!("pt 1");
         instructions::new_rewarder::handler(ctx)
     }
 
@@ -361,9 +358,9 @@ pub mod quarry_mine {
         instructions::rescue_tokens::handler(ctx)
     }
 
-    /// --------------------------------
-    /// Protocol Functions
-    /// --------------------------------
+    // --------------------------------
+    // Protocol Functions
+    // --------------------------------
 
     /// Extracts fees to the Quarry DAO.
     /// This can be called by anyone.

@@ -1,26 +1,30 @@
-use quarry_mine::execute_ix_handler;
-
 use crate::*;
 
 /// Calls [quarry_mine::quarry_mine::create_quarry].
 pub fn handler(ctx: Context<DelegateCreateQuarry>) -> Result<()> {
-    execute_ix_handler(
-        ctx.program_id,
-        DelegateCreateQuarryV2 {
-            with_delegate: ctx.accounts.with_delegate.clone(),
-            quarry: ctx.accounts.quarry.clone(),
-            token_mint: ctx.accounts.token_mint.clone(),
-            payer: ctx.accounts.payer.clone(),
-            system_program: ctx.accounts.system_program.clone(),
+    let operator = &ctx.accounts.with_delegate.operator;
+    let signer_seeds: &[&[&[u8]]] = &[gen_operator_signer_seeds!(operator)];
+    quarry_mine::cpi::create_quarry_v2(CpiContext::new_with_signer(
+        ctx.accounts
+            .with_delegate
+            .quarry_mine_program
+            .to_account_info(),
+        quarry_mine::cpi::accounts::CreateQuarryV2 {
+            quarry: ctx.accounts.quarry.to_account_info(),
+            auth: ctx.accounts.with_delegate.to_auth_accounts(),
+            token_mint: ctx.accounts.token_mint.to_account_info(),
+            payer: ctx.accounts.payer.to_account_info(),
+            system_program: ctx.accounts.system_program.to_account_info(),
         },
-        crate::quarry_operator::delegate_create_quarry_v2,
-    )
+        signer_seeds,
+    ))?;
+    Ok(())
 }
 
-/// Accounts for [crate::quarry_operator::delegate_create_quarry].
+/// Accounts for [crate::quarry_operator::delegate_create_quarry_v2].
 #[derive(Accounts)]
 pub struct DelegateCreateQuarry<'info> {
-    /// Delegation accounts.
+    /// Delegate information.
     pub with_delegate: WithDelegate<'info>,
 
     /// The Quarry to create.
