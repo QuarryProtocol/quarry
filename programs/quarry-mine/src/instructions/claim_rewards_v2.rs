@@ -204,3 +204,22 @@ impl<'info> Validate<'info> for UserClaimV2<'info> {
         Ok(())
     }
 }
+
+/// Emitted when reward tokens are claimed.
+#[event]
+pub struct ClaimEvent {
+    /// Authority staking.
+    #[index]
+    pub authority: Pubkey,
+    /// Token of the pool staked into.
+    #[index]
+    pub staked_token: Pubkey,
+    /// Token received as rewards.
+    pub rewards_token: Pubkey,
+    /// Amount of rewards token received.
+    pub amount: u64,
+    /// Fees paid.
+    pub fees: u64,
+    /// When the event occurred.
+    pub timestamp: i64,
+}

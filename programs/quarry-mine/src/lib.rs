@@ -557,28 +557,9 @@ pub struct MutableRewarderWithPauseAuthority<'info> {
     pub rewarder: Account<'info, Rewarder>,
 }
 
-/// --------------------------------
-/// Events
-/// --------------------------------
-
-/// Emitted when reward tokens are claimed.
-#[event]
-pub struct ClaimEvent {
-    /// Authority staking.
-    #[index]
-    pub authority: Pubkey,
-    /// Token of the pool staked into.
-    #[index]
-    pub staked_token: Pubkey,
-    /// Token received as rewards.
-    pub rewards_token: Pubkey,
-    /// Amount of rewards token received.
-    pub amount: u64,
-    /// Fees paid.
-    pub fees: u64,
-    /// When the event occurred.
-    pub timestamp: i64,
-}
+// --------------------------------
+// Events
+// --------------------------------
 
 /// Emitted when tokens are staked into a [Quarry].
 #[event]
@@ -621,15 +602,6 @@ pub struct RewarderAnnualRewardsUpdateEvent {
     pub timestamp: i64,
 }
 
-/// Emitted when a new quarry is created.
-#[event]
-pub struct QuarryCreateEvent {
-    /// [Mint] of the [Quarry] token.
-    pub token_mint: Pubkey,
-    /// When the event took place.
-    pub timestamp: i64,
-}
-
 /// Emitted when a quarry's reward share is updated.
 #[event]
 pub struct QuarryRewardsUpdateEvent {
@@ -643,9 +615,7 @@ pub struct QuarryRewardsUpdateEvent {
     pub timestamp: i64,
 }
 
-/// --------------------------------
 /// Error Codes
-/// --------------------------------
 #[error_code]
 pub enum ErrorCode {
     #[msg("You are not authorized to perform this action.")]

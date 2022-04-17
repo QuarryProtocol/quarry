@@ -65,3 +65,12 @@ impl<'info> Validate<'info> for CreateQuarryV2<'info> {
         Ok(())
     }
 }
+
+/// Emitted when a new quarry is created.
+#[event]
+pub struct QuarryCreateEvent {
+    /// [Mint] of the [Quarry] token.
+    pub token_mint: Pubkey,
+    /// When the event took place.
+    pub timestamp: i64,
+}
