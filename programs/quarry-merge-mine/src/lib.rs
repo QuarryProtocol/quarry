@@ -304,7 +304,7 @@ pub struct ClaimRewards<'info> {
     /// Mint wrapper program.
     pub mint_wrapper_program: Program<'info, quarry_mint_wrapper::program::QuarryMintWrapper>,
     /// [quarry_mint_wrapper::Minter].
-    #[account(mut)]
+    #[account(mut, has_one = mint_wrapper)]
     pub minter: Box<Account<'info, quarry_mint_wrapper::Minter>>,
 
     /// [Mint] of the [quarry_mine] rewards token.
@@ -320,9 +320,8 @@ pub struct ClaimRewards<'info> {
     pub claim_fee_token_account: Box<Account<'info, TokenAccount>>,
 
     /// Arbitrary account holding the [Mint] of the quarry staked token.
-    /// Passed to [quarry_mine] but unused.
-    #[account(mut)]
-    pub stake_token_account: Box<Account<'info, TokenAccount>>,
+    /// CHECK: Unused.
+    pub stake_token_account: UncheckedAccount<'info>,
 
     /// User's stake.
     pub stake: QuarryStake<'info>,

@@ -36,11 +36,6 @@ impl<'info> ClaimRewards<'info> {
             claim: self.stake.gen_user_claim(),
         }
     }
-
-    /// Conversion.
-    pub fn to_user_stake_accounts(&self) -> quarry_mine::cpi::accounts::UserStake<'info> {
-        self.stake.gen_user_stake(&self.stake_token_account)
-    }
 }
 
 impl<'info> QuarryStake<'info> {
