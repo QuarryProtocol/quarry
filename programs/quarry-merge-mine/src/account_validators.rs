@@ -1,13 +1,6 @@
 //! Account validators
 
-use anchor_lang::prelude::*;
-use vipers::prelude::*;
-
-use crate::{
-    ClaimRewards, InitMergeMiner, InitMiner, NewPool, QuarryStake, QuarryStakePrimary,
-    QuarryStakeReplica, WithdrawTokens,
-};
-use anchor_lang::Key;
+use crate::*;
 
 // --------------------------------
 // Instruction account validators
