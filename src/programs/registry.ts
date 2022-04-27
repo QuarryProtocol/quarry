@@ -1,3 +1,4 @@
+import type { Program } from "@project-serum/anchor";
 import type { AnchorTypes } from "@saberhq/anchor-contrib";
 
 import type { QuarryRegistryIDL } from "../idls/quarry_registry";
@@ -13,8 +14,8 @@ export type RegistryTypes = AnchorTypes<
 
 type Accounts = RegistryTypes["Accounts"];
 
-export type RegistryData = Accounts["Registry"];
+export type RegistryData = Accounts["registry"];
 
 export type RegistryError = RegistryTypes["Error"];
 
-export type RegistryProgram = RegistryTypes["Program"];
+export type RegistryProgram = Program<QuarryRegistryIDL>;

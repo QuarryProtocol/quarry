@@ -1,3 +1,9 @@
+import type {
+  IdlAccount,
+  IdlAccountItem,
+  IdlAccounts,
+} from "@project-serum/anchor/dist/esm/idl";
+import type { AllInstructionsMap } from "@project-serum/anchor/dist/esm/program/namespace/types";
 import type { Provider } from "@saberhq/solana-contrib";
 import { TransactionEnvelope } from "@saberhq/solana-contrib";
 import type { TokenAmount } from "@saberhq/token-utils";
@@ -5,19 +11,35 @@ import { getOrCreateATA, TOKEN_PROGRAM_ID } from "@saberhq/token-utils";
 import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { SystemProgram } from "@solana/web3.js";
 
-import type { MineProgram, MinerData } from "../../programs/mine";
+import type {
+  MineProgram,
+  MinerData,
+  QuarryMineIDL,
+} from "../../programs/mine";
 import type { QuarrySDK } from "../../sdk";
 import { findMinterAddress } from "../mintWrapper/pda";
 import type { QuarryWrapper } from "./quarry";
 import type { PendingMiner } from "./types";
 
-type MineUserStakeAccounts = Parameters<
-  MineProgram["instruction"]["stakeTokens"]["accounts"]
->[0];
+export type AccountMaps<T extends IdlAccounts> = {
+  [K in T["accounts"][number]["name"]]: T["accounts"][number] & {
+    name: K;
+  } extends IdlAccount
+    ? PublicKey
+    : AccountMap<T["accounts"][number] & { name: K }>;
+};
 
-type MineUserClaimAccounts = Parameters<
-  MineProgram["instruction"]["claimRewards"]["accounts"]
->[0]["claim"];
+export type AccountMap<T extends IdlAccountItem> = T extends IdlAccounts
+  ? AccountMaps<T>
+  : PublicKey;
+
+export type MineUserStakeAccounts = AccountMaps<
+  AllInstructionsMap<QuarryMineIDL>["stakeTokens"]
+>;
+
+export type MineUserClaimAccounts = AccountMaps<
+  AllInstructionsMap<QuarryMineIDL>["claimRewards"]["accounts"]["6"]
+>;
 
 export class MinerWrapper {
   /**
@@ -167,7 +189,7 @@ export class MinerWrapper {
    * @returns
    */
   async fetchData(): Promise<MinerData> {
-    return await this.program.account.miner.fetch(this.minerKey);
+    return (await this.program.account.miner.fetch(this.minerKey)) as MinerData;
   }
 
   /**

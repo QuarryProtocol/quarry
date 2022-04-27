@@ -1,32 +1,27 @@
-import type { Program } from "@project-serum/anchor";
+import type { IdlAccounts, Program } from "@project-serum/anchor";
+import type { AllInstructionsMap } from "@project-serum/anchor/dist/esm/program/namespace/types";
 import type { AnchorTypes } from "@saberhq/anchor-contrib";
-import type { PublicKey } from "@solana/web3.js";
 
-import type { AnchorQuarryMergeMine } from "../idls/quarry_merge_mine";
+import type { QuarryMergeMineIDL } from "../idls/quarry_merge_mine";
+import type { AccountMaps } from "../wrappers/mine/miner";
 
 export * from "../idls/quarry_merge_mine";
 
 export type QuarryMergeMineTypes = AnchorTypes<
-  AnchorQuarryMergeMine,
+  QuarryMergeMineIDL,
   {
     mergePool: MergePoolData;
     mergeMiner: MergeMinerData;
   }
 >;
 
-type Accounts = QuarryMergeMineTypes["Accounts"];
+type Accounts = IdlAccounts<QuarryMergeMineIDL>;
 export type MergePoolData = Accounts["mergePool"];
 export type MergeMinerData = Accounts["mergeMiner"];
 
 export type QuarryMergeMineError = QuarryMergeMineTypes["Error"];
-export type QuarryMergeMineProgram = Omit<
-  Program<AnchorQuarryMergeMine>,
-  "account"
-> &
-  QuarryMergeMineTypes["Program"];
+export type QuarryMergeMineProgram = Program<QuarryMergeMineIDL>;
 
-export type QuarryStakeAccounts = {
-  [A in keyof Parameters<
-    QuarryMergeMineProgram["instruction"]["stakePrimaryMiner"]["accounts"]
-  >[0]["stake"]]: PublicKey;
-};
+export type QuarryStakeAccounts = AccountMaps<
+  AllInstructionsMap<QuarryMergeMineIDL>["stakePrimaryMiner"]["accounts"][2]
+>;

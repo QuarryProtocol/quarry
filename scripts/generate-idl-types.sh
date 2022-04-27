@@ -5,10 +5,10 @@ shopt -s extglob
 cd $(dirname $0)/..
 
 generate_declaration_file() {
-    PROGRAM_SO=$1
+    PROGRAM_TS=$1
     OUT_DIR=$2
 
-    prog="$(basename $PROGRAM_SO .json)"
+    prog="$(basename $PROGRAM_TS .ts)"
     OUT_PATH="$OUT_DIR/$prog.ts"
     if [ ! $(which gsed) ]; then
         PREFIX=$(echo $prog | sed -E 's/(^|_)([a-z])/\U\2/g')
@@ -18,17 +18,13 @@ generate_declaration_file() {
     typename="${PREFIX}IDL"
     rawName="${PREFIX}JSON"
 
+    cat $PROGRAM_TS >"$OUT_DIR/$prog.raw.ts"
+
     # types
-    echo "export type $typename =" >>$OUT_PATH
-    cat $PROGRAM_SO >>$OUT_PATH
-    echo ";" >>$OUT_PATH
+    echo "import type { $PREFIX as $typename } from './$prog.raw';" >>$OUT_PATH
+    echo "import { IDL as $rawName } from './$prog.raw';" >>$OUT_PATH
 
-    cat artifacts/idl/$prog.ts | sed -E "s/${PREFIX}/Anchor${PREFIX}/" | sed -E "s/IDL: /Anchor${PREFIX}IDL: /" >>$OUT_PATH
-
-    # raw json
-    echo "export const $rawName: $typename =" >>$OUT_PATH
-    cat $PROGRAM_SO >>$OUT_PATH
-    echo ";" >>$OUT_PATH
+    echo "export { $typename, $rawName };" >>$OUT_PATH
 
     # error type
     echo "import { generateErrorMap } from '@saberhq/anchor-contrib';" >>$OUT_PATH
@@ -57,4 +53,4 @@ generate_sdk_idls() {
     fi
 }
 
-generate_sdk_idls ./src/idls 'artifacts/idl/*.json'
+generate_sdk_idls ./src/idls 'artifacts/idl/*.ts'

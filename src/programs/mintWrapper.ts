@@ -1,3 +1,4 @@
+import type { Program } from "@project-serum/anchor";
 import type { AnchorTypes } from "@saberhq/anchor-contrib";
 
 import type { QuarryMintWrapperIDL } from "../idls/quarry_mint_wrapper";
@@ -14,9 +15,9 @@ export type MintWrapperTypes = AnchorTypes<
 
 type Accounts = MintWrapperTypes["Accounts"];
 
-export type MintWrapperData = Accounts["MintWrapper"];
-export type MinterData = Accounts["Minter"];
+export type MintWrapperData = Accounts["mintWrapper"];
+export type MinterData = Accounts["minter"];
 
 export type MintWrapperError = MintWrapperTypes["Error"];
 
-export type MintWrapperProgram = MintWrapperTypes["Program"];
+export type MintWrapperProgram = Program<QuarryMintWrapperIDL>;

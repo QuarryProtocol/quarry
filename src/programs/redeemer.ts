@@ -1,3 +1,4 @@
+import type { Program } from "@project-serum/anchor";
 import type { AnchorTypes } from "@saberhq/anchor-contrib";
 import type { TransactionEnvelope } from "@saberhq/solana-contrib";
 import type { u64 } from "@saberhq/token-utils";
@@ -15,11 +16,11 @@ export type RedeemerTypes = AnchorTypes<
 >;
 
 type Accounts = RedeemerTypes["Accounts"];
-export type RedeemerData = Accounts["Redeemer"];
+export type RedeemerData = Accounts["redeemer"];
 
 export type RedeemerError = RedeemerTypes["Error"];
 export type RedeemerEvents = RedeemerTypes["Events"];
-export type RedeemerProgram = RedeemerTypes["Program"];
+export type RedeemerProgram = Program<QuarryRedeemerIDL>;
 
 export type PendingRedeemer = {
   bump: number;

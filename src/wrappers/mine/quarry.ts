@@ -93,7 +93,7 @@ export class QuarryWrapper {
     token: Token;
   }): Promise<QuarryWrapper> {
     const program = sdk.programs.Mine;
-    const quarryData = await program.account.quarry.fetch(key);
+    const quarryData = (await program.account.quarry.fetch(key)) as QuarryData;
     const rewarderData = await program.account.rewarder.fetch(
       quarryData.rewarder
     );
@@ -140,13 +140,9 @@ export class QuarryWrapper {
    * @returns
    */
   async getMiner(authority: PublicKey): Promise<MinerData | null> {
-    try {
-      return await this.program.account.miner.fetch(
-        await this.getMinerAddress(authority)
-      );
-    } catch (e) {
-      return null;
-    }
+    return (await this.program.account.miner.fetchNullable(
+      await this.getMinerAddress(authority)
+    )) as MinerData;
   }
 
   /**
