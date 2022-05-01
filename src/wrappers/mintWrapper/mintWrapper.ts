@@ -1,3 +1,4 @@
+import type { ProgramAccount } from "@project-serum/anchor";
 import type {
   AugmentedProvider,
   TransactionEnvelope,
@@ -379,6 +380,7 @@ export class MintWrapper {
 
   /**
    * Performs a mint of tokens to an account.
+   * @deprecated use {@link performMintWithMinter}
    * @returns
    */
   async performMint({
@@ -391,7 +393,27 @@ export class MintWrapper {
       accountInfo: AccountInfo<MinterData>;
     };
   }): Promise<TransactionEnvelope> {
-    const minterData = minter.accountInfo.data;
+    return await this.performMintWithMinter({
+      amount,
+      minter: {
+        publicKey: minter.accountId,
+        account: minter.accountInfo.data,
+      },
+    });
+  }
+
+  /**
+   * Performs a mint of tokens to an account.
+   * @returns
+   */
+  async performMintWithMinter({
+    amount,
+    minter,
+  }: {
+    amount: TokenAmount;
+    minter: ProgramAccount<MinterData>;
+  }): Promise<TransactionEnvelope> {
+    const minterData = minter.account;
     const ata = await getOrCreateATA({
       provider: this.provider,
       mint: amount.token.mintAccount,
@@ -405,7 +427,7 @@ export class MintWrapper {
           minterAuthority: minterData.minterAuthority,
           tokenMint: amount.token.mintAccount,
           destination: ata.address,
-          minter: minter.accountId,
+          minter: minter.publicKey,
           tokenProgram: TOKEN_PROGRAM_ID,
         },
       }),
