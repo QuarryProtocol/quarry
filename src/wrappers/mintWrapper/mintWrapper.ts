@@ -393,25 +393,13 @@ export class MintWrapper {
       accountInfo: AccountInfo<MinterData>;
     };
   }): Promise<TransactionEnvelope> {
-    const minterData = minter.accountInfo.data;
-    const ata = await getOrCreateATA({
-      provider: this.provider,
-      mint: amount.token.mintAccount,
-      owner: this.provider.wallet.publicKey,
+    return await this.performMintWithMinter({
+      amount,
+      minter: {
+        publicKey: minter.accountId,
+        account: minter.accountInfo.data,
+      },
     });
-    return this.provider.newTX([
-      ata.instruction,
-      this.program.instruction.performMint(amount.toU64(), {
-        accounts: {
-          mintWrapper: minterData.mintWrapper,
-          minterAuthority: minterData.minterAuthority,
-          tokenMint: amount.token.mintAccount,
-          destination: ata.address,
-          minter: minter.accountId,
-          tokenProgram: TOKEN_PROGRAM_ID,
-        },
-      }),
-    ]);
   }
 
   /**
