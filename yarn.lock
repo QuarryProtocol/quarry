@@ -227,6 +227,7 @@ __metadata:
     lint-staged: ^13.0.1
     mocha: ^10.0.0
     prettier: ^2.6.2
+    superstruct: ^0.16.0
     tiny-invariant: ^1.2.0
     ts-node: ^10.8.1
     tslib: ^2.4.0
@@ -4429,6 +4430,13 @@ resolve@^1.20.0:
   version: 0.15.4
   resolution: "superstruct@npm:0.15.4"
   checksum: aac38eecda2c0d3aace2fe95baac042d39bfdd50dda480d3f70b8bacb87fe7ba228ede4869537dfb64f1d32a1fe3d794052e7765ed6c3f7bc156795fd761fdfd
+  languageName: node
+  linkType: hard
+
+"superstruct@npm:^0.16.0":
+  version: 0.16.0
+  resolution: "superstruct@npm:0.16.0"
+  checksum: 1979c287f95f2a9dece537f74f5330b0b831965030fe025e2d52dfb3ecdf8974251371cc22d5cdf36960639b039687e5a236881f6ec7cf33d5c8fdc348f13a46
   languageName: node
   linkType: hard
 
