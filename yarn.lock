@@ -238,7 +238,7 @@ __metadata:
     "@saberhq/solana-contrib": ^1.13
     "@saberhq/token-utils": ^1.13
     "@solana/web3.js": ^1.43
-    bn.js: ^5.2.0
+    bn.js: ^5.2.1
     jsbi: ^3 || ^4
   languageName: unknown
   linkType: soft
