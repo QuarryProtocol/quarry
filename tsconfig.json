@@ -5,5 +5,5 @@
     "noEmit": true,
     "types": ["mocha"]
   },
-  "include": ["src/", "tests/"]
+  "include": ["src/", "tests/", ".eslintrc.cjs", ".mocharc.cjs"]
 }

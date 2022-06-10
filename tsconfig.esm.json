@@ -1,9 +1,6 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "@saberhq/tsconfig/tsconfig.module.json",
   "compilerOptions": {
-    "module": "ESNext",
-    "types": [],
-    "noEmit": false,
     "outDir": "dist/esm/"
   },
   "include": ["src/"]
