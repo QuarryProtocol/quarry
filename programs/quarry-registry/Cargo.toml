@@ -1,6 +1,6 @@
 [package]
 name = "quarry-registry"
-version = "5.1.0"
+version = "5.1.1"
 description = "Registry of all quarries associated with a rewarder."
 edition = "2021"
 homepage = "https://quarry.so"
@@ -20,7 +20,7 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = ">=0.22, <=0.24"
-quarry-mine = { version = "5.0.0", path = "../quarry-mine", features = ["cpi"] }
+anchor-lang = ">=0.22, <=0.25"
+quarry-mine = { path = "../quarry-mine", features = ["cpi"], version = "5.1.1" }
 solana-security-txt = "1.0.1"
 vipers = "^2.0"
