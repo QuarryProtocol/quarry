@@ -92,12 +92,14 @@ impl<'info> Validate<'info> for ClaimRewards<'info> {
     fn validate(&self) -> Result<()> {
         self.stake.validate()?;
 
-        let staked_mint_key = self.stake.quarry.token_mint_key;
-
         assert_keys_eq!(self.mint_wrapper, self.stake.rewarder.mint_wrapper);
         assert_keys_eq!(self.minter.mint_wrapper, self.mint_wrapper);
         assert_keys_eq!(self.minter.minter_authority, self.stake.rewarder);
         assert_keys_eq!(self.rewards_token_mint, self.mint_wrapper.token_mint);
+        assert_keys_eq!(
+            self.rewards_token_mint,
+            self.stake.rewarder.rewards_token_mint
+        );
 
         assert_keys_eq!(self.rewards_token_account.mint, self.rewards_token_mint);
         assert_keys_eq!(self.rewards_token_account.owner, self.stake.mm);
@@ -107,7 +109,6 @@ impl<'info> Validate<'info> for ClaimRewards<'info> {
             self.stake.rewarder.claim_fee_token_account
         );
         assert_keys_eq!(self.claim_fee_token_account.mint, self.rewards_token_mint);
-        assert_keys_eq!(self.stake_token_account.mint, staked_mint_key);
 
         Ok(())
     }
