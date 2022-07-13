@@ -23,7 +23,7 @@ default = []
 [dependencies]
 anchor-lang = ">=0.22, <=0.25"
 anchor-spl = ">=0.22, <=0.25"
-num-traits = "0.2.14"
+num-traits = "0.2.15"
 quarry-mint-wrapper = { path = "../quarry-mint-wrapper", features = [
   "cpi"
 ], version = "5.1.1" }
