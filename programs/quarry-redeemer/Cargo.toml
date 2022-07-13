@@ -1,6 +1,6 @@
 [package]
 name = "quarry-redeemer"
-version = "5.1.0"
+version = "5.1.1"
 description = "Redeems one token for another"
 edition = "2021"
 homepage = "https://quarry.so"
@@ -20,7 +20,7 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = ">=0.22, <=0.24"
-anchor-spl = ">=0.22, <=0.24"
+anchor-lang = ">=0.22, <=0.25"
+anchor-spl = ">=0.22, <=0.25"
 solana-security-txt = "1.0.1"
 vipers = "^2.0"
