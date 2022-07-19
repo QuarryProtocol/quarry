@@ -20,7 +20,6 @@ use anchor_spl::token::Token;
 use anchor_spl::token::{self, Mint, TokenAccount, Transfer};
 use payroll::Payroll;
 pub use state::*;
-use std::cmp;
 use vipers::prelude::*;
 
 pub mod account_validators;
