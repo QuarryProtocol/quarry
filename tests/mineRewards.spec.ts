@@ -359,4 +359,50 @@ describe("Mine Rewards", () => {
       claimEvent.data.amount.toString()
     );
   });
+
+  it("Does not lose rewards when setting quarry share", async () => {
+    const quarry = await rewarderWrapper.getQuarry(stakeToken);
+    expect(quarry).to.exist;
+    const miner = await quarry.getMiner(provider.wallet.publicKey);
+    invariant(miner, "miner does not exist");
+
+    const minerActions = await quarry.getMinerActions(
+      provider.wallet.publicKey
+    );
+
+    const stakeTx = minerActions.stake(
+      new TokenAmount(stakeToken, stakeAmount)
+    );
+    await expectTX(stakeTx, "Stake").to.be.fulfilled;
+
+    // whitelist rewarder
+    await expectTX(
+      mintWrapper.newMinterWithAllowance(
+        mintWrapperKey,
+        rewarder,
+        new u64(100_000_000_000000)
+      ),
+      "Minter add"
+    ).to.be.fulfilled;
+
+    const rewardsTokenAccount = await getATAAddress({
+      mint: rewardsMint,
+      owner: provider.wallet.publicKey,
+    });
+    expect(await provider.getAccountInfo(rewardsTokenAccount)).to.be.null;
+
+    // wait some time so we can earn some tokens
+    await sleep(3_000);
+
+    await expectTX(
+      quarry.setRewardsShare(new BN(42)).combine(await minerActions.claim()),
+      "set rewards share and claim"
+    ).to.be.fulfilled;
+
+    const rewardsTokenAccountInfo = await getTokenAccount(
+      provider,
+      rewardsTokenAccount
+    );
+    expect(rewardsTokenAccountInfo.amount.isZero()).to.be.false;
+  });
 });

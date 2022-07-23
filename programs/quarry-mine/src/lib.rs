@@ -20,7 +20,6 @@ use anchor_spl::token::Token;
 use anchor_spl::token::{self, Mint, TokenAccount, Transfer};
 use payroll::Payroll;
 pub use state::*;
-use std::cmp;
 use vipers::prelude::*;
 
 pub mod account_validators;
@@ -178,17 +177,16 @@ pub mod quarry_mine {
             .checked_add(new_share)
             .and_then(|v| v.checked_sub(quarry.rewards_share)));
 
-        let now = Clock::get()?.unix_timestamp;
-        quarry.last_update_ts = cmp::min(now, quarry.famine_ts);
-        quarry.annual_rewards_rate = rewarder.compute_quarry_annual_rewards_rate(new_share)?;
         quarry.rewards_share = new_share;
-
-        emit!(QuarryRewardsUpdateEvent {
-            token_mint: quarry.token_mint_key,
-            annual_rewards_rate: quarry.annual_rewards_rate,
-            rewards_share: quarry.rewards_share,
-            timestamp: now,
-        });
+        // Do not update annual_rewards_rate here. Just wait for the update_quarry_rewards call
+        // because rewarder.total_rewards_shares may change with other quarry share changes
+        // and quarry.annual_rewards_rate calculated here will become invalid.
+        // The correct share update procedure is calling all set_rewards_share
+        // first (with set_annual_rewards if needed) and update_quarry_rewards
+        // for each quarry to finalize changes.
+        // TODO: because update_quarry_rewards is permissionless better
+        // to add protection from calling it after admin started to change the rates
+        // and commit_changes instruction making possible to call update_quarry_rewards again
 
         Ok(())
     }
@@ -602,7 +600,7 @@ pub struct RewarderAnnualRewardsUpdateEvent {
     pub timestamp: i64,
 }
 
-/// Emitted when a quarry's reward share is updated.
+/// Emitted when a quarry's reward rate is updated.
 #[event]
 pub struct QuarryRewardsUpdateEvent {
     /// [Mint] of the [Quarry] token.

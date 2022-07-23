@@ -522,8 +522,6 @@ describe("Mine", () => {
       });
 
       it("Set rewards share", async () => {
-        const currentTime = Math.floor(new Date().getTime() / 1000);
-
         await assert.doesNotReject(async () => {
           await mine.program.rpc.setRewardsShare(quarryRewardsShare, {
             accounts: {
@@ -543,8 +541,27 @@ describe("Mine", () => {
           quarryRewardsShare.toString()
         );
 
-        const quarry = await rewarder.getQuarry(stakeToken);
+        let quarry = await rewarder.getQuarry(stakeToken);
         expect(quarry.key).to.eqAddress(quarryKey);
+        expect(quarry.quarryData.lastUpdateTs.toString()).to.equal(
+          quarryData.lastUpdateTs.toString()
+        );
+        expect(quarry.quarryData.annualRewardsRate.toString()).to.equal(
+          quarryData.annualRewardsRate.toString()
+        );
+        expect(quarry.quarryData.rewardsShare.toString()).to.eq(
+          quarryRewardsShare.toString()
+        );
+        expect(quarry.quarryData.annualRewardsRate.toString()).to.not.equal(
+          quarry.computeAnnualRewardsRate().toString()
+        );
+
+        const currentTime = Math.floor(new Date().getTime() / 1000);
+        await assert.doesNotReject(async () => {
+          const tx = await rewarder.syncQuarryRewards([stakeTokenMint]);
+          await tx.confirm();
+        });
+        quarry = await rewarder.getQuarry(stakeToken);
         expect(
           quarry.quarryData.lastUpdateTs
             .sub(new BN(currentTime))
@@ -554,9 +571,6 @@ describe("Mine", () => {
         const expectedRewardsRate = quarry.computeAnnualRewardsRate();
         expect(quarry.quarryData.annualRewardsRate.toString()).to.equal(
           expectedRewardsRate.toString()
-        );
-        expect(quarry.quarryData.rewardsShare.toString()).to.eq(
-          quarryRewardsShare.toString()
         );
       });
 
@@ -884,8 +898,6 @@ describe("Mine", () => {
       });
 
       it("Set rewards share", async () => {
-        const currentTime = Math.floor(new Date().getTime() / 1000);
-
         await assert.doesNotReject(async () => {
           await mine.program.rpc.setRewardsShare(quarryRewardsShare, {
             accounts: {
@@ -905,8 +917,27 @@ describe("Mine", () => {
           quarryRewardsShare.toString()
         );
 
-        const quarry = await rewarder.getQuarry(stakeToken);
+        let quarry = await rewarder.getQuarry(stakeToken);
         expect(quarry.key).to.eqAddress(quarryKey);
+        expect(quarry.quarryData.lastUpdateTs.toString()).to.equal(
+          quarryData.lastUpdateTs.toString()
+        );
+        expect(quarry.quarryData.annualRewardsRate.toString()).to.equal(
+          quarryData.annualRewardsRate.toString()
+        );
+        expect(quarry.quarryData.rewardsShare.toString()).to.eq(
+          quarryRewardsShare.toString()
+        );
+        expect(quarry.quarryData.annualRewardsRate.toString()).to.not.equal(
+          quarry.computeAnnualRewardsRate().toString()
+        );
+
+        const currentTime = Math.floor(new Date().getTime() / 1000);
+        await assert.doesNotReject(async () => {
+          const tx = await rewarder.syncQuarryRewards([stakeTokenMint]);
+          await tx.confirm();
+        });
+        quarry = await rewarder.getQuarry(stakeToken);
         expect(
           quarry.quarryData.lastUpdateTs
             .sub(new BN(currentTime))
@@ -916,9 +947,6 @@ describe("Mine", () => {
         const expectedRewardsRate = quarry.computeAnnualRewardsRate();
         expect(quarry.quarryData.annualRewardsRate.toString()).to.equal(
           expectedRewardsRate.toString()
-        );
-        expect(quarry.quarryData.rewardsShare.toString()).to.eq(
-          quarryRewardsShare.toString()
         );
       });
 
