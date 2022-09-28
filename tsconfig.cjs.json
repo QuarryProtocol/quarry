@@ -1,6 +1,7 @@
 {
-  "extends": "@saberhq/tsconfig/tsconfig.cjs.json",
+  "extends": "@saberhq/tsconfig/tsconfig.mono.cjs.json",
   "compilerOptions": {
+    "rootDir": "src",
     "outDir": "dist/cjs/"
   },
   "include": ["src/"]
