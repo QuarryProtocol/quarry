@@ -8,7 +8,7 @@ pkgs.buildEnv {
     (pkgs.lib.optionals pkgs.stdenv.isLinux [ udev ]) ++ [
       anchor-0_24_2
       cargo-workspaces
-      solana-basic
+      solana-1_10-basic
 
       nodejs
       yarn
