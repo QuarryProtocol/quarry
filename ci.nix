@@ -14,7 +14,7 @@ pkgs.buildEnv {
       yarn
       python3
 
-      pkgconfig
+      pkg-config
       openssl
       jq
       gnused
