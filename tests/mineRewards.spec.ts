@@ -159,9 +159,9 @@ describe("Mine Rewards", () => {
     );
     const theParser = (logs: string[]) => {
       const events: StakeEvent[] = [];
-      parser.parseLogs(logs, (event) => {
+      for (const event of parser.parseLogs(logs)) {
         events.push(event as StakeEvent);
-      });
+      }
       return events;
     };
     const event = receipt.getEvents(theParser)[0];
