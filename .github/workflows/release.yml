@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: cachix/install-nix-action@v17
+      - uses: cachix/install-nix-action@v18
       - name: Setup Cachix
         uses: cachix/cachix-action@v10
         with:
@@ -52,7 +52,7 @@ jobs:
     name: Release crate on crates.io
     steps:
       - uses: actions/checkout@v3
-      - uses: cachix/install-nix-action@v17
+      - uses: cachix/install-nix-action@v18
       - name: Setup Cachix
         uses: cachix/cachix-action@v10
         with:
@@ -75,7 +75,7 @@ jobs:
     name: Release verifiable binaries
     steps:
       - uses: actions/checkout@v3
-      - uses: cachix/install-nix-action@v17
+      - uses: cachix/install-nix-action@v18
       - name: Setup Cachix
         uses: cachix/cachix-action@v10
         with:
@@ -98,7 +98,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - uses: cachix/install-nix-action@v17
+      - uses: cachix/install-nix-action@v18
       - name: Setup Cachix
         uses: cachix/cachix-action@v10
         with:
