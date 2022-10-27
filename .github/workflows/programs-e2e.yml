@@ -20,7 +20,7 @@ jobs:
 
       - uses: cachix/install-nix-action@v17
       - name: Setup Cachix
-        uses: cachix/cachix-action@v10
+        uses: cachix/cachix-action@v12
         with:
           name: quarry
           extraPullNames: saber
@@ -55,7 +55,7 @@ jobs:
       # Install Cachix
       - uses: cachix/install-nix-action@v17
       - name: Setup Cachix
-        uses: cachix/cachix-action@v10
+        uses: cachix/cachix-action@v12
         with:
           name: quarry
           extraPullNames: saber
