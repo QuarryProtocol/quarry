@@ -262,7 +262,7 @@ __metadata:
     "@types/node": "npm:^18.7.23"
     "@types/prettier": "npm:^2.7.1"
     bn.js: "npm:^5.2.1"
-    chai: "npm:=4.3.4"
+    chai: "npm:=4.3.7"
     eslint: "npm:^8.24.0"
     eslint-import-resolver-node: "npm:^0.3.6"
     eslint-plugin-import: "npm:^2.26.0"
@@ -1382,6 +1382,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"chai@npm:=4.3.7":
+  version: 4.3.7
+  resolution: "chai@npm:4.3.7"
+  dependencies:
+    assertion-error: "npm:^1.1.0"
+    check-error: "npm:^1.0.2"
+    deep-eql: "npm:^4.1.2"
+    get-func-name: "npm:^2.0.0"
+    loupe: "npm:^2.3.1"
+    pathval: "npm:^1.1.1"
+    type-detect: "npm:^4.0.5"
+  checksum: 07600143d9c0530811acf71e3fe3d613b13c627d19890e220a01064d9187c49ccd6be76e572a90e061f010f940ca380e9364b383e8a8a3f83313890986f49414
+  languageName: node
+  linkType: hard
+
 "chalk@npm:^4.0.0, chalk@npm:^4.1.0":
   version: 4.1.2
   resolution: "chalk@npm:4.1.2"
@@ -1663,6 +1678,15 @@ __metadata:
   dependencies:
     type-detect: "npm:^4.0.0"
   checksum: 65824d56734864b95537d70bdf3a7857d157ad217bb6d16bbe92477b7aed0ab04c0d14c3909abdd47fba35f714d012627309377adba80fb0420dc3a72c746e62
+  languageName: node
+  linkType: hard
+
+"deep-eql@npm:^4.1.2":
+  version: 4.1.2
+  resolution: "deep-eql@npm:4.1.2"
+  dependencies:
+    type-detect: "npm:^4.0.0"
+  checksum: 62e7861c491b606203aaf4d15d2f1f1c84852f41d54ee25eadb03b438b940ea364a0c08d06a97a04863145cbc183b53a5bec5fe88355c65bc3113ee45d475cea
   languageName: node
   linkType: hard
 
@@ -3157,6 +3181,15 @@ __metadata:
     slice-ansi: "npm:^4.0.0"
     wrap-ansi: "npm:^6.2.0"
   checksum: b508aeb81f60fab087e44f9eb8591a22b791caa3df8363da9b171518f36406151a9590db573acbb7eeb8b49874944d3bf844d5dee734f810ad8b5a3c5eadbabf
+  languageName: node
+  linkType: hard
+
+"loupe@npm:^2.3.1":
+  version: 2.3.6
+  resolution: "loupe@npm:2.3.6"
+  dependencies:
+    get-func-name: "npm:^2.0.0"
+  checksum: 5a74e2ed6e6578fc03d5a9a119382e74ad1c442445c7ffa27e88b51b4637ede09eb5b216a6a771781f3201c8e4fcd64dd55392c69bbd35f1d0b6b1f1f7501863
   languageName: node
   linkType: hard
 

@@ -52,7 +52,7 @@
     "@types/node": "^18.7.23",
     "@types/prettier": "^2.7.1",
     "bn.js": "^5.2.1",
-    "chai": "=4.3.4",
+    "chai": "=4.3.7",
     "eslint": "^8.24.0",
     "eslint-import-resolver-node": "^0.3.6",
     "eslint-plugin-import": "^2.26.0",
