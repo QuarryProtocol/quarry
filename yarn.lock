@@ -295,6 +295,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@saberhq/anchor-contrib@npm:^1.14.10":
+  version: 1.14.10
+  resolution: "@saberhq/anchor-contrib@npm:1.14.10"
+  dependencies:
+    "@saberhq/solana-contrib": "npm:^1.14.10"
+    eventemitter3: "npm:^4.0.7"
+    lodash.camelcase: "npm:^4.3.0"
+    lodash.mapvalues: "npm:^4.6.0"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    "@project-serum/anchor": ^0.22 || ^0.23 || ^0.24
+    "@solana/web3.js": ^1.42
+    bn.js: ^4 || ^5
+  checksum: 214b01ea1ef976eb7bfb4112233722bb84d3a59d35c6dade05a2da0797ae72edf025d7c917bb45285db1d1eb21e9c26e4f9e5081ef1a6c9703442dbd0896d3be
+  languageName: node
+  linkType: hard
+
 "@saberhq/anchor-contrib@npm:^1.14.8":
   version: 1.14.8
   resolution: "@saberhq/anchor-contrib@npm:1.14.8"
@@ -313,12 +330,12 @@ __metadata:
   linkType: hard
 
 "@saberhq/chai-solana@npm:^1.14.8":
-  version: 1.14.8
-  resolution: "@saberhq/chai-solana@npm:1.14.8"
+  version: 1.14.10
+  resolution: "@saberhq/chai-solana@npm:1.14.10"
   dependencies:
-    "@saberhq/anchor-contrib": "npm:^1.14.8"
-    "@saberhq/solana-contrib": "npm:^1.14.8"
-    "@saberhq/token-utils": "npm:^1.14.8"
+    "@saberhq/anchor-contrib": "npm:^1.14.10"
+    "@saberhq/solana-contrib": "npm:^1.14.10"
+    "@saberhq/token-utils": "npm:^1.14.10"
     "@types/chai": "npm:^4.3.3"
     "@types/chai-as-promised": "npm:^7.1.5"
     "@types/promise-retry": "npm:^1.1.3"
@@ -332,7 +349,7 @@ __metadata:
     "@solana/web3.js": ^1.42
     bn.js: ^5.2.0
     jsbi: "*"
-  checksum: bc71887d80ee5c38210cf1626f9235d79d3984882d41ad92ff7f4cde76c1de7326332b1f4255e2113feb9d11e1471564ee16b5483b312776bf3d1ca0152f839f
+  checksum: 48f9cdb10dbae555b23a61918e5cf07061020ebc84a7f46f0f604566ab2e0162fd5a9ea94424a0fb71c960c30693322a631544fc8277a84d868fee3274e385e2
   languageName: node
   linkType: hard
 
@@ -355,12 +372,40 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@saberhq/option-utils@npm:^1.14.10":
+  version: 1.14.10
+  resolution: "@saberhq/option-utils@npm:1.14.10"
+  dependencies:
+    tslib: "npm:^2.4.0"
+  checksum: 31de8a62be5e50761e2f2a593b809c727ea1d10c488e9a29e9e4d2b8a82eee780cdfbb3f5ac20c55afbe5c281ad8a6fe7f1ae1582e6e61add224da6dea9f265c
+  languageName: node
+  linkType: hard
+
 "@saberhq/option-utils@npm:^1.14.8":
   version: 1.14.8
   resolution: "@saberhq/option-utils@npm:1.14.8"
   dependencies:
     tslib: "npm:^2.4.0"
   checksum: 91fbb367737286efc79b1d30ca779c8f278cb1072dc3eafbcd0e6eecb475171484c4df44fa9c1cd8596634333407c9756b7efac7836343c5f572f54325250bdd
+  languageName: node
+  linkType: hard
+
+"@saberhq/solana-contrib@npm:^1.14.10":
+  version: 1.14.10
+  resolution: "@saberhq/solana-contrib@npm:1.14.10"
+  dependencies:
+    "@saberhq/option-utils": "npm:^1.14.10"
+    "@solana/buffer-layout": "npm:^4.0.0"
+    "@types/promise-retry": "npm:^1.1.3"
+    "@types/retry": "npm:^0.12.2"
+    promise-retry: "npm:^2.0.1"
+    retry: "npm:^0.13.1"
+    tiny-invariant: "npm:^1.3.1"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    "@solana/web3.js": ^1.42
+    bn.js: ^4 || ^5
+  checksum: 21081d3e0336812725f892df21b9995d9e61bd20d2abc3e4a2acf4e3a0ec5379c2f4f42a4b58a68ef4f87d20071579187eac773bcdbb354de763babac354d38e
   languageName: node
   linkType: hard
 
@@ -380,6 +425,24 @@ __metadata:
     "@solana/web3.js": ^1.42
     bn.js: ^4 || ^5
   checksum: 5e19fd1d9d36c12a7e6406b578e0413b4dceda6359f32c110fa8db2c559ecc29f5db36a14ca34e56a343955bcf8a7879a47b8e1583932ca0f86806e30710f238
+  languageName: node
+  linkType: hard
+
+"@saberhq/token-utils@npm:^1.14.10":
+  version: 1.14.10
+  resolution: "@saberhq/token-utils@npm:1.14.10"
+  dependencies:
+    "@saberhq/solana-contrib": "npm:^1.14.10"
+    "@solana/buffer-layout": "npm:^4.0.0"
+    "@solana/spl-token": "npm:^0.1.8"
+    "@ubeswap/token-math": "npm:^5.2.1"
+    tiny-invariant: "npm:^1.3.1"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    "@solana/web3.js": ^1.42
+    bn.js: ^4 || ^5
+    jsbi: ^3 || ^4
+  checksum: b88a0390f2cfb09f6ab88155245a68c10807b2e219e14557ad30f36f34947acc7bae728207a80b63cbd6530eae704fb93aa3b51ff51690435041145a4786c647
   languageName: node
   linkType: hard
 
