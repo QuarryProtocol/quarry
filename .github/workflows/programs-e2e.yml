@@ -68,7 +68,7 @@ jobs:
           override: true
           profile: minimal
           toolchain: ${{ env.RUST_TOOLCHAIN }}
-      - uses: Swatinem/rust-cache@v1
+      - uses: Swatinem/rust-cache@v2
       - name: Install Linux dependencies
         run: |
           sudo apt-get update
