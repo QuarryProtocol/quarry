@@ -22,5 +22,5 @@ default = []
 [dependencies]
 anchor-lang = ">=0.22, <=0.25"
 quarry-mine = { path = "../quarry-mine", features = ["cpi"], version = "5.3.0" }
-solana-security-txt = "1.0.1"
+solana-security-txt = "1.0.2"
 vipers = "^2.0"
