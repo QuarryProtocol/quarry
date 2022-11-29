@@ -258,7 +258,7 @@ __metadata:
     "@types/bn.js": "npm:^5.1.1"
     "@types/chai": "npm:^4.3.3"
     "@types/eslint": "npm:^8.4.6"
-    "@types/mocha": "npm:^9.1.1"
+    "@types/mocha": "npm:^10.0.1"
     "@types/node": "npm:^18.7.23"
     "@types/prettier": "npm:^2.7.1"
     bn.js: "npm:^5.2.1"
@@ -655,10 +655,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mocha@npm:^9.1.1":
-  version: 9.1.1
-  resolution: "@types/mocha@npm:9.1.1"
-  checksum: a218939a0f14206cba5e93e3964e8eda37845655d45200b756a647fdce72d210b49bf0bcb123977b2fabd11cc55123ff18970642858ee1fc949f8bed01bf7090
+"@types/mocha@npm:^10.0.1":
+  version: 10.0.1
+  resolution: "@types/mocha@npm:10.0.1"
+  checksum: 2aa6d54641ec226e57c4ee5304f6ca3c92d1d78b16c2ecd015ce19a2f4c648b0753f33802468c136e63caaadc7f365962dc404380e8f9903a9c0b10485ed187b
   languageName: node
   linkType: hard
 
@@ -865,13 +865,6 @@ __metadata:
   peerDependencies:
     jsbi: ^3 || ^4
   checksum: 1ceb33a363b5e390c6b0b07aa964f5e78c76148f991228a4e5fdcbecbc73de09aefee80705aa0e6bc3801362abd4762ba5f8298a80385da4ec9b6d0e3d4c3fc8
-  languageName: node
-  linkType: hard
-
-"@ungap/promise-all-settled@npm:1.1.2":
-  version: 1.1.2
-  resolution: "@ungap/promise-all-settled@npm:1.1.2"
-  checksum: 35cca49cdb38013cc8a89c19d22346cc9037f1b0d7062acfb3a0a3f1731647c330bcf2bc0688573bc43d2b9f8a5bc1d91253bfc4cf851d7a954f3731e8525d83
   languageName: node
   linkType: hard
 
@@ -3416,10 +3409,9 @@ __metadata:
   linkType: hard
 
 "mocha@npm:^10.0.0":
-  version: 10.0.0
-  resolution: "mocha@npm:10.0.0"
+  version: 10.1.0
+  resolution: "mocha@npm:10.1.0"
   dependencies:
-    "@ungap/promise-all-settled": "npm:1.1.2"
     ansi-colors: "npm:4.1.1"
     browser-stdout: "npm:1.3.1"
     chokidar: "npm:3.5.3"
@@ -3444,7 +3436,7 @@ __metadata:
   bin:
     _mocha: bin/_mocha
     mocha: bin/mocha.js
-  checksum: c6ecf68202aadb81bd5f112c595433e2c8d361c1df1aa0cd72d01633af8ccaf01ebde68af76f189208f7a02cd8927244f285091518a32d441092f5e54d2c264f
+  checksum: 94bd32e9793df68868c1f7e3d505024b6612827aa499e22c5fe771a0f105c4fc266e44427e935a96140a1d28cc591cdb9b8f83e2eab1f1ff31368942190cbafa
   languageName: node
   linkType: hard
 
