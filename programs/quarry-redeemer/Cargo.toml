@@ -22,5 +22,5 @@ default = []
 [dependencies]
 anchor-lang = ">=0.22, <=0.25"
 anchor-spl = ">=0.22, <=0.25"
-solana-security-txt = "1.0.1"
+solana-security-txt = "1.1.0"
 vipers = "^2.0"
