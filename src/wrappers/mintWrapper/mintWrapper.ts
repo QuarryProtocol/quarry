@@ -1,12 +1,15 @@
-import type { AugmentedProvider } from "@saberhq/solana-contrib";
-import { TransactionEnvelope } from "@saberhq/solana-contrib";
+import type { ProgramAccount } from "@project-serum/anchor";
+import type {
+  AugmentedProvider,
+  TransactionEnvelope,
+} from "@saberhq/solana-contrib";
 import type { TokenAmount, u64 } from "@saberhq/token-utils";
 import {
   createInitMintInstructions,
   getOrCreateATA,
   TOKEN_PROGRAM_ID,
 } from "@saberhq/token-utils";
-import type { AccountInfo, PublicKey } from "@solana/web3.js";
+import type { AccountInfo, PublicKey, Signer } from "@solana/web3.js";
 import { Keypair, SystemProgram } from "@solana/web3.js";
 
 import type {
@@ -29,31 +32,103 @@ export class MintWrapper {
     return this.sdk.provider;
   }
 
-  async newWrapper({
+  async newWrapperAndMintV1({
+    mintKP = Keypair.generate(),
+    decimals = 6,
+    ...newWrapperArgs
+  }: {
+    mintKP?: Signer;
+    decimals?: number;
+
+    hardcap: u64;
+    baseKP?: Signer;
+    tokenProgram?: PublicKey;
+    admin?: PublicKey;
+    payer?: PublicKey;
+  }): Promise<PendingMintAndWrapper> {
+    const provider = this.provider;
+    const { mintWrapper, tx: initMintProxyTX } = await this.newWrapperV1({
+      ...newWrapperArgs,
+      tokenMint: mintKP.publicKey,
+    });
+    const initMintTX = await createInitMintInstructions({
+      provider,
+      mintAuthority: mintWrapper,
+      freezeAuthority: mintWrapper,
+      mintKP,
+      decimals,
+    });
+    return {
+      mintWrapper,
+      mint: mintKP.publicKey,
+      tx: initMintTX.combine(initMintProxyTX),
+    };
+  }
+
+  async newWrapperV1({
     hardcap,
     tokenMint,
     baseKP = Keypair.generate(),
     tokenProgram = TOKEN_PROGRAM_ID,
-    admin = this.program.provider.wallet.publicKey,
-    payer = this.program.provider.wallet.publicKey,
+    admin = this.provider.wallet.publicKey,
+    payer = this.provider.wallet.publicKey,
   }: {
     hardcap: u64;
     tokenMint: PublicKey;
-    baseKP?: Keypair;
+    baseKP?: Signer;
     tokenProgram?: PublicKey;
     admin?: PublicKey;
     payer?: PublicKey;
   }): Promise<PendingMintWrapper> {
-    const [mintWrapper, nonce] = await findMintWrapperAddress(
+    const [mintWrapper, bump] = await findMintWrapperAddress(
       baseKP.publicKey,
       this.program.programId
     );
     return {
       mintWrapper,
-      tx: new TransactionEnvelope(
-        this.provider,
+      tx: this.provider.newTX(
         [
-          this.program.instruction.newWrapper(nonce, hardcap, {
+          this.program.instruction.newWrapper(bump, hardcap, {
+            accounts: {
+              base: baseKP.publicKey,
+              mintWrapper,
+              admin,
+              tokenMint,
+              tokenProgram,
+              payer,
+              systemProgram: SystemProgram.programId,
+            },
+          }),
+        ],
+        [baseKP]
+      ),
+    };
+  }
+
+  async newWrapper({
+    hardcap,
+    tokenMint,
+    baseKP = Keypair.generate(),
+    tokenProgram = TOKEN_PROGRAM_ID,
+    admin = this.provider.wallet.publicKey,
+    payer = this.provider.wallet.publicKey,
+  }: {
+    hardcap: u64;
+    tokenMint: PublicKey;
+    baseKP?: Signer;
+    tokenProgram?: PublicKey;
+    admin?: PublicKey;
+    payer?: PublicKey;
+  }): Promise<PendingMintWrapper> {
+    const [mintWrapper] = await findMintWrapperAddress(
+      baseKP.publicKey,
+      this.program.programId
+    );
+    return {
+      mintWrapper,
+      tx: this.provider.newTX(
+        [
+          this.program.instruction.newWrapperV2(hardcap, {
             accounts: {
               base: baseKP.publicKey,
               mintWrapper,
@@ -75,11 +150,11 @@ export class MintWrapper {
     decimals = 6,
     ...newWrapperArgs
   }: {
-    mintKP?: Keypair;
+    mintKP?: Signer;
     decimals?: number;
 
     hardcap: u64;
-    baseKP?: Keypair;
+    baseKP?: Signer;
     tokenProgram?: PublicKey;
     admin?: PublicKey;
     payer?: PublicKey;
@@ -109,9 +184,7 @@ export class MintWrapper {
    * @returns
    */
   async fetchMintWrapper(wrapper: PublicKey): Promise<MintWrapperData | null> {
-    const accountInfo = await this.program.provider.connection.getAccountInfo(
-      wrapper
-    );
+    const accountInfo = await this.provider.connection.getAccountInfo(wrapper);
     if (!accountInfo) {
       return null;
     }
@@ -135,7 +208,7 @@ export class MintWrapper {
       authority,
       this.program.programId
     );
-    const accountInfo = await this.program.provider.connection.getAccountInfo(
+    const accountInfo = await this.provider.connection.getAccountInfo(
       minterAddress
     );
     if (!accountInfo) {
@@ -147,7 +220,7 @@ export class MintWrapper {
     );
   }
 
-  async newMinter(
+  async newMinterV1(
     wrapper: PublicKey,
     authority: PublicKey
   ): Promise<TransactionEnvelope> {
@@ -161,11 +234,36 @@ export class MintWrapper {
         accounts: {
           auth: {
             mintWrapper: wrapper,
-            admin: this.program.provider.wallet.publicKey,
+            admin: this.provider.wallet.publicKey,
           },
-          minterAuthority: authority,
+          newMinterAuthority: authority,
           minter,
-          payer: this.program.provider.wallet.publicKey,
+          payer: this.provider.wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+      }),
+    ]);
+  }
+
+  async newMinter(
+    wrapper: PublicKey,
+    authority: PublicKey
+  ): Promise<TransactionEnvelope> {
+    const [minter] = await findMinterAddress(
+      wrapper,
+      authority,
+      this.program.programId
+    );
+    return this.provider.newTX([
+      this.program.instruction.newMinterV2({
+        accounts: {
+          auth: {
+            mintWrapper: wrapper,
+            admin: this.provider.wallet.publicKey,
+          },
+          newMinterAuthority: authority,
+          minter,
+          payer: this.provider.wallet.publicKey,
           systemProgram: SystemProgram.programId,
         },
       }),
@@ -193,7 +291,7 @@ export class MintWrapper {
         accounts: {
           auth: {
             mintWrapper: wrapper,
-            admin: this.program.provider.wallet.publicKey,
+            admin: this.provider.wallet.publicKey,
           },
           minter,
         },
@@ -227,7 +325,7 @@ export class MintWrapper {
       this.program.instruction.transferAdmin({
         accounts: {
           mintWrapper: wrapper,
-          admin: this.program.provider.wallet.publicKey,
+          admin: this.provider.wallet.publicKey,
           nextAdmin,
         },
       }),
@@ -239,7 +337,7 @@ export class MintWrapper {
       this.program.instruction.acceptAdmin({
         accounts: {
           mintWrapper: wrapper,
-          pendingAdmin: this.program.provider.wallet.publicKey,
+          pendingAdmin: this.provider.wallet.publicKey,
         },
       }),
     ]);
@@ -282,6 +380,7 @@ export class MintWrapper {
 
   /**
    * Performs a mint of tokens to an account.
+   * @deprecated use {@link performMintWithMinter}
    * @returns
    */
   async performMint({
@@ -294,7 +393,27 @@ export class MintWrapper {
       accountInfo: AccountInfo<MinterData>;
     };
   }): Promise<TransactionEnvelope> {
-    const minterData = minter.accountInfo.data;
+    return await this.performMintWithMinter({
+      amount,
+      minter: {
+        publicKey: minter.accountId,
+        account: minter.accountInfo.data,
+      },
+    });
+  }
+
+  /**
+   * Performs a mint of tokens to an account.
+   * @returns
+   */
+  async performMintWithMinter({
+    amount,
+    minter,
+  }: {
+    amount: TokenAmount;
+    minter: ProgramAccount<MinterData>;
+  }): Promise<TransactionEnvelope> {
+    const minterData = minter.account;
     const ata = await getOrCreateATA({
       provider: this.provider,
       mint: amount.token.mintAccount,
@@ -308,7 +427,7 @@ export class MintWrapper {
           minterAuthority: minterData.minterAuthority,
           tokenMint: amount.token.mintAccount,
           destination: ata.address,
-          minter: minter.accountId,
+          minter: minter.publicKey,
           tokenProgram: TOKEN_PROGRAM_ID,
         },
       }),

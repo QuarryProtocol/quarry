@@ -9,7 +9,7 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@saberhq/token-utils";
 import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
-import { Keypair, SystemProgram } from "@solana/web3.js";
+import { SystemProgram } from "@solana/web3.js";
 
 import { QUARRY_ADDRESSES } from "../../constants";
 import type {
@@ -71,7 +71,7 @@ export class MergePool {
     if (instruction) {
       throw new Error("User has no tokens to deposit");
     }
-    const [mmKey, bump] = await findMergeMinerAddress({
+    const [mmKey] = await findMergeMinerAddress({
       pool: this.key,
       owner: mmOwner,
     });
@@ -87,7 +87,7 @@ export class MergePool {
     // Initialize mergeMiner if it does not exist
     if (!mmAccount) {
       allInstructions.push(
-        this.program.instruction.initMergeMiner(bump, {
+        this.program.instruction.initMergeMinerV2({
           accounts: {
             pool: this.key,
             owner: mmOwner,
@@ -166,7 +166,7 @@ export class MergePool {
 
     const stake = await this.getReplicaStakeAccounts(rewarder, mergeMiner);
     const [quarry] = await findQuarryAddress(rewarder, poolData.replicaMint);
-    const [miner, minerBump] = await findMinerAddress(quarry, mergeMiner);
+    const [miner] = await findMinerAddress(quarry, mergeMiner);
 
     const mmReplicaMintTokenAccount = await getOrCreateATA({
       provider: this.provider,
@@ -195,7 +195,7 @@ export class MergePool {
         owner: miner,
       });
       txEnv.instructions.unshift(
-        this.program.instruction.initMiner(minerBump, {
+        this.program.instruction.initMinerV2({
           accounts: {
             pool: this.key,
             mm: mergeMiner,
@@ -473,19 +473,17 @@ export class MergePool {
       miner,
       minerVault,
       ...this.commonAccounts,
-      unusedAccount: Keypair.generate().publicKey,
     };
   }
 
   get commonAccounts(): Pick<
     QuarryStakeAccounts,
-    "pool" | "tokenProgram" | "unusedAccount" | "mineProgram"
+    "pool" | "tokenProgram" | "mineProgram"
   > {
     return {
       pool: this.key,
       tokenProgram: TOKEN_PROGRAM_ID,
       mineProgram: this.mergeMine.programs.Mine.programId,
-      unusedAccount: Keypair.generate().publicKey,
     };
   }
 }

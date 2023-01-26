@@ -10,6 +10,17 @@ mod account_validators;
 
 declare_id!("QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc");
 
+#[cfg(not(feature = "no-entrypoint"))]
+solana_security_txt::security_txt! {
+    name: "Quarry Registry",
+    project_url: "https://quarry.so",
+    contacts: "email:team@quarry.so",
+    policy: "https://github.com/QuarryProtocol/quarry/blob/master/SECURITY.md",
+
+    source_code: "https://github.com/QuarryProtocol/quarry",
+    auditors: "Quantstamp"
+}
+
 /// Registry to help frontends quickly locate all active quarries.
 #[program]
 pub mod quarry_registry {
@@ -25,7 +36,7 @@ pub mod quarry_registry {
     pub fn new_registry(ctx: Context<NewRegistry>, max_quarries: u16, _bump: u8) -> Result<()> {
         ctx.accounts.validate()?;
         let registry = &mut ctx.accounts.registry;
-        registry.bump = *unwrap_int!(ctx.bumps.get("registry"));
+        registry.bump = unwrap_bump!(ctx, "registry");
         registry.rewarder = ctx.accounts.rewarder.key();
         registry
             .tokens
@@ -91,4 +102,30 @@ pub struct Registry {
     pub rewarder: Pubkey,
     /// Tokens
     pub tokens: Vec<Pubkey>,
+}
+
+impl Registry {
+    /// Number of bytes a [Registry] takes up when serialized.
+    pub fn byte_length(max_quarries: u16) -> usize {
+        (1 + 32 + 4 + 32 * max_quarries) as usize
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use anchor_lang::system_program;
+
+    use super::*;
+
+    #[test]
+    fn test_registry_len() {
+        let registry = Registry {
+            tokens: vec![system_program::ID, system_program::ID],
+            ..Default::default()
+        };
+        assert_eq!(
+            registry.try_to_vec().unwrap().len(),
+            Registry::byte_length(2)
+        );
+    }
 }

@@ -1,5 +1,5 @@
 import * as anchor from "@project-serum/anchor";
-import { expectTX } from "@saberhq/chai-solana";
+import { assertTXSuccess, expectTX } from "@saberhq/chai-solana";
 import type { Provider } from "@saberhq/solana-contrib";
 import { PendingTransaction } from "@saberhq/solana-contrib";
 import {
@@ -61,6 +61,13 @@ describe("MintWrapper", () => {
 
     mintWrapperKey = wrapperKey;
     await expectTX(tx, "Initialize mint").to.be.fulfilled;
+  });
+
+  it("init mint wrapper v1", async () => {
+    const { tx } = await mintWrapper.newWrapperAndMintV1({
+      hardcap: hardCap.toU64(),
+    });
+    await assertTXSuccess(tx, "init mint wrapper v1");
   });
 
   it("Check MintWrapper", async () => {
@@ -142,6 +149,14 @@ describe("MintWrapper", () => {
       expect(mintWrapperState.pendingAdmin).to.eqAddress(
         web3.PublicKey.default
       );
+    });
+
+    it("new minter v1", async () => {
+      const id = Keypair.generate().publicKey;
+      await expectTX(
+        mintWrapper.newMinterV1(mintWrapperKey, id),
+        "new minter v1"
+      ).to.be.fulfilled;
     });
 
     it("Adds a Minter", async () => {

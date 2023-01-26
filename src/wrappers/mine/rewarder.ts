@@ -1,10 +1,11 @@
+import type { AugmentedProvider, Provider } from "@saberhq/solana-contrib";
 import { TransactionEnvelope } from "@saberhq/solana-contrib";
-import type { Token, u64 } from "@saberhq/token-utils";
+import type { ProgramAccount, Token, u64 } from "@saberhq/token-utils";
 import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
-import { SystemProgram, SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
+import { SystemProgram } from "@solana/web3.js";
 
 import type { MineProgram, RewarderData } from "../../programs/mine";
-import type { QuarrySDK } from "../../sdk";
+import { QuarrySDK } from "../../sdk";
 import type { MineWrapper } from ".";
 import { findQuarryAddress } from "./pda";
 import { QuarryWrapper } from "./quarry";
@@ -21,6 +22,21 @@ export class RewarderWrapper {
   ) {
     this.sdk = mineWrapper.sdk;
     this.program = mineWrapper.program;
+  }
+
+  get provider(): AugmentedProvider {
+    return this.sdk.provider;
+  }
+
+  static fromData(
+    provider: Provider,
+    rewarder: ProgramAccount<RewarderData>
+  ): RewarderWrapper {
+    return new RewarderWrapper(
+      QuarrySDK.load({ provider }).mine,
+      rewarder.publicKey,
+      rewarder.account
+    );
   }
 
   /**
@@ -62,12 +78,13 @@ export class RewarderWrapper {
 
   /**
    * Creates a new quarry. Only the rewarder can call this.
+   * @deprecated Use {@link createQuarry}.
    * @param param0
    * @returns
    */
-  async createQuarry({
+  async createQuarryV1({
     token,
-    authority = this.program.provider.wallet.publicKey,
+    authority = this.provider.wallet.publicKey,
   }: {
     token: Token;
     authority?: PublicKey;
@@ -85,8 +102,45 @@ export class RewarderWrapper {
           rewarder: this.rewarderKey,
         },
         tokenMint: token.mintAccount,
-        payer: this.program.provider.wallet.publicKey,
-        unusedClock: SYSVAR_CLOCK_PUBKEY,
+        payer: this.provider.wallet.publicKey,
+        systemProgram: SystemProgram.programId,
+        unusedAccount: SystemProgram.programId,
+      },
+    });
+
+    return {
+      rewarder: this.rewarderKey,
+      quarry: quarryKey,
+      tx: this.sdk.newTx([ix]),
+    };
+  }
+
+  /**
+   * Creates a new quarry. Only the rewarder can call this.
+   * @param param0
+   * @returns
+   */
+  async createQuarry({
+    token,
+    authority = this.provider.wallet.publicKey,
+  }: {
+    token: Token;
+    authority?: PublicKey;
+  }): Promise<PendingQuarry> {
+    const [quarryKey] = await findQuarryAddress(
+      this.rewarderKey,
+      token.mintAccount,
+      this.program.programId
+    );
+    const ix = this.program.instruction.createQuarryV2({
+      accounts: {
+        quarry: quarryKey,
+        auth: {
+          authority,
+          rewarder: this.rewarderKey,
+        },
+        tokenMint: token.mintAccount,
+        payer: this.provider.wallet.publicKey,
         systemProgram: SystemProgram.programId,
       },
     });
@@ -105,7 +159,7 @@ export class RewarderWrapper {
    */
   setAnnualRewards({
     newAnnualRate,
-    authority = this.program.provider.wallet.publicKey,
+    authority = this.provider.wallet.publicKey,
   }: {
     newAnnualRate: u64;
     authority?: PublicKey;

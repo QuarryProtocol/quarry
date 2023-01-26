@@ -1,9 +1,7 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "@saberhq/tsconfig/tsconfig.mono.json",
   "compilerOptions": {
-    "module": "ESNext",
-    "types": [],
-    "noEmit": false,
+    "rootDir": "src",
     "outDir": "dist/esm/"
   },
   "include": ["src/"]

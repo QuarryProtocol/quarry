@@ -146,7 +146,7 @@ export class QuarrySDK {
   }: {
     rewarder: PublicKey;
     admin?: PublicKey;
-    baseKP?: Keypair;
+    baseKP?: Signer;
     payer?: PublicKey;
   }): Promise<{ key: PublicKey; tx: TransactionEnvelope }> {
     return await Operator.createOperator({

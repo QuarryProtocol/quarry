@@ -1,12 +1,11 @@
 //! Rewarder utilities.
 
 use anchor_lang::prelude::*;
-use anchor_spl::token::TokenAccount;
 use num_traits::ToPrimitive;
 use spl_math::uint::U192;
 use vipers::prelude::*;
 
-use crate::{ClaimEvent, ClaimRewards, Rewarder, DEFAULT_CLAIM_FEE_MILLIBPS, MAX_BPS};
+use crate::Rewarder;
 
 impl Rewarder {
     /// Computes the amount of rewards a [crate::Quarry] should receive, annualized.

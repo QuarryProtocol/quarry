@@ -13,11 +13,7 @@ impl<'info> Validate<'info> for NewRegistry<'info> {
 
 impl<'info> Validate<'info> for SyncQuarry<'info> {
     fn validate(&self) -> Result<()> {
-        assert_keys_eq!(
-            self.quarry.rewarder_key,
-            self.registry.rewarder,
-            "quarry.rewarder_key"
-        );
+        assert_keys_eq!(self.quarry.rewarder, self.registry.rewarder);
         Ok(())
     }
 }

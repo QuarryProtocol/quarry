@@ -5,16 +5,16 @@ with saber-pkgs;
 pkgs.buildEnv {
   name = "ci";
   paths = with pkgs;
-    (pkgs.lib.optionals pkgs.stdenv.isLinux [ libudev ]) ++ [
-      anchor-0_22_0
+    (pkgs.lib.optionals pkgs.stdenv.isLinux [ udev ]) ++ [
+      anchor-0_24_2
       cargo-workspaces
-      solana-basic
+      solana-1_10-basic
 
       nodejs
       yarn
       python3
 
-      pkgconfig
+      pkg-config
       openssl
       jq
       gnused

@@ -153,7 +153,8 @@ describe("Famine", () => {
 
   it("Stake and claim after famine", async () => {
     const famine = new BN(Date.now() / 1000 - 5); // Rewards stopped 5 seconds ago
-    await expectTX(quarryWrapper.setFamine(famine), "Set famine");
+    await expectTX(quarryWrapper.setFamine(famine), "Set famine").to.be
+      .fulfilled;
 
     const minerActions = await quarryWrapper.getMinerActions(
       provider.wallet.publicKey
@@ -192,7 +193,7 @@ describe("Famine", () => {
         .stake(new TokenAmount(stakeToken, stakeAmount))
         .combine(quarryWrapper.setFamine(famine)),
       "Set famine then stake tokens"
-    );
+    ).to.be.fulfilled;
 
     // Sleep for 8 seconds
     await sleep(8_000);

@@ -2,11 +2,11 @@
   "nodes": {
     "flake-utils": {
       "locked": {
-        "lastModified": 1644229661,
-        "narHash": "sha256-1YdnJAsNy69bpcjuoKdOYQX0YxZBiCYZo4Twxerqv7k=",
+        "lastModified": 1659877975,
+        "narHash": "sha256-zllb8aq3YO3h8B/U0/J1WBgAL8EX5yWf5pMj3G0NAmc=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "3cecb5b042f7f209c56ffd8371b2711a290ec797",
+        "rev": "c0e246b9b83f637f4681389ecabcb2681b4f3af0",
         "type": "github"
       },
       "original": {
@@ -17,11 +17,11 @@
     },
     "flake-utils_2": {
       "locked": {
-        "lastModified": 1644229661,
-        "narHash": "sha256-1YdnJAsNy69bpcjuoKdOYQX0YxZBiCYZo4Twxerqv7k=",
+        "lastModified": 1659877975,
+        "narHash": "sha256-zllb8aq3YO3h8B/U0/J1WBgAL8EX5yWf5pMj3G0NAmc=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "3cecb5b042f7f209c56ffd8371b2711a290ec797",
+        "rev": "c0e246b9b83f637f4681389ecabcb2681b4f3af0",
         "type": "github"
       },
       "original": {
@@ -32,11 +32,11 @@
     },
     "flake-utils_3": {
       "locked": {
-        "lastModified": 1637014545,
-        "narHash": "sha256-26IZAc5yzlD9FlDT54io1oqG/bBoyka+FJk5guaX4x4=",
+        "lastModified": 1656928814,
+        "narHash": "sha256-RIFfgBuKz6Hp89yRr7+NR5tzIAbn52h8vT6vXkYjZoM=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "bba5dcc8e0b20ab664967ad83d24d64cb64ec4f4",
+        "rev": "7e2a3b3dfd9af950a856d66b0a7d01e3c18aa249",
         "type": "github"
       },
       "original": {
@@ -45,13 +45,30 @@
         "type": "github"
       }
     },
+    "goki-cli": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1656706106,
+        "narHash": "sha256-gxavNplCWTQF3pr8njtgN6FT1PGoHy6qxfJkRbMmUtE=",
+        "owner": "GokiProtocol",
+        "repo": "goki-cli",
+        "rev": "d044040f583c2bb666375b67a25795540f4eefdd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "GokiProtocol",
+        "ref": "master",
+        "repo": "goki-cli",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1645493675,
-        "narHash": "sha256-9xundbZQbhFodsQRh6QMN1GeSXfo3y/5NL0CZcJULz0=",
+        "lastModified": 1664356419,
+        "narHash": "sha256-PD0hM9YWp2lepAJk7edh8g1VtzJip5rals1fpoQUlY0=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "74b10859829153d5c5d50f7c77b86763759e8654",
+        "rev": "46e8398474ac3b1b7bb198bf9097fc213bbf59b1",
         "type": "github"
       },
       "original": {
@@ -63,11 +80,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1645013224,
-        "narHash": "sha256-b7OEC8vwzJv3rsz9pwnTX2LQDkeOWz2DbKypkVvNHXc=",
+        "lastModified": 1663264531,
+        "narHash": "sha256-2ncO5chPXlTxaebDlhx7MhL0gOEIWxzSyfsl0r0hxQk=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "b66b39216b1fef2d8c33cc7a5c72d8da80b79970",
+        "rev": "454887a35de6317a30be284e8adc2d2f6d8a07c4",
         "type": "github"
       },
       "original": {
@@ -93,11 +110,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1645409726,
-        "narHash": "sha256-rji0+Ii6WpBB8VCPh3siV/MFfaSiksNbDHOE1DHcHCA=",
+        "lastModified": 1663297375,
+        "narHash": "sha256-7pjd2x9fSXXynIzp9XiXjbYys7sR6MKCot/jfGL7dgE=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "d12fa61b3991d332d3b18ccb20a27d5e473f876e",
+        "rev": "0678b6187a153eb0baa9688335b002fe14ba6712",
         "type": "github"
       },
       "original": {
@@ -109,15 +126,16 @@
     "saber-overlay": {
       "inputs": {
         "flake-utils": "flake-utils_2",
+        "goki-cli": "goki-cli",
         "nixpkgs": "nixpkgs_2",
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1645564574,
-        "narHash": "sha256-mAhxmgBKGM6Ip3hPcPY0o8BOVSEqAxXOaPJ3bKrE6i0=",
+        "lastModified": 1664388865,
+        "narHash": "sha256-hOP0HHCdP4kqQiRdstUsbpAAQFNjQuxWJq9U3ZQBUcc=",
         "owner": "saber-hq",
         "repo": "saber-overlay",
-        "rev": "070f62a47f5419077250c070fd4393adfbf50e3a",
+        "rev": "638cb4ff75bd990ef371e6e2e66872afe08c804e",
         "type": "github"
       },
       "original": {

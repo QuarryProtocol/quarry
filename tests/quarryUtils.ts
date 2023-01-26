@@ -1,27 +1,14 @@
 import { expectTX } from "@saberhq/chai-solana";
 import { SignerWallet, SolanaProvider } from "@saberhq/solana-contrib";
 import { Token, u64 } from "@saberhq/token-utils";
-import type { Connection, PublicKey } from "@solana/web3.js";
+import type { Connection, PublicKey, Signer } from "@solana/web3.js";
 import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 import type { RewarderWrapper } from "../src";
 import { QuarrySDK, QuarryWrapper } from "../src";
 
-export const createRewarderAndQuarry = async ({
-  connection,
-  stakedToken,
-  annualRate,
-  adminKP = Keypair.generate(),
-}: {
-  adminKP?: Keypair;
-  connection: Connection;
-  /**
-   * Token to stake in the Quarry.
-   */
-  stakedToken: Token;
-  annualRate: u64;
-}): Promise<{
-  adminKP: Keypair;
+export type RewarderAndQuarry = {
+  adminKP: Signer;
   /**
    * Token issued as Quarry rewards.
    */
@@ -38,7 +25,22 @@ export const createRewarderAndQuarry = async ({
    * Rewarder wrapper
    */
   rewarderW: RewarderWrapper;
-}> => {
+};
+
+export const createRewarderAndQuarry = async ({
+  connection,
+  stakedToken,
+  annualRate,
+  adminKP = Keypair.generate(),
+}: {
+  adminKP?: Signer;
+  connection: Connection;
+  /**
+   * Token to stake in the Quarry.
+   */
+  stakedToken: Token;
+  annualRate: u64;
+}): Promise<RewarderAndQuarry> => {
   const { rewardsToken, rewarder, rewarderW, quarrySDK } = await createRewarder(
     {
       connection,
@@ -78,11 +80,11 @@ export const createRewarder = async ({
   connection,
   adminKP = Keypair.generate(),
 }: {
-  adminKP?: Keypair;
+  adminKP?: Signer;
   connection: Connection;
 }): Promise<{
   quarrySDK: QuarrySDK;
-  adminKP: Keypair;
+  adminKP: Signer;
   /**
    * Token issued as Quarry rewards.
    */

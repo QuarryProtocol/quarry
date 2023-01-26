@@ -25,15 +25,15 @@ impl<'info> InitMiner<'info> {
 
 impl<'info> ClaimRewards<'info> {
     /// Conversion.
-    pub fn to_claim_rewards_accounts(&self) -> quarry_mine::cpi::accounts::ClaimRewards<'info> {
-        quarry_mine::cpi::accounts::ClaimRewards {
+    pub fn to_claim_rewards_accounts(&self) -> quarry_mine::cpi::accounts::ClaimRewardsV2<'info> {
+        quarry_mine::cpi::accounts::ClaimRewardsV2 {
             mint_wrapper: self.mint_wrapper.to_account_info(),
             claim_fee_token_account: self.claim_fee_token_account.to_account_info(),
             mint_wrapper_program: self.mint_wrapper_program.to_account_info(),
             minter: self.minter.to_account_info(),
             rewards_token_mint: self.rewards_token_mint.to_account_info(),
             rewards_token_account: self.rewards_token_account.to_account_info(),
-            stake: self.stake.gen_user_claim(),
+            claim: self.stake.gen_user_claim(),
         }
     }
 
@@ -45,15 +45,13 @@ impl<'info> ClaimRewards<'info> {
 
 impl<'info> QuarryStake<'info> {
     /// Generates the [quarry_mine::UserStake] accounts.
-    fn gen_user_claim(&self) -> quarry_mine::cpi::accounts::UserClaim<'info> {
-        quarry_mine::cpi::accounts::UserClaim {
+    fn gen_user_claim(&self) -> quarry_mine::cpi::accounts::UserClaimV2<'info> {
+        quarry_mine::cpi::accounts::UserClaimV2 {
             authority: self.mm.to_account_info(),
             miner: self.miner.to_account_info(),
             quarry: self.quarry.to_account_info(),
             token_program: self.token_program.to_account_info(),
             rewarder: self.rewarder.to_account_info(),
-            unused_miner_vault: self.unused_account.to_account_info(),
-            unused_token_account: self.unused_account.to_account_info(),
         }
     }
 
@@ -93,7 +91,7 @@ impl<'info> QuarryStakeReplica<'info> {
     pub fn to_burn_accounts(&self) -> token::Burn<'info> {
         token::Burn {
             mint: self.replica_mint.to_account_info(),
-            to: self.replica_mint_token_account.to_account_info(),
+            from: self.replica_mint_token_account.to_account_info(),
             authority: self.stake.mm.to_account_info(),
         }
     }

@@ -1,15 +1,32 @@
 //! Delegates Quarry Rewarder authority roles.
 #![deny(rustdoc::all)]
 #![allow(rustdoc::missing_doc_code_examples)]
+#![allow(deprecated)]
 
 use anchor_lang::prelude::*;
 use quarry_mine::{Quarry, Rewarder};
 use vipers::prelude::*;
 
 mod account_validators;
+mod instructions;
 mod macros;
+mod state;
+
+use instructions::*;
+pub use state::*;
 
 declare_id!("QoP6NfrQbaGnccXQrMLUkog2tQZ4C1RFgJcwDnT8Kmz");
+
+#[cfg(not(feature = "no-entrypoint"))]
+solana_security_txt::security_txt! {
+    name: "Quarry Operator",
+    project_url: "https://quarry.so",
+    contacts: "email:team@quarry.so",
+    policy: "https://github.com/QuarryProtocol/quarry/blob/master/SECURITY.md",
+
+    source_code: "https://github.com/QuarryProtocol/quarry",
+    auditors: "Quantstamp"
+}
 
 /// Quarry Operator program.
 #[program]
@@ -17,31 +34,18 @@ pub mod quarry_operator {
     use super::*;
 
     /// Creates a new [Operator].
+    #[deprecated(since = "5.0.0", note = "Use `create_operator_v2` instead.")]
     #[access_control(ctx.accounts.validate())]
     pub fn create_operator(ctx: Context<CreateOperator>, _bump: u8) -> Result<()> {
-        let operator = &mut ctx.accounts.operator;
-        operator.base = ctx.accounts.base.key();
-        operator.bump = *unwrap_int!(ctx.bumps.get("operator"));
+        instructions::create_operator::handler(ctx)
+    }
 
-        operator.rewarder = ctx.accounts.rewarder.key();
-        operator.admin = ctx.accounts.admin.key();
-
-        operator.rate_setter = operator.admin;
-        operator.quarry_creator = operator.admin;
-        operator.share_allocator = operator.admin;
-        operator.record_update()?;
-
-        let signer_seeds: &[&[&[u8]]] = &[gen_operator_signer_seeds!(operator)];
-        quarry_mine::cpi::accept_authority(CpiContext::new_with_signer(
-            ctx.accounts.quarry_mine_program.to_account_info(),
-            quarry_mine::cpi::accounts::AcceptAuthority {
-                authority: ctx.accounts.operator.to_account_info(),
-                rewarder: ctx.accounts.rewarder.to_account_info(),
-            },
-            signer_seeds,
-        ))?;
-
-        Ok(())
+    /// Creates a new [Operator].
+    ///
+    /// The V2 variant removes the need for supplying the bump.
+    #[access_control(ctx.accounts.validate())]
+    pub fn create_operator_v2(ctx: Context<CreateOperator>) -> Result<()> {
+        instructions::create_operator::handler(ctx)
     }
 
     /// Sets the account that can set roles.
@@ -104,30 +108,16 @@ pub mod quarry_operator {
         Ok(())
     }
 
-    /// Calls [quarry_mine::quarry_mine::create_quarry].
+    /// Calls [quarry_mine::quarry_mine::create_quarry_v2].
     #[access_control(ctx.accounts.validate())]
-    pub fn delegate_create_quarry(ctx: Context<DelegateCreateQuarry>, bump: u8) -> Result<()> {
-        let operator = &ctx.accounts.with_delegate.operator;
-        let signer_seeds: &[&[&[u8]]] = &[gen_operator_signer_seeds!(operator)];
-        quarry_mine::cpi::create_quarry(
-            CpiContext::new_with_signer(
-                ctx.accounts
-                    .with_delegate
-                    .quarry_mine_program
-                    .to_account_info(),
-                quarry_mine::cpi::accounts::CreateQuarry {
-                    quarry: ctx.accounts.quarry.to_account_info(),
-                    auth: ctx.accounts.with_delegate.to_auth_accounts(),
-                    token_mint: ctx.accounts.token_mint.to_account_info(),
-                    payer: ctx.accounts.payer.to_account_info(),
-                    unused_clock: ctx.accounts.unused_clock.to_account_info(),
-                    system_program: ctx.accounts.system_program.to_account_info(),
-                },
-                signer_seeds,
-            ),
-            bump,
-        )?;
-        Ok(())
+    pub fn delegate_create_quarry(ctx: Context<DelegateCreateQuarry>, _bump: u8) -> Result<()> {
+        instructions::delegate_create_quarry::handler(ctx)
+    }
+
+    /// Calls [quarry_mine::quarry_mine::create_quarry_v2].
+    #[access_control(ctx.accounts.validate())]
+    pub fn delegate_create_quarry_v2(ctx: Context<DelegateCreateQuarryV2>) -> Result<()> {
+        instructions::delegate_create_quarry_v2::handler(ctx)
     }
 
     /// Calls [quarry_mine::quarry_mine::set_rewards_share].
@@ -178,79 +168,9 @@ pub mod quarry_operator {
     }
 }
 
-impl Operator {
-    fn record_update(&mut self) -> Result<()> {
-        self.last_modified_ts = Clock::get()?.unix_timestamp;
-        self.generation = unwrap_int!(self.generation.checked_add(1));
-        Ok(())
-    }
-}
-
-// --------------------------------
-// Accounts
-// --------------------------------
-
-/// Operator state
-#[account]
-#[derive(Copy, Default, Debug, PartialEq, Eq)]
-pub struct Operator {
-    /// The base.
-    pub base: Pubkey,
-    /// Bump seed.
-    pub bump: u8,
-
-    /// The [Rewarder].
-    pub rewarder: Pubkey,
-    /// Can modify the authorities below.
-    pub admin: Pubkey,
-
-    /// Can call [quarry_mine::quarry_mine::set_annual_rewards].
-    pub rate_setter: Pubkey,
-    /// Can call [quarry_mine::quarry_mine::create_quarry].
-    pub quarry_creator: Pubkey,
-    /// Can call [quarry_mine::quarry_mine::set_rewards_share].
-    pub share_allocator: Pubkey,
-
-    /// When the [Operator] was last modified.
-    pub last_modified_ts: i64,
-    /// Auto-incrementing sequence number of the set of authorities.
-    /// Useful for checking if things were updated.
-    pub generation: u64,
-}
-
 // --------------------------------
 // Instructions
 // --------------------------------
-
-/// Accounts for [crate::quarry_operator::create_operator].
-#[derive(Accounts)]
-pub struct CreateOperator<'info> {
-    /// Base key used to create the [Operator].
-    pub base: Signer<'info>,
-    /// Operator PDA.
-    #[account(
-        init,
-        seeds = [
-            b"Operator".as_ref(),
-            base.key().to_bytes().as_ref()
-        ],
-        bump,
-        payer = payer
-    )]
-    pub operator: Account<'info, Operator>,
-    /// [Rewarder] of the token.
-    #[account(mut)]
-    pub rewarder: Box<Account<'info, Rewarder>>,
-    /// CHECK: The admin to set.
-    pub admin: UncheckedAccount<'info>,
-    /// Payer.
-    #[account(mut)]
-    pub payer: Signer<'info>,
-    /// [System] program.
-    pub system_program: Program<'info, System>,
-    /// Quarry mine
-    pub quarry_mine_program: Program<'info, quarry_mine::program::QuarryMine>,
-}
 
 /// Accounts for setting roles.
 #[derive(Accounts)]
@@ -268,27 +188,8 @@ pub struct SetRole<'info> {
 /// Accounts for [crate::quarry_operator::delegate_set_annual_rewards].
 #[derive(Accounts)]
 pub struct DelegateSetAnnualRewards<'info> {
+    /// Delegate accounts.
     pub with_delegate: WithDelegate<'info>,
-}
-
-/// Accounts for [crate::quarry_operator::delegate_create_quarry].
-#[derive(Accounts)]
-pub struct DelegateCreateQuarry<'info> {
-    pub with_delegate: WithDelegate<'info>,
-    #[account(mut)]
-    pub quarry: SystemAccount<'info>,
-    pub token_mint: Box<Account<'info, anchor_spl::token::Mint>>,
-
-    /// Payer of [Quarry] creation.
-    #[account(mut)]
-    pub payer: Signer<'info>,
-
-    /// Unused variable that held the clock. Placeholder.
-    /// CHECK: OK
-    pub unused_clock: UncheckedAccount<'info>,
-
-    /// System program.
-    pub system_program: Program<'info, System>,
 }
 
 /// Accounts for [crate::quarry_operator::delegate_set_rewards_share].
@@ -297,8 +198,11 @@ pub struct DelegateSetRewardsShare<'info> {
     /// Delegate accounts.
     pub with_delegate: WithDelegate<'info>,
     /// [Quarry].
-    #[account(mut)]
-    pub quarry: Box<Account<'info, Quarry>>,
+    #[account(
+        mut,
+        constraint = quarry.rewarder == with_delegate.rewarder.key()
+    )]
+    pub quarry: Account<'info, Quarry>,
 }
 
 /// Accounts for [crate::quarry_operator::delegate_set_famine].
@@ -307,21 +211,27 @@ pub struct DelegateSetFamine<'info> {
     /// Delegate accounts.
     pub with_delegate: WithDelegate<'info>,
     /// [Quarry].
-    #[account(mut)]
-    pub quarry: Box<Account<'info, Quarry>>,
+    #[account(
+        mut,
+        constraint = quarry.rewarder == with_delegate.rewarder.key()
+    )]
+    pub quarry: Account<'info, Quarry>,
 }
 
-/// Delegate accounts.
-#[derive(Accounts)]
+/// Accounts struct for instructions that must be signed by one of the delegates on the [Operator].
+#[derive(Accounts, Clone)]
 pub struct WithDelegate<'info> {
     /// The [Operator] of the [Rewarder].
-    #[account(mut)]
+    #[account(mut, has_one = rewarder)]
     pub operator: Account<'info, Operator>,
-    /// The account to give the role to.
+    /// The delegated account in one of the [Operator] roles.
     pub delegate: Signer<'info>,
     /// The [Rewarder].
-    #[account(mut)]
-    pub rewarder: Box<Account<'info, Rewarder>>,
+    #[account(
+        mut,
+        constraint = rewarder.authority == operator.key() @ ErrorCode::OperatorNotRewarderAuthority
+    )]
+    pub rewarder: Account<'info, Rewarder>,
     /// Quarry mine
     pub quarry_mine_program: Program<'info, quarry_mine::program::QuarryMine>,
 }
@@ -355,4 +265,6 @@ pub enum ErrorCode {
     Unauthorized,
     #[msg("Pending authority must be set to the created operator.")]
     PendingAuthorityNotSet,
+    #[msg("Operator is not the Rewarder authority.")]
+    OperatorNotRewarderAuthority,
 }

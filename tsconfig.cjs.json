@@ -1,7 +1,7 @@
 {
-  "extends": "./tsconfig.esm.json",
+  "extends": "@saberhq/tsconfig/tsconfig.mono.cjs.json",
   "compilerOptions": {
-    "module": "CommonJS",
+    "rootDir": "src",
     "outDir": "dist/cjs/"
   },
   "include": ["src/"]

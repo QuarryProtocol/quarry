@@ -1,12 +1,14 @@
 //! Holds tokens to allow one depositor to mine multiple quarries at the same time.
 #![deny(rustdoc::all)]
 #![allow(rustdoc::missing_doc_code_examples)]
+#![allow(deprecated)]
 
 #[macro_use]
 mod macros;
 
 mod account_validators;
 mod processor;
+use processor::*;
 
 pub(crate) mod account_conversions;
 pub(crate) mod mm_cpi;
@@ -20,6 +22,17 @@ use vipers::prelude::*;
 
 pub use state::*;
 
+#[cfg(not(feature = "no-entrypoint"))]
+solana_security_txt::security_txt! {
+    name: "Quarry Merge Mine",
+    project_url: "https://quarry.so",
+    contacts: "email:team@quarry.so",
+    policy: "https://github.com/QuarryProtocol/quarry/blob/master/SECURITY.md",
+
+    source_code: "https://github.com/QuarryProtocol/quarry",
+    auditors: "Quantstamp"
+}
+
 declare_id!("QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto");
 
 #[deny(clippy::integer_arithmetic, clippy::float_arithmetic)]
@@ -30,22 +43,49 @@ pub mod quarry_merge_mine {
 
     /// Creates a new [MergePool].
     /// Anyone can call this.
+    #[deprecated(since = "5.0.0", note = "Use `new_pool_v2` instead.")]
     #[access_control(ctx.accounts.validate())]
     pub fn new_pool(ctx: Context<NewPool>, _bump: u8, _mint_bump: u8) -> Result<()> {
         processor::init::new_pool(ctx)
     }
 
+    /// Creates a new [MergePool].
+    /// Anyone can call this.
+    ///
+    /// The V2 variant removes the need for supplying the bump.
+    #[access_control(ctx.accounts.validate())]
+    pub fn new_pool_v2(ctx: Context<NewPool>) -> Result<()> {
+        processor::init::new_pool(ctx)
+    }
+
     /// Creates a new [MergeMiner].
     /// Anyone can call this.
+    #[deprecated(since = "5.0.0", note = "Use `init_merge_miner_v2` instead.")]
     #[access_control(ctx.accounts.validate())]
     pub fn init_merge_miner(ctx: Context<InitMergeMiner>, _bump: u8) -> Result<()> {
         processor::init::init_merge_miner(ctx)
     }
 
+    /// Creates a new [MergeMiner].
+    /// Anyone can call this.
+    ///
+    /// The V2 variant removes the need for supplying the bump.
+    #[access_control(ctx.accounts.validate())]
+    pub fn init_merge_miner_v2(ctx: Context<InitMergeMiner>) -> Result<()> {
+        processor::init::init_merge_miner(ctx)
+    }
+
+    /// Initializes a [quarry_mine::Miner] owned by the [MergeMiner].
+    #[deprecated(since = "5.0.0", note = "Use `init_miner_v2` instead.")]
+    #[access_control(ctx.accounts.validate())]
+    pub fn init_miner(ctx: Context<InitMiner>, _bump: u8) -> Result<()> {
+        processor::init::init_miner(ctx)
+    }
+
     /// Initializes a [quarry_mine::Miner] owned by the [MergeMiner].
     #[access_control(ctx.accounts.validate())]
-    pub fn init_miner(ctx: Context<InitMiner>, bump: u8) -> Result<()> {
-        processor::init::init_miner(ctx, bump)
+    pub fn init_miner_v2(ctx: Context<InitMiner>) -> Result<()> {
+        processor::init::init_miner(ctx)
     }
 
     // --------------------------------
@@ -90,6 +130,12 @@ pub mod quarry_merge_mine {
         processor::withdraw::withdraw_tokens(ctx)
     }
 
+    /// Rescues stuck tokens in miners owned by a [MergeMiner].
+    #[access_control(ctx.accounts.validate())]
+    pub fn rescue_tokens(ctx: Context<RescueTokens>) -> Result<()> {
+        processor::rescue_tokens::handler(ctx)
+    }
+
     // --------------------------------
     // Claim
     // --------------------------------
@@ -116,7 +162,8 @@ pub struct NewPool<'info> {
           primary_mint.key().to_bytes().as_ref()
         ],
         bump,
-        payer = payer
+        payer = payer,
+        space = 8 + MergePool::LEN
     )]
     pub pool: Account<'info, MergePool>,
 
@@ -133,8 +180,7 @@ pub struct NewPool<'info> {
         mint::decimals = primary_mint.decimals,
         mint::authority = pool,
         bump,
-        payer = payer,
-        space = Mint::LEN
+        payer = payer
     )]
     pub replica_mint: Account<'info, Mint>,
 
@@ -171,7 +217,8 @@ pub struct InitMergeMiner<'info> {
           owner.key().to_bytes().as_ref()
         ],
         bump,
-        payer = payer
+        payer = payer,
+        space = 8 + MergeMiner::LEN
     )]
     pub mm: Account<'info, MergeMiner>,
 
@@ -285,6 +332,7 @@ pub struct ClaimRewards<'info> {
 #[derive(Accounts)]
 pub struct QuarryStakePrimary<'info> {
     /// The [MergeMiner::owner].
+    #[account(constraint = mm_owner.key() == stake.mm.owner)]
     pub mm_owner: Signer<'info>,
 
     /// The [TokenAccount] holding the [MergeMiner]'s primary tokens.
@@ -299,6 +347,7 @@ pub struct QuarryStakePrimary<'info> {
 #[derive(Accounts)]
 pub struct QuarryStakeReplica<'info> {
     /// The [MergeMiner::owner].
+    #[account(constraint = mm_owner.key() == stake.mm.owner)]
     pub mm_owner: Signer<'info>,
 
     /// [Mint] of a token that can be staked into a farming program.
@@ -327,22 +376,26 @@ pub struct QuarryStake<'info> {
     pub pool: Account<'info, MergePool>,
 
     /// The [MergeMiner] (also the [quarry_mine::Miner] authority).
-    #[account(mut)]
+    #[account(mut, has_one = pool)]
     pub mm: Account<'info, MergeMiner>,
 
     /// The [quarry_mine::Rewarder] to stake into.
     pub rewarder: Box<Account<'info, quarry_mine::Rewarder>>,
 
     /// The [quarry_mine::Quarry] to claim from.
-    #[account(mut)]
+    #[account(mut, has_one = rewarder)]
     pub quarry: Box<Account<'info, quarry_mine::Quarry>>,
 
     /// The [quarry_mine::Miner].
-    #[account(mut)]
+    #[account(
+        mut,
+        has_one = quarry,
+        constraint = miner.authority == mm.key()
+    )]
     pub miner: Box<Account<'info, quarry_mine::Miner>>,
 
     /// The [TokenAccount] of the [quarry_mine::Miner] that holds the staked tokens.
-    #[account(mut)]
+    #[account(mut, constraint = miner_vault.key() == miner.token_vault_key)]
     pub miner_vault: Account<'info, TokenAccount>,
 
     /// [anchor_spl::token] program.
@@ -350,12 +403,6 @@ pub struct QuarryStake<'info> {
 
     /// [quarry_mine] program.
     pub mine_program: Program<'info, quarry_mine::program::QuarryMine>,
-
-    /// Unused variable used as a filler for deprecated accounts. Handled by [quarry_mine].
-    /// One should pass in a randomly generated Keypair for this account.
-    /// CHECK: OK
-    #[account(mut)]
-    pub unused_account: UncheckedAccount<'info>,
 }
 
 /// Error Codes
@@ -371,4 +418,8 @@ pub enum ErrorCode {
     CannotWithdrawReplicaMint,
     #[msg("User must first withdraw from all replica quarries.")]
     OutstandingReplicaTokens,
+    #[msg("The replica mint must have the same number of decimals as the primary mint.")]
+    ReplicaDecimalsMismatch,
+    #[msg("The replica mint must have zero supply.")]
+    ReplicaNonZeroSupply,
 }

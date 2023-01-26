@@ -9,8 +9,22 @@ use vipers::prelude::*;
 mod account_validators;
 mod macros;
 mod redeem_cpi;
+mod state;
+
+pub use state::*;
 
 declare_id!("QRDxhMw1P2NEfiw5mYXG79bwfgHTdasY2xNP76XSea9");
+
+#[cfg(not(feature = "no-entrypoint"))]
+solana_security_txt::security_txt! {
+    name: "Quarry Redeemer",
+    project_url: "https://quarry.so",
+    contacts: "email:team@quarry.so",
+    policy: "https://github.com/QuarryProtocol/quarry/blob/master/SECURITY.md",
+
+    source_code: "https://github.com/QuarryProtocol/quarry",
+    auditors: "Quantstamp"
+}
 
 /// Quarry Redeemer program.
 #[program]
@@ -23,7 +37,7 @@ pub mod quarry_redeemer {
         let redeemer = &mut ctx.accounts.redeemer;
         redeemer.iou_mint = ctx.accounts.iou_mint.key();
         redeemer.redemption_mint = ctx.accounts.redemption_mint.key();
-        redeemer.bump = *unwrap_int!(ctx.bumps.get("redeemer"));
+        redeemer.bump = unwrap_bump!(ctx, "redeemer");
 
         redeemer.total_tokens_redeemed = 0;
         Ok(())
@@ -74,21 +88,6 @@ pub mod quarry_redeemer {
 // Accounts
 // --------------------------------
 
-/// Redeemer state
-#[account]
-#[derive(Copy, Default, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Redeemer {
-    /// [Mint] of the IOU token.
-    pub iou_mint: Pubkey,
-    /// [Mint] of the token to redeem.
-    pub redemption_mint: Pubkey,
-    /// Bump seed.
-    pub bump: u8,
-
-    /// Lifetime number of IOU tokens redeemed for redemption tokens.
-    pub total_tokens_redeemed: u64,
-}
-
 // --------------------------------
 // Instructions
 // --------------------------------
@@ -104,7 +103,8 @@ pub struct CreateRedeemer<'info> {
             redemption_mint.to_account_info().key.as_ref()
         ],
         bump,
-        payer = payer
+        payer = payer,
+        space = 8 + Redeemer::LEN
     )]
     pub redeemer: Account<'info, Redeemer>,
     /// [Mint] of the IOU token.
@@ -137,7 +137,7 @@ pub struct RedeemTokens<'info> {
     #[account(mut)]
     pub redemption_vault: Account<'info, TokenAccount>,
     /// Destination of the IOU tokens.
-    #[account(mut)]
+    #[account(mut, constraint = redemption_destination.key() != redemption_vault.key())]
     pub redemption_destination: Account<'info, TokenAccount>,
 
     /// The spl_token program corresponding to [Token].

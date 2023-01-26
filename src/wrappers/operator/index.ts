@@ -1,7 +1,7 @@
 import { TransactionEnvelope } from "@saberhq/solana-contrib";
 import { u64 } from "@saberhq/token-utils";
-import type { PublicKey } from "@solana/web3.js";
-import { Keypair, SystemProgram, SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
+import type { PublicKey, Signer } from "@solana/web3.js";
+import { Keypair, SystemProgram } from "@solana/web3.js";
 
 import type { OperatorData, QuarryOperatorProgram, QuarrySDK } from "../..";
 import { findQuarryAddress } from "..";
@@ -57,13 +57,13 @@ export class Operator {
     sdk: QuarrySDK;
     rewarder: PublicKey;
     admin?: PublicKey;
-    baseKP?: Keypair;
+    baseKP?: Signer;
     payer?: PublicKey;
   }): Promise<{
     key: PublicKey;
     tx: TransactionEnvelope;
   }> {
-    const [operatorKey, bump] = await findOperatorAddress(
+    const [operatorKey] = await findOperatorAddress(
       baseKP.publicKey,
       sdk.programs.Operator.programId
     );
@@ -72,7 +72,7 @@ export class Operator {
       tx: new TransactionEnvelope(
         sdk.provider,
         [
-          sdk.programs.Operator.instruction.createOperator(bump, {
+          sdk.programs.Operator.instruction.createOperatorV2({
             accounts: {
               base: baseKP.publicKey,
               operator: operatorKey,
@@ -180,7 +180,7 @@ export class Operator {
     tokenMint: PublicKey;
     payer?: PublicKey;
   }): Promise<{ tx: TransactionEnvelope; quarry: PublicKey }> {
-    const [quarry, bump] = await findQuarryAddress(
+    const [quarry] = await findQuarryAddress(
       this.data.rewarder,
       tokenMint,
       this.sdk.programs.Mine.programId
@@ -188,13 +188,12 @@ export class Operator {
     return {
       quarry,
       tx: new TransactionEnvelope(this.sdk.provider, [
-        this.program.instruction.delegateCreateQuarry(bump, {
+        this.program.instruction.delegateCreateQuarryV2({
           accounts: {
             withDelegate: this.withDelegateAccounts,
             quarry,
             tokenMint,
             payer,
-            unusedClock: SYSVAR_CLOCK_PUBKEY,
             systemProgram: SystemProgram.programId,
           },
         }),

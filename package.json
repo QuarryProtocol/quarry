@@ -1,12 +1,18 @@
 {
   "name": "@quarryprotocol/quarry-sdk",
-  "version": "3.0.0",
+  "version": "5.3.0",
   "description": "Quarry Protocol SDK",
   "keywords": [
     "solana",
     "anchor",
     "quarry"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "repository": "git@github.com:QuarryProtocol/quarry.git",
@@ -30,46 +36,46 @@
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@project-serum/anchor": "^0.22.0",
-    "@rushstack/eslint-patch": "^1.1.0",
-    "@saberhq/anchor-contrib": "^1.12.45",
-    "@saberhq/chai-solana": "^1.12.45",
-    "@saberhq/eslint-config": "^1.12.45",
-    "@saberhq/solana-contrib": "^1.12.45",
-    "@saberhq/token-utils": "^1.12.45",
-    "@saberhq/tsconfig": "^1.12.45",
-    "@solana/web3.js": "^1.35.1",
-    "@types/bn.js": "^5.1.0",
-    "@types/chai": "^4.3.0",
-    "@types/mocha": "^9.1.0",
-    "@types/node": "^17.0.19",
-    "@types/prettier": "^2.4.4",
-    "bn.js": "^5.2.0",
+    "@project-serum/anchor": "^0.25.0",
+    "@rushstack/eslint-patch": "^1.2.0",
+    "@saberhq/anchor-contrib": "^1.14.8",
+    "@saberhq/chai-solana": "^1.14.8",
+    "@saberhq/eslint-config": "^2.1.0",
+    "@saberhq/solana-contrib": "^1.14.8",
+    "@saberhq/token-utils": "^1.14.8",
+    "@saberhq/tsconfig": "^2.1.0",
+    "@solana/web3.js": "^1.63.1",
+    "@types/bn.js": "^5.1.1",
+    "@types/chai": "^4.3.3",
+    "@types/eslint": "^8.4.6",
+    "@types/mocha": "^9.1.1",
+    "@types/node": "^18.7.23",
+    "@types/prettier": "^2.7.1",
+    "bn.js": "^5.2.1",
     "chai": "=4.3.4",
-    "eslint": "^8.9.0",
+    "eslint": "^8.24.0",
     "eslint-import-resolver-node": "^0.3.6",
-    "eslint-plugin-import": "^2.25.4",
-    "husky": "^7.0.4",
-    "jsbi": "^4.1.0",
-    "lint-staged": "^12.3.4",
-    "mocha": "^9.2.1",
-    "prettier": "^2.5.1",
-    "ts-node": "^10.5.0",
-    "typedoc": "^0.22.12",
-    "typescript": "^4.5.5"
+    "eslint-plugin-import": "^2.26.0",
+    "husky": "^8.0.1",
+    "jsbi": "^4.3.0",
+    "lint-staged": "^13.0.3",
+    "mocha": "^10.0.0",
+    "prettier": "^2.7.1",
+    "ts-node": "^10.9.1",
+    "typedoc": "^0.23.15",
+    "typescript": "^4.8.4"
   },
   "peerDependencies": {
-    "@project-serum/anchor": ">=0.19",
-    "@saberhq/anchor-contrib": "^1.11",
-    "@saberhq/solana-contrib": "^1.11",
-    "@saberhq/token-utils": "^1.11",
-    "@solana/web3.js": "^1",
-    "bn.js": "^5.2.0",
+    "@project-serum/anchor": ">=0.24",
+    "@saberhq/anchor-contrib": "^1.13",
+    "@saberhq/solana-contrib": "^1.13",
+    "@saberhq/token-utils": "^1.13",
+    "@solana/web3.js": "^1.43",
+    "bn.js": "^5.2.1",
     "jsbi": "^3 || ^4"
   },
   "resolutions": {
-    "bn.js": "^5.2.0",
-    "@types/bn.js": "^5.1.0"
+    "bn.js": "^5.2.1"
   },
   "publishConfig": {
     "access": "public"
@@ -83,8 +89,9 @@
     "*.{js,json,jsx,html,css,md}": "prettier --write"
   },
   "dependencies": {
-    "tiny-invariant": "^1.2.0",
-    "tslib": "^2.3.1"
+    "superstruct": "^0.16.5",
+    "tiny-invariant": "^1.3.1",
+    "tslib": "^2.4.0"
   },
-  "packageManager": "yarn@3.1.1"
+  "packageManager": "yarn@4.0.0-rc.22"
 }
