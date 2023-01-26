@@ -23,4 +23,4 @@ default = []
 anchor-lang = "0.26.0"
 anchor-spl = "0.26.0"
 solana-security-txt = "1.0.1"
-vipers = "^2.0"
+vipers = { git="ssh://git@github.com/bridgesplit/vipers.git"}

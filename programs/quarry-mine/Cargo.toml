@@ -29,7 +29,7 @@ quarry-mint-wrapper = { path = "../quarry-mint-wrapper", features = [
 ], version = "5.3.0" }
 solana-security-txt = "1.0.1"
 spl-math = { version = "0.1.0", features = ["no-entrypoint"] }
-vipers = "^2.0"
+vipers = { git="ssh://git@github.com/bridgesplit/vipers.git"}
 
 [dev-dependencies]
 proptest = { version = "1.0" }
