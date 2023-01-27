@@ -4,6 +4,12 @@ use anchor_lang::prelude::*;
 use num_traits::ToPrimitive;
 use spl_math::uint::U192;
 use vipers::prelude::*;
+use crate::DEFAULT_CLAIM_FEE_MILLIBPS;
+use crate::MAX_BPS;
+use crate::ClaimEvent;
+use crate::TokenAccount;
+use crate::instructions::ClaimRewards;
+use crate::ErrorCode::*;
 
 use crate::Rewarder;
 
@@ -42,96 +48,96 @@ impl Rewarder {
     }
 }
 
-impl<'info> ClaimRewards<'info> {
-    /// Calculates rewards and claims them.
-    pub fn calculate_and_claim_rewards(&mut self) -> Result<()> {
-        let miner = &mut self.stake.miner;
+// impl<'info> ClaimRewards<'info> {
+//     /// Calculates rewards and claims them.
+//     pub fn calculate_and_claim_rewards(&mut self) -> Result<()> {
+//         let miner = &mut self.stake.miner;
 
-        let miner_rewards = miner.rewards_earned;
-        let hard_cap = self.mint_wrapper.hard_cap;
-        let amount_claimable = std::cmp::min(miner_rewards, hard_cap);
+//         let miner_rewards = miner.rewards_earned;
+//         let hard_cap = self.mint_wrapper.hard_cap;
+//         let amount_claimable = std::cmp::min(miner_rewards, hard_cap);
 
-        if amount_claimable == 0 {
-            // 0 claimable -- skip all logic
-            return Ok(());
-        }
+//         if amount_claimable == 0 {
+//             // 0 claimable -- skip all logic
+//             return Ok(());
+//         }
 
-        // Calculate rewards
-        let max_claim_fee_millibps = self.stake.rewarder.max_claim_fee_millibps;
-        invariant!(
-            max_claim_fee_millibps < MAX_BPS * DEFAULT_CLAIM_FEE_MILLIBPS,
-            InvalidMaxClaimFee
-        );
-        let max_claim_fee = unwrap_int!((amount_claimable as u128)
-            .checked_mul(max_claim_fee_millibps.into())
-            .and_then(|f| f.checked_div((MAX_BPS * DEFAULT_CLAIM_FEE_MILLIBPS) as u128))
-            .and_then(|f| f.to_u64()));
+//         // Calculate rewards
+//         let max_claim_fee_millibps = self.stake.rewarder.max_claim_fee_millibps;
+//         invariant!(
+//             max_claim_fee_millibps < MAX_BPS * DEFAULT_CLAIM_FEE_MILLIBPS,
+//             InvalidMaxClaimFee
+//         );
+//         let max_claim_fee = unwrap_int!((amount_claimable as u128)
+//             .checked_mul(max_claim_fee_millibps.into())
+//             .and_then(|f| f.checked_div((MAX_BPS * DEFAULT_CLAIM_FEE_MILLIBPS) as u128))
+//             .and_then(|f| f.to_u64()));
 
-        let amount_claimable_minus_fees = unwrap_int!(amount_claimable.checked_sub(max_claim_fee));
+//         let amount_claimable_minus_fees = unwrap_int!(amount_claimable.checked_sub(max_claim_fee));
 
-        // Claim all rewards.
-        miner.rewards_earned = 0;
+//         // Claim all rewards.
+//         miner.rewards_earned = 0;
 
-        // Setup remaining variables
-        self.mint_claimed_tokens(amount_claimable_minus_fees)?;
-        self.mint_fees(max_claim_fee)?;
+//         // Setup remaining variables
+//         self.mint_claimed_tokens(amount_claimable_minus_fees)?;
+//         self.mint_fees(max_claim_fee)?;
 
-        let now = Clock::get()?.unix_timestamp;
-        emit!(ClaimEvent {
-            authority: self.stake.authority.key(),
-            staked_token: self.stake.quarry.token_mint_key,
-            timestamp: now,
-            rewards_token: self.rewards_token_mint.key(),
-            amount: amount_claimable_minus_fees,
-            fees: max_claim_fee,
-        });
+//         let now = Clock::get()?.unix_timestamp;
+//         emit!(ClaimEvent {
+//             authority: self.stake.authority.key(),
+//             staked_token: self.stake.quarry.token_mint_key,
+//             timestamp: now,
+//             rewards_token: self.rewards_token_mint.key(),
+//             amount: amount_claimable_minus_fees,
+//             fees: max_claim_fee,
+//         });
 
-        Ok(())
-    }
+//         Ok(())
+//     }
 
-    fn create_perform_mint_accounts(
-        &self,
-        destination: Account<'info, TokenAccount>,
-    ) -> quarry_mint_wrapper::cpi::accounts::PerformMint<'info> {
-        quarry_mint_wrapper::cpi::accounts::PerformMint {
-            mint_wrapper: self.mint_wrapper.to_account_info(),
-            minter_authority: self.stake.rewarder.to_account_info(),
-            token_mint: self.rewards_token_mint.to_account_info(),
-            destination: destination.to_account_info(),
-            minter: self.minter.to_account_info(),
-            token_program: self.stake.token_program.to_account_info(),
-        }
-    }
+//     fn create_perform_mint_accounts(
+//         &self,
+//         destination: Account<'info, TokenAccount>,
+//     ) -> quarry_mint_wrapper::cpi::accounts::PerformMint<'info> {
+//         quarry_mint_wrapper::cpi::accounts::PerformMint {
+//             mint_wrapper: self.mint_wrapper.to_account_info(),
+//             minter_authority: self.stake.rewarder.to_account_info(),
+//             token_mint: self.rewards_token_mint.to_account_info(),
+//             destination: destination.to_account_info(),
+//             minter: self.minter.to_account_info(),
+//             token_program: self.stake.token_program.to_account_info(),
+//         }
+//     }
 
-    fn perform_mint(&self, destination: Account<'info, TokenAccount>, amount: u64) -> Result<()> {
-        let claim_mint_accounts = self.create_perform_mint_accounts(destination);
+//     fn perform_mint(&self, destination: Account<'info, TokenAccount>, amount: u64) -> Result<()> {
+//         let claim_mint_accounts = self.create_perform_mint_accounts(destination);
 
-        // Create the signer seeds.
-        let seeds = gen_rewarder_signer_seeds!(self.stake.rewarder);
-        let signer_seeds = &[&seeds[..]];
+//         // Create the signer seeds.
+//         let seeds = gen_rewarder_signer_seeds!(self.stake.rewarder);
+//         let signer_seeds = &[&seeds[..]];
 
-        quarry_mint_wrapper::cpi::perform_mint(
-            CpiContext::new_with_signer(
-                self.mint_wrapper_program.to_account_info(),
-                claim_mint_accounts,
-                signer_seeds,
-            ),
-            amount,
-        )
-    }
+//         quarry_mint_wrapper::cpi::perform_mint(
+//             CpiContext::new_with_signer(
+//                 self.mint_wrapper_program.to_account_info(),
+//                 claim_mint_accounts,
+//                 signer_seeds,
+//             ),
+//             amount,
+//         )
+//     }
 
-    /// Mints the claimed tokens.
-    fn mint_claimed_tokens(&self, amount_claimable_minus_fees: u64) -> Result<()> {
-        let rewards_token_account = (*self.rewards_token_account).clone();
-        self.perform_mint(rewards_token_account, amount_claimable_minus_fees)
-    }
+//     /// Mints the claimed tokens.
+//     fn mint_claimed_tokens(&self, amount_claimable_minus_fees: u64) -> Result<()> {
+//         let rewards_token_account = (*self.rewards_token_account).clone();
+//         self.perform_mint(rewards_token_account, amount_claimable_minus_fees)
+//     }
 
-    /// Mints the fee tokens.
-    fn mint_fees(&self, claim_fee: u64) -> Result<()> {
-        let claim_fee_token_account = (*self.claim_fee_token_account).clone();
-        self.perform_mint(claim_fee_token_account, claim_fee)
-    }
-}
+//     /// Mints the fee tokens.
+//     fn mint_fees(&self, claim_fee: u64) -> Result<()> {
+//         let claim_fee_token_account = (*self.claim_fee_token_account).clone();
+//         self.perform_mint(claim_fee_token_account, claim_fee)
+//     }
+// }
 
 #[cfg(test)]
 #[allow(clippy::unwrap_used)]
@@ -156,7 +162,7 @@ mod tests {
             ..Default::default()
         };
 
-        let invalid: Result<u64> = err!(InvalidRewardsShare);
+        let invalid: Result<u64> = err!(crate::ErrorCode::InvalidRewardsShare);
 
         // invalid because there are no shares
         assert_eq!(
