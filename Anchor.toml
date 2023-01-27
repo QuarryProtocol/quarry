@@ -1,4 +1,4 @@
-anchor_version = "0.24.2"
+anchor_version = "0.26.0"
 solana_version = "1.10.39"
 
 [features]

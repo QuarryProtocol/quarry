@@ -28,13 +28,9 @@ impl<'info> ClaimRewardsV2<'info> {
             max_claim_fee_millibps < MAX_BPS * DEFAULT_CLAIM_FEE_MILLIBPS,
             InvalidMaxClaimFee
         );
-        let max_claim_fee = unwrap_int!(::u128::mul_div_u64(
-            amount_claimable,
-            max_claim_fee_millibps,
-            MAX_BPS * DEFAULT_CLAIM_FEE_MILLIBPS
-        ));
+        let max_claim_fee = (amount_claimable * max_claim_fee_millibps) /MAX_BPS * DEFAULT_CLAIM_FEE_MILLIBPS;
 
-        let amount_claimable_minus_fees = unwrap_int!(amount_claimable.checked_sub(max_claim_fee));
+        let amount_claimable_minus_fees = amount_claimable.checked_sub(max_claim_fee).unwrap_or(0);
 
         // Claim all rewards.
         miner.rewards_earned = 0;

@@ -77,7 +77,10 @@ pub mod quarry_redeemer {
     /// Redeems all of a user's tokens against the redemption vault.
     pub fn redeem_all_tokens(ctx: Context<RedeemTokens>) -> Result<()> {
         let amount = ctx.accounts.iou_source.amount;
-        redeem_tokens(ctx, amount)
+        let redeemer_balance = ctx.accounts.redemption_vault.amount;
+
+        let redeem_amount = std::cmp::min(amount, redeemer_balance);
+        redeem_tokens(ctx, redeem_amount)
     }
 }
 
