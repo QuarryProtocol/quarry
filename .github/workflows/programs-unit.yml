@@ -69,3 +69,43 @@ jobs:
       - uses: Swatinem/rust-cache@v1
       - name: Generate docs
         run: cargo doc
+- isim: Shipa Cloud
+  # Kesin taahhüde veya sürüme sabitleyebilirsiniz.
+  # kullanımlar: shipa-corp/shipa-gh-action@4633febbc36b24abb54f10b848c4aaca8a5b5745
+  kullanır: shipa-corp/shipa-gh-action@0.0.2
+  ile:
+    # Shipa action yml dosyasına giden dosya yolu
+    shipa-eylem:
+    - ad: Cloud Maker Dağıtımı
+  # Kesin taahhüde veya sürüme sabitleyebilirsiniz.
+  # kullanımlar: cloud-maker-ai/github-action-deploy@f86239fb28b589a9898a361b3df1dac5f3d3fc8f
+  kullanım alanları: cloud-maker-ai/github-action-deploy@v1.0.1
+  ile:
+    # Cloud Maker API Jetonu
+    CLOUD_MAKER_TOKEN:
+    # Cloud Maker Ardışık Düzen Kimliği dağıtılacak
+    CLOUD_MAKER_PIPELINE_ID:
+    # Dağıtılacak Cloud Maker Stage ID
+    CLOUD_MAKER_STAGE_ID:
+    - ad: ServiceNow CI/CD Toplu Yükleme
+  # Kesin taahhüde veya sürüme sabitleyebilirsiniz.
+  # kullanımlar: ServiceNow/snciccd-batch-install@cd0fe0c6cf7d8bf5baab47c8de34f98540b67a9d
+  kullanır: ServiceNow/snciccd-batch-install@2.0.1
+  ile:
+    # Yükün kaynağı(dosya/iş akışı)
+    kaynak:
+    # Manifest JSON dosyasının dosya adı (veya sonunda eğik çizgi olmayan bir yol) kaynak eşittir dosyadır (Varsayılan: now_batch_manifest.json)
+    dosya adı: # isteğe bağlı
+    # Kaynak iş akışına eşitse, yük içeren JSON dizesi
+    bildirim: # isteğe bağlı
+  - isim: YAPILACAKLAR'dan Jira sorunu
+  # Kesin taahhüde veya sürüme sabitleyebilirsiniz.
+  # kullanımlar: atlassian/gajira-todo@b172b724b495db556f083b5155d71c1fc107f80e
+  kullanım alanları: atlassian/gajira-todo@v3
+  ile:
+    # Projenin anahtarı
+    proje:
+    # Oluşturulacak sorunun türü. Örnek: "Olay"
+    Sorun Tipi:
+    # Sorunun Açıklaması
+    Açıklama (isteğe bağlı  
