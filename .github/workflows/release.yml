@@ -18,9 +18,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: cachix/install-nix-action@v17
+      - uses: cachix/install-nix-action@v24
       - name: Setup Cachix
-        uses: cachix/cachix-action@v10
+        uses: cachix/cachix-action@v12
         with:
           name: quarry
           extraPullNames: saber
@@ -52,9 +52,9 @@ jobs:
     name: Release crate on crates.io
     steps:
       - uses: actions/checkout@v3
-      - uses: cachix/install-nix-action@v17
+      - uses: cachix/install-nix-action@v24
       - name: Setup Cachix
-        uses: cachix/cachix-action@v10
+        uses: cachix/cachix-action@v12
         with:
           name: quarry
           extraPullNames: saber
@@ -75,9 +75,9 @@ jobs:
     name: Release verifiable binaries
     steps:
       - uses: actions/checkout@v3
-      - uses: cachix/install-nix-action@v17
+      - uses: cachix/install-nix-action@v24
       - name: Setup Cachix
-        uses: cachix/cachix-action@v10
+        uses: cachix/cachix-action@v12
         with:
           name: quarry
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
@@ -98,9 +98,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - uses: cachix/install-nix-action@v17
+      - uses: cachix/install-nix-action@v24
       - name: Setup Cachix
-        uses: cachix/cachix-action@v10
+        uses: cachix/cachix-action@v12
         with:
           name: quarry
           extraPullNames: saber
