@@ -59,7 +59,7 @@ describe("Famine", () => {
       stakeTokenMint = await createMint(
         provider,
         stakedMintAuthority.publicKey,
-        DEFAULT_DECIMALS
+        DEFAULT_DECIMALS,
       );
     });
 
@@ -82,7 +82,7 @@ describe("Famine", () => {
         decimals: DEFAULT_DECIMALS,
         mintAuthority: wrapperKey,
         freezeAuthority: wrapperKey,
-      })
+      }),
     ).to.be.fulfilled;
 
     mintWrapperKey = wrapperKey;
@@ -106,7 +106,7 @@ describe("Famine", () => {
       rewarderWrapper.setAnnualRewards({
         newAnnualRate: annualRewardsRate,
       }),
-      "Set annual rewards rate"
+      "Set annual rewards rate",
     ).to.be.fulfilled;
 
     // whitelist rewarder
@@ -114,9 +114,9 @@ describe("Famine", () => {
       mintWrapper.newMinterWithAllowance(
         mintWrapperKey,
         rewarder,
-        new u64(100_000_000_000000)
+        new u64(100_000_000_000000),
       ),
-      "Minter add"
+      "Minter add",
     ).to.be.fulfilled;
   });
 
@@ -139,12 +139,12 @@ describe("Famine", () => {
       quarryWrapper,
       stakeToken,
       stakedMintAuthority,
-      stakeAmount
+      stakeAmount,
     );
 
     await expectTX(
       quarryWrapper.setRewardsShare(new u64(100)),
-      "Set rewards share"
+      "Set rewards share",
     ).to.be.fulfilled;
 
     const { tx: tx2 } = await quarryWrapper.createMiner();
@@ -157,11 +157,11 @@ describe("Famine", () => {
       .fulfilled;
 
     const minerActions = await quarryWrapper.getMinerActions(
-      provider.wallet.publicKey
+      provider.wallet.publicKey,
     );
     await expectTX(
       minerActions.stake(new TokenAmount(stakeToken, stakeAmount)),
-      "Stake into the quarry"
+      "Stake into the quarry",
     ).to.be.fulfilled;
 
     // Sleep for 5 seconds
@@ -176,14 +176,14 @@ describe("Famine", () => {
     });
     const rewardsTokenAccountInfo = await getTokenAccount(
       provider,
-      rewardsTokenAccount
+      rewardsTokenAccount,
     );
     expect(rewardsTokenAccountInfo.amount.toString()).to.equal(ZERO.toString());
   });
 
   it("Stake before famine and claim after famine", async () => {
     const minerActions = await quarryWrapper.getMinerActions(
-      provider.wallet.publicKey
+      provider.wallet.publicKey,
     );
 
     const rewardsDuration = 5; // 5 seconds
@@ -192,7 +192,7 @@ describe("Famine", () => {
       minerActions
         .stake(new TokenAmount(stakeToken, stakeAmount))
         .combine(quarryWrapper.setFamine(famine)),
-      "Set famine then stake tokens"
+      "Set famine then stake tokens",
     ).to.be.fulfilled;
 
     // Sleep for 8 seconds
@@ -205,11 +205,11 @@ describe("Famine", () => {
     receipt.printLogs();
 
     const claimEvent = QUARRY_CODERS.Mine.parseProgramLogEvents(
-      receipt.response.meta?.logMessages ?? []
+      receipt.response.meta?.logMessages ?? [],
     ).find((ev) => ev.name === "ClaimEvent");
     invariant(
       claimEvent && claimEvent.name === "ClaimEvent",
-      "claim event not found"
+      "claim event not found",
     );
 
     const expectedRewards = dailyRewardsRate
@@ -232,7 +232,7 @@ describe("Famine", () => {
     claim2Receipt.printLogs();
 
     const claim2Event = QUARRY_CODERS.Mine.parseProgramLogEvents(
-      claim2Receipt.response.meta?.logMessages ?? []
+      claim2Receipt.response.meta?.logMessages ?? [],
     )[0];
     expect(claim2Event).to.be.undefined; // No claim event
   });

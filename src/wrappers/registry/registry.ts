@@ -33,7 +33,7 @@ export class QuarryRegistry {
   }): Promise<{ tx: TransactionEnvelope; registry: PublicKey }> {
     const [registry, bump] = await findRegistryAddress(
       rewarderKey,
-      this.program.programId
+      this.program.programId,
     );
     const createRegistryTX = new TransactionEnvelope(this.provider, [
       this.program.instruction.newRegistry(numQuarries, bump, {
@@ -60,12 +60,12 @@ export class QuarryRegistry {
   }): Promise<TransactionEnvelope> {
     const [registry] = await findRegistryAddress(
       rewarderKey,
-      this.program.programId
+      this.program.programId,
     );
     const [quarry] = await findQuarryAddress(
       rewarderKey,
       tokenMint,
-      this.sdk.programs.Mine.programId
+      this.sdk.programs.Mine.programId,
     );
     return new TransactionEnvelope(this.provider, [
       this.program.instruction.syncQuarry({

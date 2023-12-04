@@ -18,7 +18,7 @@ export class RewarderWrapper {
   constructor(
     readonly mineWrapper: MineWrapper,
     readonly rewarderKey: PublicKey,
-    readonly rewarderData: RewarderData
+    readonly rewarderData: RewarderData,
   ) {
     this.sdk = mineWrapper.sdk;
     this.program = mineWrapper.program;
@@ -30,12 +30,12 @@ export class RewarderWrapper {
 
   static fromData(
     provider: Provider,
-    rewarder: ProgramAccount<RewarderData>
+    rewarder: ProgramAccount<RewarderData>,
   ): RewarderWrapper {
     return new RewarderWrapper(
       QuarrySDK.load({ provider }).mine,
       rewarder.publicKey,
-      rewarder.account
+      rewarder.account,
     );
   }
 
@@ -71,7 +71,7 @@ export class RewarderWrapper {
     const [quarryKey] = await findQuarryAddress(
       this.rewarderKey,
       mint,
-      this.program.programId
+      this.program.programId,
     );
     return quarryKey;
   }
@@ -92,7 +92,7 @@ export class RewarderWrapper {
     const [quarryKey, bump] = await findQuarryAddress(
       this.rewarderKey,
       token.mintAccount,
-      this.program.programId
+      this.program.programId,
     );
     const ix = this.program.instruction.createQuarry(bump, {
       accounts: {
@@ -130,7 +130,7 @@ export class RewarderWrapper {
     const [quarryKey] = await findQuarryAddress(
       this.rewarderKey,
       token.mintAccount,
-      this.program.programId
+      this.program.programId,
     );
     const ix = this.program.instruction.createQuarryV2({
       accounts: {
@@ -182,7 +182,7 @@ export class RewarderWrapper {
    */
   async setAndSyncAnnualRewards(
     newAnnualRate: u64,
-    mints: PublicKey[]
+    mints: PublicKey[],
   ): Promise<TransactionEnvelope> {
     const tx = await this.syncQuarryRewards(mints);
     return this.setAnnualRewards({ newAnnualRate }).combine(tx);
@@ -204,9 +204,9 @@ export class RewarderWrapper {
               rewarder: this.rewarderKey,
               quarry,
             },
-          })
+          }),
         );
-      })
+      }),
     );
     return this.sdk.newTx(instructions);
   }
@@ -261,7 +261,7 @@ export class RewarderWrapper {
    * Pause the rewarder
    */
   pause(
-    authority: PublicKey = this.sdk.provider.wallet.publicKey
+    authority: PublicKey = this.sdk.provider.wallet.publicKey,
   ): TransactionEnvelope {
     return new TransactionEnvelope(this.sdk.provider, [
       this.program.instruction.pause({
@@ -274,7 +274,7 @@ export class RewarderWrapper {
    * Unpause the rewarder
    */
   unpause(
-    authority: PublicKey = this.sdk.provider.wallet.publicKey
+    authority: PublicKey = this.sdk.provider.wallet.publicKey,
   ): TransactionEnvelope {
     return new TransactionEnvelope(this.sdk.provider, [
       this.program.instruction.unpause({

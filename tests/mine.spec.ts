@@ -72,7 +72,7 @@ describe("Mine", () => {
       stakeTokenMint = await createMint(
         provider,
         stakedMintAuthority.publicKey,
-        DEFAULT_DECIMALS
+        DEFAULT_DECIMALS,
       );
     });
 
@@ -103,7 +103,7 @@ describe("Mine", () => {
         decimals: DEFAULT_DECIMALS,
         mintAuthority: wrapperKey,
         freezeAuthority: wrapperKey,
-      })
+      }),
     ).to.be.fulfilled;
 
     mintWrapperKey = wrapperKey;
@@ -145,7 +145,7 @@ describe("Mine", () => {
               feeToTokenAccount: ata.address,
               tokenProgram: TOKEN_PROGRAM_ID,
             },
-          })
+          }),
         ).to.be.fulfilled;
       });
 
@@ -209,7 +209,7 @@ describe("Mine", () => {
       expect(rewarder.annualRewardsRate.toString()).to.eql(ZERO.toString());
       expect(rewarder.numQuarries).to.eq(ZERO.toNumber());
       expect(rewarder.totalRewardsShares.toString()).to.bignumber.eq(
-        ZERO.toString()
+        ZERO.toString(),
       );
     });
 
@@ -265,7 +265,7 @@ describe("Mine", () => {
             authority: newAuthority.publicKey,
             rewarder: rewarderKey,
           },
-        })
+        }),
       );
       instructions.push(
         mine.program.instruction.acceptAuthority({
@@ -273,7 +273,7 @@ describe("Mine", () => {
             authority: provider.wallet.publicKey,
             rewarder: rewarderKey,
           },
-        })
+        }),
       );
 
       tx = sdk.newTx(instructions, [newAuthority]);
@@ -321,7 +321,7 @@ describe("Mine", () => {
               feeToTokenAccount: ata.address,
               tokenProgram: TOKEN_PROGRAM_ID,
             },
-          })
+          }),
         ).to.be.fulfilled;
       });
 
@@ -385,7 +385,7 @@ describe("Mine", () => {
       expect(rewarder.annualRewardsRate.toString()).to.eql(ZERO.toString());
       expect(rewarder.numQuarries).to.eq(ZERO.toNumber());
       expect(rewarder.totalRewardsShares.toString()).to.bignumber.eq(
-        ZERO.toString()
+        ZERO.toString(),
       );
     });
 
@@ -441,7 +441,7 @@ describe("Mine", () => {
             authority: newAuthority.publicKey,
             rewarder: rewarderKey,
           },
-        })
+        }),
       );
       instructions.push(
         mine.program.instruction.acceptAuthority({
@@ -449,7 +449,7 @@ describe("Mine", () => {
             authority: provider.wallet.publicKey,
             rewarder: rewarderKey,
           },
-        })
+        }),
       );
 
       tx = sdk.newTx(instructions, [newAuthority]);
@@ -479,7 +479,7 @@ describe("Mine", () => {
       rewarder = await mine.loadRewarderWrapper(rewarderKey);
       await expectTX(
         await rewarder.setAndSyncAnnualRewards(ANNUAL_REWARDS_RATE, []),
-        "set annual rewards"
+        "set annual rewards",
       );
     });
 
@@ -490,31 +490,29 @@ describe("Mine", () => {
         });
         await expectTX(tx, "Create new quarry").to.be.fulfilled;
 
-        const rewarderData = await mine.program.account.rewarder.fetch(
-          rewarderKey
-        );
+        const rewarderData =
+          await mine.program.account.rewarder.fetch(rewarderKey);
         assert.strictEqual(rewarderData.numQuarries, 1);
-        const quarryAccountInfo = await provider.connection.getAccountInfo(
-          quarry
-        );
+        const quarryAccountInfo =
+          await provider.connection.getAccountInfo(quarry);
         expect(quarryAccountInfo?.owner).to.eqAddress(mine.program.programId);
 
         assert.ok(quarryAccountInfo);
         quarryData = mine.program.coder.accounts.decode<QuarryData>(
           "Quarry",
-          quarryAccountInfo.data
+          quarryAccountInfo.data,
         );
         assert.strictEqual(
           quarryData.famineTs.toString(),
-          "9223372036854775807"
+          "9223372036854775807",
         );
         assert.strictEqual(
           quarryData.tokenMintKey.toBase58(),
-          stakeTokenMint.toBase58()
+          stakeTokenMint.toBase58(),
         );
         assert.strictEqual(
           quarryData.annualRewardsRate.toString(),
-          ZERO.toString()
+          ZERO.toString(),
         );
         assert.strictEqual(quarryData.rewardsShare.toString(), ZERO.toString());
 
@@ -534,26 +532,25 @@ describe("Mine", () => {
           });
         });
 
-        const rewarderData = await mine.program.account.rewarder.fetch(
-          rewarderKey
-        );
+        const rewarderData =
+          await mine.program.account.rewarder.fetch(rewarderKey);
         expect(rewarderData.totalRewardsShares.toString()).to.equal(
-          quarryRewardsShare.toString()
+          quarryRewardsShare.toString(),
         );
 
         let quarry = await rewarder.getQuarry(stakeToken);
         expect(quarry.key).to.eqAddress(quarryKey);
         expect(quarry.quarryData.lastUpdateTs.toString()).to.equal(
-          quarryData.lastUpdateTs.toString()
+          quarryData.lastUpdateTs.toString(),
         );
         expect(quarry.quarryData.annualRewardsRate.toString()).to.equal(
-          quarryData.annualRewardsRate.toString()
+          quarryData.annualRewardsRate.toString(),
         );
         expect(quarry.quarryData.rewardsShare.toString()).to.eq(
-          quarryRewardsShare.toString()
+          quarryRewardsShare.toString(),
         );
         expect(quarry.quarryData.annualRewardsRate.toString()).to.not.equal(
-          quarry.computeAnnualRewardsRate().toString()
+          quarry.computeAnnualRewardsRate().toString(),
         );
 
         const currentTime = Math.floor(new Date().getTime() / 1000);
@@ -566,11 +563,11 @@ describe("Mine", () => {
           quarry.quarryData.lastUpdateTs
             .sub(new BN(currentTime))
             .abs()
-            .lte(new BN(1))
+            .lte(new BN(1)),
         ).to.be.true;
         const expectedRewardsRate = quarry.computeAnnualRewardsRate();
         expect(quarry.quarryData.annualRewardsRate.toString()).to.equal(
-          expectedRewardsRate.toString()
+          expectedRewardsRate.toString(),
         );
       });
 
@@ -587,13 +584,12 @@ describe("Mine", () => {
             },
           });
         });
-        const quarryAccountInfo = await provider.connection.getAccountInfo(
-          quarryKey
-        );
+        const quarryAccountInfo =
+          await provider.connection.getAccountInfo(quarryKey);
         assert.ok(quarryAccountInfo);
         const quarryData = mine.program.coder.accounts.decode<QuarryData>(
           "Quarry",
-          quarryAccountInfo?.data
+          quarryAccountInfo?.data,
         );
         assert.strictEqual(quarryData.famineTs.toString(), now.toString());
 
@@ -615,11 +611,11 @@ describe("Mine", () => {
         const nextMint = await createMint(
           provider,
           provider.wallet.publicKey,
-          DEFAULT_DECIMALS
+          DEFAULT_DECIMALS,
         );
         const [quarryKey, bump] = await findQuarryAddress(
           rewarderKey,
-          nextMint
+          nextMint,
         );
         await assert.rejects(
           async () => {
@@ -642,7 +638,7 @@ describe("Mine", () => {
             console.error(err);
             expect(err.message).to.include("Error Code: Unauthorized"); // mut constraint
             return true;
-          }
+          },
         );
       });
 
@@ -651,7 +647,7 @@ describe("Mine", () => {
         const nextMint = await createMint(
           provider,
           provider.wallet.publicKey,
-          DEFAULT_DECIMALS
+          DEFAULT_DECIMALS,
         );
         const [quarryKey] = await findQuarryAddress(rewarderKey, nextMint);
         await assert.rejects(
@@ -674,7 +670,7 @@ describe("Mine", () => {
             console.error(err);
             expect(err.message).to.include("Error Code: Unauthorized");
             return true;
-          }
+          },
         );
       });
 
@@ -682,7 +678,7 @@ describe("Mine", () => {
         await assert.rejects(async () => {
           const [quarryKey, bump] = await findQuarryAddress(
             rewarderKey,
-            Keypair.generate().publicKey
+            Keypair.generate().publicKey,
           );
           await mine.program.rpc.createQuarry(bump, {
             accounts: {
@@ -704,7 +700,7 @@ describe("Mine", () => {
         await assert.rejects(async () => {
           const [quarryKey] = await findQuarryAddress(
             rewarderKey,
-            Keypair.generate().publicKey
+            Keypair.generate().publicKey,
           );
           await mine.program.rpc.createQuarryV2({
             accounts: {
@@ -746,12 +742,11 @@ describe("Mine", () => {
           totalRewardsShare = totalRewardsShare.add(rewardsShare);
         }
 
-        const rewarderData = await mine.program.account.rewarder.fetch(
-          rewarderKey
-        );
+        const rewarderData =
+          await mine.program.account.rewarder.fetch(rewarderKey);
         expect(rewarderData.numQuarries).to.eq(numQuarries);
         expect(rewarderData.totalRewardsShares).to.bignumber.eq(
-          totalRewardsShare
+          totalRewardsShare,
         );
 
         const mints = tokens.map((tok) => tok.mintAccount);
@@ -761,20 +756,19 @@ describe("Mine", () => {
 
       it("Set annual rewards and make sure quarries update", async () => {
         const multiplier = new BN(10);
-        let rewarderData = await mine.program.account.rewarder.fetch(
-          rewarderKey
-        );
+        let rewarderData =
+          await mine.program.account.rewarder.fetch(rewarderKey);
         const nextAnnualRewardsRate = ANNUAL_REWARDS_RATE.mul(multiplier);
         const prevRates = await Promise.all(
           tokens.map(async (t) => {
             const quarry = await rewarder.getQuarry(t);
             return { token: t, rate: quarry.quarryData.annualRewardsRate };
-          })
+          }),
         );
 
         const tx = await rewarder.setAndSyncAnnualRewards(
           nextAnnualRewardsRate,
-          tokens.map((t) => t.mintAccount)
+          tokens.map((t) => t.mintAccount),
         );
         console.log(await tx.simulate());
         await expectTX(tx, "set annual rewards and update quarry rewards").to.be
@@ -782,7 +776,7 @@ describe("Mine", () => {
 
         rewarderData = await mine.program.account.rewarder.fetch(rewarderKey);
         expect(rewarderData.annualRewardsRate).to.bignumber.eq(
-          nextAnnualRewardsRate
+          nextAnnualRewardsRate,
         );
 
         let sumRewardsPerAnnum = new BN(0);
@@ -793,7 +787,7 @@ describe("Mine", () => {
           const prevRate = prevRates.find((r) => r.token.equals(token))?.rate;
           invariant(
             prevRate,
-            `prev rate not found for token ${token.toString()}`
+            `prev rate not found for token ${token.toString()}`,
           );
 
           // Epsilon is 10
@@ -801,22 +795,22 @@ describe("Mine", () => {
           const expectedRate = prevRate.mul(multiplier);
           expect(
             nextRate,
-            `mul rate: ${multiplier.toString()}; expected: ${expectedRate.toString()}; got: ${nextRate.toString()}`
+            `mul rate: ${multiplier.toString()}; expected: ${expectedRate.toString()}; got: ${nextRate.toString()}`,
           ).to.bignumber.closeTo(expectedRate, "10");
         }
         // Check on day multiple
         expect(
           sumRewardsPerAnnum,
-          "rewards rate within one day multiple"
+          "rewards rate within one day multiple",
         ).bignumber.closeTo(
           nextAnnualRewardsRate,
-          new BN(2) // precision lost
+          new BN(2), // precision lost
         );
 
         // Restore daily rewards rate
         const txRestore = await rewarder.setAndSyncAnnualRewards(
           ANNUAL_REWARDS_RATE,
-          tokens.map((t) => t.mintAccount)
+          tokens.map((t) => t.mintAccount),
         );
         await expectTX(txRestore, "revert daily rewards to previous amount").to
           .be.fulfilled;
@@ -828,10 +822,10 @@ describe("Mine", () => {
           const prevRate = prevRates.find((r) => r.token.equals(token))?.rate;
           invariant(
             prevRate,
-            `prev rate not found for token ${token.toString()}`
+            `prev rate not found for token ${token.toString()}`,
           );
           expect(lastRate, `revert rate ${token.toString()}`).bignumber.to.eq(
-            prevRate
+            prevRate,
           );
         }
       });
@@ -855,7 +849,7 @@ describe("Mine", () => {
       rewarder = await mine.loadRewarderWrapper(rewarderKey);
       await expectTX(
         await rewarder.setAndSyncAnnualRewards(ANNUAL_REWARDS_RATE, []),
-        "set annual rewards"
+        "set annual rewards",
       );
     });
 
@@ -866,31 +860,29 @@ describe("Mine", () => {
         });
         await expectTX(tx, "Create new quarry").to.be.fulfilled;
 
-        const rewarderData = await mine.program.account.rewarder.fetch(
-          rewarderKey
-        );
+        const rewarderData =
+          await mine.program.account.rewarder.fetch(rewarderKey);
         assert.strictEqual(rewarderData.numQuarries, 1);
-        const quarryAccountInfo = await provider.connection.getAccountInfo(
-          quarry
-        );
+        const quarryAccountInfo =
+          await provider.connection.getAccountInfo(quarry);
         expect(quarryAccountInfo?.owner).to.eqAddress(mine.program.programId);
 
         assert.ok(quarryAccountInfo);
         quarryData = mine.program.coder.accounts.decode<QuarryData>(
           "Quarry",
-          quarryAccountInfo.data
+          quarryAccountInfo.data,
         );
         assert.strictEqual(
           quarryData.famineTs.toString(),
-          "9223372036854775807"
+          "9223372036854775807",
         );
         assert.strictEqual(
           quarryData.tokenMintKey.toBase58(),
-          stakeTokenMint.toBase58()
+          stakeTokenMint.toBase58(),
         );
         assert.strictEqual(
           quarryData.annualRewardsRate.toString(),
-          ZERO.toString()
+          ZERO.toString(),
         );
         assert.strictEqual(quarryData.rewardsShare.toString(), ZERO.toString());
 
@@ -910,26 +902,25 @@ describe("Mine", () => {
           });
         });
 
-        const rewarderData = await mine.program.account.rewarder.fetch(
-          rewarderKey
-        );
+        const rewarderData =
+          await mine.program.account.rewarder.fetch(rewarderKey);
         expect(rewarderData.totalRewardsShares.toString()).to.equal(
-          quarryRewardsShare.toString()
+          quarryRewardsShare.toString(),
         );
 
         let quarry = await rewarder.getQuarry(stakeToken);
         expect(quarry.key).to.eqAddress(quarryKey);
         expect(quarry.quarryData.lastUpdateTs.toString()).to.equal(
-          quarryData.lastUpdateTs.toString()
+          quarryData.lastUpdateTs.toString(),
         );
         expect(quarry.quarryData.annualRewardsRate.toString()).to.equal(
-          quarryData.annualRewardsRate.toString()
+          quarryData.annualRewardsRate.toString(),
         );
         expect(quarry.quarryData.rewardsShare.toString()).to.eq(
-          quarryRewardsShare.toString()
+          quarryRewardsShare.toString(),
         );
         expect(quarry.quarryData.annualRewardsRate.toString()).to.not.equal(
-          quarry.computeAnnualRewardsRate().toString()
+          quarry.computeAnnualRewardsRate().toString(),
         );
 
         const currentTime = Math.floor(new Date().getTime() / 1000);
@@ -942,11 +933,11 @@ describe("Mine", () => {
           quarry.quarryData.lastUpdateTs
             .sub(new BN(currentTime))
             .abs()
-            .lte(new BN(1))
+            .lte(new BN(1)),
         ).to.be.true;
         const expectedRewardsRate = quarry.computeAnnualRewardsRate();
         expect(quarry.quarryData.annualRewardsRate.toString()).to.equal(
-          expectedRewardsRate.toString()
+          expectedRewardsRate.toString(),
         );
       });
 
@@ -963,13 +954,12 @@ describe("Mine", () => {
             },
           });
         });
-        const quarryAccountInfo = await provider.connection.getAccountInfo(
-          quarryKey
-        );
+        const quarryAccountInfo =
+          await provider.connection.getAccountInfo(quarryKey);
         assert.ok(quarryAccountInfo);
         const quarryData = mine.program.coder.accounts.decode<QuarryData>(
           "Quarry",
-          quarryAccountInfo?.data
+          quarryAccountInfo?.data,
         );
         assert.strictEqual(quarryData.famineTs.toString(), now.toString());
 
@@ -991,11 +981,11 @@ describe("Mine", () => {
         const nextMint = await createMint(
           provider,
           provider.wallet.publicKey,
-          DEFAULT_DECIMALS
+          DEFAULT_DECIMALS,
         );
         const [quarryKey, bump] = await findQuarryAddress(
           rewarderKey,
-          nextMint
+          nextMint,
         );
         await assert.rejects(
           async () => {
@@ -1018,7 +1008,7 @@ describe("Mine", () => {
             console.error(err);
             expect(err.message).to.include("Error Code: Unauthorized"); // mut constraint
             return true;
-          }
+          },
         );
       });
 
@@ -1027,7 +1017,7 @@ describe("Mine", () => {
         const nextMint = await createMint(
           provider,
           provider.wallet.publicKey,
-          DEFAULT_DECIMALS
+          DEFAULT_DECIMALS,
         );
         const [quarryKey] = await findQuarryAddress(rewarderKey, nextMint);
         await assert.rejects(
@@ -1050,7 +1040,7 @@ describe("Mine", () => {
             console.error(err);
             expect(err.message).to.include("Error Code: Unauthorized");
             return true;
-          }
+          },
         );
       });
 
@@ -1058,7 +1048,7 @@ describe("Mine", () => {
         await assert.rejects(async () => {
           const [quarryKey, bump] = await findQuarryAddress(
             rewarderKey,
-            Keypair.generate().publicKey
+            Keypair.generate().publicKey,
           );
           await mine.program.rpc.createQuarry(bump, {
             accounts: {
@@ -1080,7 +1070,7 @@ describe("Mine", () => {
         await assert.rejects(async () => {
           const [quarryKey] = await findQuarryAddress(
             rewarderKey,
-            Keypair.generate().publicKey
+            Keypair.generate().publicKey,
           );
           await mine.program.rpc.createQuarryV2({
             accounts: {
@@ -1122,12 +1112,11 @@ describe("Mine", () => {
           totalRewardsShare = totalRewardsShare.add(rewardsShare);
         }
 
-        const rewarderData = await mine.program.account.rewarder.fetch(
-          rewarderKey
-        );
+        const rewarderData =
+          await mine.program.account.rewarder.fetch(rewarderKey);
         expect(rewarderData.numQuarries).to.eq(numQuarries);
         expect(rewarderData.totalRewardsShares).to.bignumber.eq(
-          totalRewardsShare
+          totalRewardsShare,
         );
 
         const mints = tokens.map((tok) => tok.mintAccount);
@@ -1137,20 +1126,19 @@ describe("Mine", () => {
 
       it("Set annual rewards and make sure quarries update", async () => {
         const multiplier = new BN(10);
-        let rewarderData = await mine.program.account.rewarder.fetch(
-          rewarderKey
-        );
+        let rewarderData =
+          await mine.program.account.rewarder.fetch(rewarderKey);
         const nextAnnualRewardsRate = ANNUAL_REWARDS_RATE.mul(multiplier);
         const prevRates = await Promise.all(
           tokens.map(async (t) => {
             const quarry = await rewarder.getQuarry(t);
             return { token: t, rate: quarry.quarryData.annualRewardsRate };
-          })
+          }),
         );
 
         const tx = await rewarder.setAndSyncAnnualRewards(
           nextAnnualRewardsRate,
-          tokens.map((t) => t.mintAccount)
+          tokens.map((t) => t.mintAccount),
         );
         console.log(await tx.simulate());
         await expectTX(tx, "set annual rewards and update quarry rewards").to.be
@@ -1158,7 +1146,7 @@ describe("Mine", () => {
 
         rewarderData = await mine.program.account.rewarder.fetch(rewarderKey);
         expect(rewarderData.annualRewardsRate).to.bignumber.eq(
-          nextAnnualRewardsRate
+          nextAnnualRewardsRate,
         );
 
         let sumRewardsPerAnnum = new BN(0);
@@ -1169,7 +1157,7 @@ describe("Mine", () => {
           const prevRate = prevRates.find((r) => r.token.equals(token))?.rate;
           invariant(
             prevRate,
-            `prev rate not found for token ${token.toString()}`
+            `prev rate not found for token ${token.toString()}`,
           );
 
           // Epsilon is 10
@@ -1177,22 +1165,22 @@ describe("Mine", () => {
           const expectedRate = prevRate.mul(multiplier);
           expect(
             nextRate,
-            `mul rate: ${multiplier.toString()}; expected: ${expectedRate.toString()}; got: ${nextRate.toString()}`
+            `mul rate: ${multiplier.toString()}; expected: ${expectedRate.toString()}; got: ${nextRate.toString()}`,
           ).to.bignumber.closeTo(expectedRate, "10");
         }
         // Check on day multiple
         expect(
           sumRewardsPerAnnum,
-          "rewards rate within one day multiple"
+          "rewards rate within one day multiple",
         ).bignumber.closeTo(
           nextAnnualRewardsRate,
-          new BN(2) // precision lost
+          new BN(2), // precision lost
         );
 
         // Restore daily rewards rate
         const txRestore = await rewarder.setAndSyncAnnualRewards(
           ANNUAL_REWARDS_RATE,
-          tokens.map((t) => t.mintAccount)
+          tokens.map((t) => t.mintAccount),
         );
         await expectTX(txRestore, "revert daily rewards to previous amount").to
           .be.fulfilled;
@@ -1204,10 +1192,10 @@ describe("Mine", () => {
           const prevRate = prevRates.find((r) => r.token.equals(token))?.rate;
           invariant(
             prevRate,
-            `prev rate not found for token ${token.toString()}`
+            `prev rate not found for token ${token.toString()}`,
           );
           expect(lastRate, `revert rate ${token.toString()}`).bignumber.to.eq(
-            prevRate
+            prevRate,
           );
         }
       });
@@ -1228,7 +1216,7 @@ describe("Mine", () => {
       rewarderKey = theRewarderKey;
       rewarder = await mine.loadRewarderWrapper(rewarderKey);
       await expectTX(
-        await rewarder.setAndSyncAnnualRewards(ANNUAL_REWARDS_RATE, [])
+        await rewarder.setAndSyncAnnualRewards(ANNUAL_REWARDS_RATE, []),
       ).to.be.fulfilled;
 
       const { tx: quarryTx } = await rewarder.createQuarry({
@@ -1253,14 +1241,14 @@ describe("Mine", () => {
       assert.ok(minerAccountInfo?.data);
       const minerData = mine.program.coder.accounts.decode<MinerData>(
         "Miner",
-        minerAccountInfo.data
+        minerAccountInfo.data,
       );
       expect(minerData.authority).to.eqAddress(provider.wallet.publicKey);
       assert.strictEqual(minerData.quarry.toBase58(), quarry.key.toBase58());
 
       const minerBalance = await getTokenAccount(
         provider,
-        minerData.tokenVaultKey
+        minerData.tokenVaultKey,
       );
       expect(minerBalance.amount).to.bignumber.eq(ZERO);
     });
@@ -1273,16 +1261,16 @@ describe("Mine", () => {
         quarry,
         stakeToken,
         stakedMintAuthority,
-        amount
+        amount,
       );
 
       // stake into the quarry
       const minerActions = await quarry.getMinerActions(
-        provider.wallet.publicKey
+        provider.wallet.publicKey,
       );
       await expectTX(
         minerActions.stake(new TokenAmount(stakeToken, amount)),
-        "Stake into the quarry"
+        "Stake into the quarry",
       ).to.be.fulfilled;
 
       let miner = await quarry.getMiner(provider.wallet.publicKey);
@@ -1295,21 +1283,21 @@ describe("Mine", () => {
       expect(minerVaultInfo.amount).to.bignumber.eq(new BN(amount));
       let userStakeTokenAccountInfo = await getTokenAccount(
         provider,
-        userStakeTokenAccount
+        userStakeTokenAccount,
       );
       expect(userStakeTokenAccountInfo.amount).to.bignumber.eq(ZERO);
 
       // withdraw from the quarry
       await expectTX(
         minerActions.withdraw(new TokenAmount(stakeToken, amount)),
-        "Withdraw from the quarry"
+        "Withdraw from the quarry",
       ).to.be.fulfilled;
       miner = await quarry.getMiner(provider.wallet.publicKey);
       invariant(miner, "miner must exist");
 
       const endMinerBalance = await getTokenAccount(
         provider,
-        miner.tokenVaultKey
+        miner.tokenVaultKey,
       );
       expect(endMinerBalance.amount).to.bignumber.eq(ZERO);
 
@@ -1317,7 +1305,7 @@ describe("Mine", () => {
       expect(minerVaultInfo.amount.toNumber()).to.eq(ZERO.toNumber());
       userStakeTokenAccountInfo = await getTokenAccount(
         provider,
-        userStakeTokenAccount
+        userStakeTokenAccount,
       );
       expect(userStakeTokenAccountInfo.amount.toNumber()).to.eq(amount);
     });
@@ -1331,7 +1319,7 @@ describe("Mine", () => {
         user = Keypair.generate();
         await provider.connection.requestAirdrop(
           user.publicKey,
-          LAMPORTS_PER_SOL
+          LAMPORTS_PER_SOL,
         );
         rescueMint = await createMint(provider);
       });
@@ -1362,8 +1350,8 @@ describe("Mine", () => {
             minerATA,
             provider.wallet.publicKey,
             [],
-            EXPECTED_RESCUE_AMOUNT
-          )
+            EXPECTED_RESCUE_AMOUNT,
+          ),
         );
 
         await expectTXTable(tx, "create miner with ATA").to.be.fulfilled;
@@ -1376,13 +1364,13 @@ describe("Mine", () => {
           quarry,
           stakeToken,
           stakedMintAuthority,
-          stakeAmount.toNumber()
+          stakeAmount.toNumber(),
         );
         const minerActions = await quarry.getMinerActions(
-          provider.wallet.publicKey
+          provider.wallet.publicKey,
         );
         const stakeTx = minerActions.stake(
-          new TokenAmount(stakeToken, stakeAmount)
+          new TokenAmount(stakeToken, stakeAmount),
         );
         await expectTX(stakeTx, "deposit staked tokens").to.be.fulfilled;
 
@@ -1396,7 +1384,7 @@ describe("Mine", () => {
         });
         await expectTX(
           rescueTX,
-          "rescue staked tokens for user"
+          "rescue staked tokens for user",
         ).to.be.rejectedWith("0x454");
       });
 
@@ -1434,7 +1422,7 @@ describe("Mine", () => {
           owner: user.publicKey,
         });
         await expectTX(tx, "rescue tokens for user").to.be.rejectedWith(
-          "Signature verification failed"
+          "Signature verification failed",
         );
       });
     });

@@ -5,18 +5,18 @@ import { QUARRY_ADDRESSES } from "../../constants";
 
 export const findMintWrapperAddress = async (
   base: PublicKey,
-  programID: PublicKey = QUARRY_ADDRESSES.MintWrapper
+  programID: PublicKey = QUARRY_ADDRESSES.MintWrapper,
 ): Promise<[PublicKey, number]> => {
   return await PublicKey.findProgramAddress(
     [Buffer.from(utils.bytes.utf8.encode("MintWrapper")), base.toBytes()],
-    programID
+    programID,
   );
 };
 
 export const findMinterAddress = async (
   wrapper: PublicKey,
   authority: PublicKey,
-  programID: PublicKey = QUARRY_ADDRESSES.MintWrapper
+  programID: PublicKey = QUARRY_ADDRESSES.MintWrapper,
 ): Promise<[PublicKey, number]> => {
   return await PublicKey.findProgramAddress(
     [
@@ -24,6 +24,6 @@ export const findMinterAddress = async (
       wrapper.toBytes(),
       authority.toBytes(),
     ],
-    programID
+    programID,
   );
 };

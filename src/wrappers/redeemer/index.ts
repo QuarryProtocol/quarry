@@ -24,7 +24,7 @@ export class RedeemerWrapper {
     readonly iouMint: PublicKey,
     readonly redemptionMint: PublicKey,
     readonly key: PublicKey,
-    readonly data: RedeemerData
+    readonly data: RedeemerData,
   ) {}
 
   get program(): RedeemerProgram {
@@ -103,7 +103,7 @@ export class RedeemerWrapper {
   }
 
   async getRedeemTokenAccounts(
-    args: Omit<RedeemTokenArgs, "tokenAmount">
+    args: Omit<RedeemTokenArgs, "tokenAmount">,
   ): Promise<{
     redeemer: PublicKey;
     iouMint: PublicKey;

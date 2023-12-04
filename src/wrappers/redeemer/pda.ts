@@ -16,6 +16,6 @@ export const findRedeemerKey = async ({
       iouMint.toBytes(),
       redemptionMint.toBytes(),
     ],
-    QUARRY_ADDRESSES.Redeemer
+    QUARRY_ADDRESSES.Redeemer,
   );
 };

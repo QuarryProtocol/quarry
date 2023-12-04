@@ -14,7 +14,7 @@ export class Operator {
   constructor(
     readonly sdk: QuarrySDK,
     readonly key: PublicKey,
-    readonly data: OperatorData
+    readonly data: OperatorData,
   ) {}
 
   get program(): QuarryOperatorProgram {
@@ -39,7 +39,7 @@ export class Operator {
   }): Promise<Operator | null> {
     const program = sdk.programs.Operator;
     const data = (await program.account.operator.fetchNullable(
-      key
+      key,
     )) as OperatorData;
     if (!data) {
       return null;
@@ -65,7 +65,7 @@ export class Operator {
   }> {
     const [operatorKey] = await findOperatorAddress(
       baseKP.publicKey,
-      sdk.programs.Operator.programId
+      sdk.programs.Operator.programId,
     );
     return {
       key: operatorKey,
@@ -85,7 +85,7 @@ export class Operator {
             },
           }),
         ],
-        [baseKP]
+        [baseKP],
       ),
     };
   }
@@ -183,7 +183,7 @@ export class Operator {
     const [quarry] = await findQuarryAddress(
       this.data.rewarder,
       tokenMint,
-      this.sdk.programs.Mine.programId
+      this.sdk.programs.Mine.programId,
     );
     return {
       quarry,

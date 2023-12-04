@@ -47,16 +47,16 @@ describe("Quarry Merge Mine", () => {
 
     const { connection } = provider;
     await connection.confirmTransaction(
-      await connection.requestAirdrop(adminKP.publicKey, 10 * LAMPORTS_PER_SOL)
+      await connection.requestAirdrop(adminKP.publicKey, 10 * LAMPORTS_PER_SOL),
     );
     await connection.confirmTransaction(
-      await connection.requestAirdrop(ownerKP.publicKey, 10 * LAMPORTS_PER_SOL)
+      await connection.requestAirdrop(ownerKP.publicKey, 10 * LAMPORTS_PER_SOL),
     );
 
     const stakedTokenMint = await createMint(
       provider,
       minterKP.publicKey,
-      DEFAULT_DECIMALS
+      DEFAULT_DECIMALS,
     );
     stakedToken = Token.fromMint(stakedTokenMint, DEFAULT_DECIMALS);
 
@@ -99,9 +99,8 @@ describe("Quarry Merge Mine", () => {
       });
 
       // init merge miner
-      const poolData = await ownerSDK.mergeMine.program.account.mergePool.fetch(
-        poolKey
-      );
+      const poolData =
+        await ownerSDK.mergeMine.program.account.mergePool.fetch(poolKey);
       const { tx: initMMTX, key: mmKey } = await ownerSDK.mergeMine.newMM({
         pool: {
           key: poolKey,
@@ -135,19 +134,19 @@ describe("Quarry Merge Mine", () => {
               ownerAccounts.staked,
               minterKP.publicKey,
               [],
-              1_000_000_000_000
+              1_000_000_000_000,
             ),
           ],
-          [minterKP]
+          [minterKP],
         ),
-        "Mint staked token to owner"
+        "Mint staked token to owner",
       ).to.be.fulfilled;
 
       const ownerInitialBalance = (
         await getTokenAccount(provider, ownerAccounts.staked)
       ).amount;
       expect(ownerInitialBalance).to.bignumber.eq(
-        TokenAmount.parse(stakedToken, "1000000").toU64()
+        TokenAmount.parse(stakedToken, "1000000").toU64(),
       );
 
       const stakedAmount = TokenAmount.parse(stakedToken, "100");
@@ -186,26 +185,26 @@ describe("Quarry Merge Mine", () => {
           replicaBBalance: BN;
           walletBalance: BN;
         },
-        msg?: string
+        msg?: string,
       ) => {
         const state = await fetchState();
         const msgFmt = (prop: string) => (msg ? `${prop} (${msg})` : undefined);
         expect(state.primaryBalance, msgFmt("primaryBalance")).to.bignumber.eq(
-          args.primaryBalance
+          args.primaryBalance,
         );
         expect(state.replicaBalance, msgFmt("replicaBalance")).to.bignumber.eq(
-          args.replicaBalance
+          args.replicaBalance,
         );
         expect(
           state.replicaABalance,
-          msgFmt("replicaABalance")
+          msgFmt("replicaABalance"),
         ).to.bignumber.eq(args.replicaABalance);
         expect(
           state.replicaBBalance,
-          msgFmt("replicaBBalance")
+          msgFmt("replicaBBalance"),
         ).to.bignumber.eq(args.replicaBBalance);
         expect(state.walletBalance, msgFmt("walletBalance")).to.bignumber.eq(
-          args.walletBalance
+          args.walletBalance,
         );
       };
 
@@ -218,7 +217,7 @@ describe("Quarry Merge Mine", () => {
           replicaBBalance: new BN(0),
           walletBalance: ownerInitialBalance,
         },
-        "initial"
+        "initial",
       );
 
       // deposit into pool
@@ -243,20 +242,20 @@ describe("Quarry Merge Mine", () => {
           replicaBBalance: new BN(0),
           walletBalance: ownerInitialBalance.sub(stakedAmount.toU64()),
         },
-        "after deposit"
+        "after deposit",
       );
 
       // sleep so we earn some tokens
       await sleep(2_000);
 
       expect(
-        (await getTokenAccount(provider, ownerAccounts.primaryRewards)).amount
+        (await getTokenAccount(provider, ownerAccounts.primaryRewards)).amount,
       ).to.bignumber.eq("0");
       expect(
-        (await getTokenAccount(provider, ownerAccounts.replicaARewards)).amount
+        (await getTokenAccount(provider, ownerAccounts.replicaARewards)).amount,
       ).to.bignumber.eq("0");
       expect(
-        (await getTokenAccount(provider, ownerAccounts.replicaBRewards)).amount
+        (await getTokenAccount(provider, ownerAccounts.replicaBRewards)).amount,
       ).to.bignumber.eq("0");
 
       // claim primary rewards
@@ -276,14 +275,14 @@ describe("Quarry Merge Mine", () => {
       await expectTX(claimReplicaATX, "Claim replica A").to.be.fulfilled;
 
       expect(
-        (await getTokenAccount(provider, ownerAccounts.primaryRewards)).amount
+        (await getTokenAccount(provider, ownerAccounts.primaryRewards)).amount,
       ).to.bignumber.not.eq("0");
       expect(
-        (await getTokenAccount(provider, ownerAccounts.replicaARewards)).amount
+        (await getTokenAccount(provider, ownerAccounts.replicaARewards)).amount,
       ).to.bignumber.not.eq("0");
       expect(
         (await getTokenAccount(provider, ownerAccounts.replicaBRewards)).amount,
-        "not claimed"
+        "not claimed",
       ).to.bignumber.eq("0");
 
       // withdraw from merge miner
@@ -307,7 +306,7 @@ describe("Quarry Merge Mine", () => {
           replicaBBalance: new BN(0),
           walletBalance: ownerInitialBalance,
         },
-        "after withdraw"
+        "after withdraw",
       );
     });
 
@@ -317,7 +316,7 @@ describe("Quarry Merge Mine", () => {
       const stakedTokenMint = await createMint(
         provider,
         minterKP.publicKey,
-        DEFAULT_DECIMALS
+        DEFAULT_DECIMALS,
       );
       const stakedToken = Token.fromMint(stakedTokenMint, DEFAULT_DECIMALS);
 
@@ -349,9 +348,8 @@ describe("Quarry Merge Mine", () => {
       });
 
       // init merge miner
-      const poolData = await ownerSDK.mergeMine.program.account.mergePool.fetch(
-        poolKey
-      );
+      const poolData =
+        await ownerSDK.mergeMine.program.account.mergePool.fetch(poolKey);
       const { tx: initMMTX, key: mmKey } = await ownerSDK.mergeMine.newMM({
         pool: {
           key: poolKey,
@@ -384,12 +382,12 @@ describe("Quarry Merge Mine", () => {
               ownerAccounts.staked,
               minterKP.publicKey,
               [],
-              1_000_000_000000
+              1_000_000_000000,
             ),
           ],
-          [minterKP]
+          [minterKP],
         ),
-        "Mint staked token to owner"
+        "Mint staked token to owner",
       ).to.be.fulfilled;
 
       const stakedAmount = TokenAmount.parse(stakedToken, "100");
@@ -417,8 +415,8 @@ describe("Quarry Merge Mine", () => {
         const err = e as Error;
         expect(err.message).to.include(
           `0x${QuarryMergeMineErrors.OutstandingReplicaTokens.code.toString(
-            16
-          )}`
+            16,
+          )}`,
         );
       }
     });
@@ -485,7 +483,7 @@ describe("Quarry Merge Mine", () => {
             minerATAKey,
             provider.wallet.publicKey,
             [],
-            EXPECTED_RESCUE_AMOUNT
+            EXPECTED_RESCUE_AMOUNT,
           ),
         ]);
         await expectTX(mintToTX, "Mint rescue tokens to miner").to.be.fulfilled;
@@ -519,7 +517,7 @@ describe("Quarry Merge Mine", () => {
 
         await expectTXTable(
           tx,
-          "rescue tokens from mergeMiner"
+          "rescue tokens from mergeMiner",
         ).to.be.rejectedWith("0x454");
       });
 
@@ -555,7 +553,7 @@ describe("Quarry Merge Mine", () => {
         const tx = createMinerTokenAccountTx.combine(rescueTX);
         await expectTXTable(
           tx,
-          "rescue tokens from mergeMiner"
+          "rescue tokens from mergeMiner",
         ).to.be.rejectedWith("0x454");
       });
 
@@ -592,7 +590,7 @@ describe("Quarry Merge Mine", () => {
 
         await expectTXTable(
           tx,
-          "rescue tokens from mergeMiner"
+          "rescue tokens from mergeMiner",
         ).to.be.rejectedWith("0x454");
       });
 
@@ -623,7 +621,7 @@ describe("Quarry Merge Mine", () => {
 
         const tokenAccount = await getTokenAccount(
           provider,
-          destinationTokenAccount
+          destinationTokenAccount,
         );
         expect(tokenAccount.amount).to.bignumber.eq(EXPECTED_RESCUE_AMOUNT);
       });
@@ -637,7 +635,7 @@ describe("Quarry Merge Mine", () => {
       const stakedTokenMint = await createMint(
         provider,
         minterKP.publicKey,
-        DEFAULT_DECIMALS
+        DEFAULT_DECIMALS,
       );
       const stakedToken = Token.fromMint(stakedTokenMint, DEFAULT_DECIMALS);
 
@@ -697,19 +695,19 @@ describe("Quarry Merge Mine", () => {
               ownerAccounts.staked,
               minterKP.publicKey,
               [],
-              1_000_000_000000
+              1_000_000_000000,
             ),
           ],
-          [minterKP]
+          [minterKP],
         ),
-        "Mint staked token to owner"
+        "Mint staked token to owner",
       ).to.be.fulfilled;
 
       const ownerInitialBalance = (
         await getTokenAccount(provider, ownerAccounts.staked)
       ).amount;
       expect(ownerInitialBalance).to.bignumber.eq(
-        TokenAmount.parse(stakedToken, "1000000").toU64()
+        TokenAmount.parse(stakedToken, "1000000").toU64(),
       );
 
       const stakedAmount = TokenAmount.parse(stakedToken, "100");
@@ -752,26 +750,26 @@ describe("Quarry Merge Mine", () => {
           replicaBBalance: BN;
           walletBalance: BN;
         },
-        msg?: string
+        msg?: string,
       ) => {
         const state = await fetchState();
         const msgFmt = (prop: string) => (msg ? `${prop} (${msg})` : undefined);
         expect(state.primaryBalance, msgFmt("primaryBalance")).to.bignumber.eq(
-          args.primaryBalance
+          args.primaryBalance,
         );
         expect(state.replicaBalance, msgFmt("replicaBalance")).to.bignumber.eq(
-          args.replicaBalance
+          args.replicaBalance,
         );
         expect(
           state.replicaABalance,
-          msgFmt("replicaABalance")
+          msgFmt("replicaABalance"),
         ).to.bignumber.eq(args.replicaABalance);
         expect(
           state.replicaBBalance,
-          msgFmt("replicaBBalance")
+          msgFmt("replicaBBalance"),
         ).to.bignumber.eq(args.replicaBBalance);
         expect(state.walletBalance, msgFmt("walletBalance")).to.bignumber.eq(
-          args.walletBalance
+          args.walletBalance,
         );
       };
 
@@ -787,7 +785,7 @@ describe("Quarry Merge Mine", () => {
 
       const replicaAStakeTX = await mp.stakeReplicaMiner(
         replicaA.rewarder,
-        mmKey
+        mmKey,
       );
       await expectTXTable(replicaAStakeTX, "Stake into replica A").to.be
         .fulfilled;
@@ -801,63 +799,63 @@ describe("Quarry Merge Mine", () => {
           replicaBBalance: new BN(0),
           walletBalance: ownerInitialBalance.sub(stakedAmount.toU64()),
         },
-        "after deposit"
+        "after deposit",
       );
 
       // sleep so we earn some tokens
       await sleep(2_000);
 
       expect(
-        (await getTokenAccount(provider, ownerAccounts.primaryRewards)).amount
+        (await getTokenAccount(provider, ownerAccounts.primaryRewards)).amount,
       ).to.bignumber.eq("0");
       expect(
-        (await getTokenAccount(provider, ownerAccounts.replicaARewards)).amount
+        (await getTokenAccount(provider, ownerAccounts.replicaARewards)).amount,
       ).to.bignumber.eq("0");
       expect(
-        (await getTokenAccount(provider, ownerAccounts.replicaBRewards)).amount
+        (await getTokenAccount(provider, ownerAccounts.replicaBRewards)).amount,
       ).to.bignumber.eq("0");
 
       // claim primary rewards
       const claimPrimary = await mp.claimPrimaryRewards(
         primary.rewarder,
-        mmKey
+        mmKey,
       );
       const { ataIXs: claimPrimaryATATx, tx: claimPrimaryTx } =
         claimPrimary.splitATAIXs();
       await expectTXTable(
         claimPrimaryATATx,
-        "Create ATA accounts for primary claim"
+        "Create ATA accounts for primary claim",
       ).to.be.fulfilled;
       await expectTXTable(claimPrimaryTx, "Claim primary").to.be.fulfilled;
 
       // claim replica A rewards
       const claimReplicaA = await mp.claimReplicaRewards(
         replicaA.rewarder,
-        mmKey
+        mmKey,
       );
       const { ataIXs: claimReplicaATATx, tx: claimReplicaATX } =
         claimReplicaA.splitATAIXs();
       await expectTXTable(
         claimReplicaATATx,
-        "Create ATA accounts for replica claim"
+        "Create ATA accounts for replica claim",
       ).to.be.fulfilled;
       await expectTXTable(claimReplicaATX, "Claim replica A").to.be.fulfilled;
 
       expect(
-        (await getTokenAccount(provider, ownerAccounts.primaryRewards)).amount
+        (await getTokenAccount(provider, ownerAccounts.primaryRewards)).amount,
       ).to.bignumber.not.eq("0");
       expect(
-        (await getTokenAccount(provider, ownerAccounts.replicaARewards)).amount
+        (await getTokenAccount(provider, ownerAccounts.replicaARewards)).amount,
       ).to.bignumber.not.eq("0");
       expect(
         (await getTokenAccount(provider, ownerAccounts.replicaBRewards)).amount,
-        "not claimed"
+        "not claimed",
       ).to.bignumber.eq("0");
 
       // withdraw from merge miner
       const unstakeReplicaATX = await mp.unstakeAllReplica(
         replicaA.rewarder,
-        mmKey
+        mmKey,
       );
       await expectTX(unstakeReplicaATX, "Unstake Replica A").to.be.fulfilled;
       const withdrawTX = await mp.withdraw({
@@ -879,7 +877,7 @@ describe("Quarry Merge Mine", () => {
           replicaBBalance: new BN(0),
           walletBalance: ownerInitialBalance,
         },
-        "after withdraw"
+        "after withdraw",
       );
     });
 
@@ -889,7 +887,7 @@ describe("Quarry Merge Mine", () => {
       const stakedTokenMint = await createMint(
         provider,
         minterKP.publicKey,
-        DEFAULT_DECIMALS
+        DEFAULT_DECIMALS,
       );
       const stakedToken = Token.fromMint(stakedTokenMint, DEFAULT_DECIMALS);
 
@@ -942,12 +940,12 @@ describe("Quarry Merge Mine", () => {
               ownerAccounts.staked,
               minterKP.publicKey,
               [],
-              1_000_000_000000
+              1_000_000_000000,
             ),
           ],
-          [minterKP]
+          [minterKP],
         ),
-        "Mint staked token to owner"
+        "Mint staked token to owner",
       ).to.be.fulfilled;
 
       const stakedAmount = TokenAmount.parse(stakedToken, "100");
@@ -967,7 +965,7 @@ describe("Quarry Merge Mine", () => {
       });
       const replicaAStakeTX = await mp.stakeReplicaMiner(
         replicaA.rewarder,
-        mmKey
+        mmKey,
       );
       await expectTX(replicaAStakeTX, "Stake into replica A").to.be.fulfilled;
 
@@ -983,8 +981,8 @@ describe("Quarry Merge Mine", () => {
         const err = e as Error;
         expect(err.message).to.include(
           `0x${QuarryMergeMineErrors.OutstandingReplicaTokens.code.toString(
-            16
-          )}`
+            16,
+          )}`,
         );
       }
     });

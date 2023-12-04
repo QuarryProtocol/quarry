@@ -45,7 +45,7 @@ export const createRewarderAndQuarry = async ({
     {
       connection,
       adminKP,
-    }
+    },
   );
 
   const { tx: createQuarryTX, quarry: quarryKey } =
@@ -93,7 +93,7 @@ export const createRewarder = async ({
   rewarderW: RewarderWrapper;
 }> => {
   await connection.confirmTransaction(
-    await connection.requestAirdrop(adminKP.publicKey, 10 * LAMPORTS_PER_SOL)
+    await connection.requestAirdrop(adminKP.publicKey, 10 * LAMPORTS_PER_SOL),
   );
 
   const primaryQuarrySDK = QuarrySDK.load({
@@ -120,13 +120,13 @@ export const createRewarder = async ({
   const minterAddTX = await primaryQuarrySDK.mintWrapper.newMinterWithAllowance(
     primaryMintWrapper.mintWrapper,
     primaryRewarder.key,
-    new u64(1_000_000000)
+    new u64(1_000_000000),
   );
   await expectTX(minterAddTX, "Minter add").to.be.fulfilled;
 
   // create quarry
   const rewarderW = await primaryQuarrySDK.mine.loadRewarderWrapper(
-    primaryRewarder.key
+    primaryRewarder.key,
   );
 
   return {

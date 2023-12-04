@@ -41,14 +41,14 @@ describe("Redeemer", () => {
     redemptionMintAuthority = Keypair.generate();
     redemptionMint = await createMint(
       sdk.provider,
-      redemptionMintAuthority.publicKey
+      redemptionMintAuthority.publicKey,
     );
 
     userAuthority = Keypair.generate();
     // Airdrop to user
     await sdk.provider.connection.requestAirdrop(
       userAuthority.publicKey,
-      10 * LAMPORTS_PER_SOL
+      10 * LAMPORTS_PER_SOL,
     );
 
     const { bump, tx, vaultTokenAccount } = await sdk.createRedeemer({
@@ -67,15 +67,15 @@ describe("Redeemer", () => {
 
     invariant(
       createAccountInstructions.iouMint,
-      "create user ATA account for iouMint"
+      "create user ATA account for iouMint",
     );
     invariant(
       createAccountInstructions.redemptionMint,
-      "create user ATA account for redemptionMint"
+      "create user ATA account for redemptionMint",
     );
     tx.instructions.push(
       createAccountInstructions.iouMint,
-      createAccountInstructions.redemptionMint
+      createAccountInstructions.redemptionMint,
     );
     tx.instructions.push(
       ...createMintToInstruction({
@@ -91,7 +91,7 @@ describe("Redeemer", () => {
         mintAuthorityKP: iouMintAuthority,
         to: accounts.iouMint,
         amount: new u64(1_000 * DEFAULT_DECIMALS),
-      }).instructions
+      }).instructions,
     );
     tx.addSigners(iouMintAuthority, redemptionMintAuthority);
     await expectTX(tx, "create redeemer").to.be.fulfilled;
@@ -133,10 +133,10 @@ describe("Redeemer", () => {
     expect(iouSourceAccount.amount.toString()).to.equal(ZERO.toString());
     const redemptionDestinationAccount = await getTokenAccount(
       provider,
-      redemptionDestination
+      redemptionDestination,
     );
     expect(redemptionDestinationAccount.amount.toString()).to.equal(
-      expectedAmount.toString()
+      expectedAmount.toString(),
     );
   });
 });
