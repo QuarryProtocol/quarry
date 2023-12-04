@@ -39,23 +39,23 @@ export class QuarryWrapper {
     /**
      * The key of the quarry.
      */
-    readonly key: PublicKey
+    readonly key: PublicKey,
   ) {}
 
   static fromData(
     provider: Provider,
     rewarder: ProgramAccount<RewarderData>,
-    quarry: ProgramAccount<QuarryData>
+    quarry: ProgramAccount<QuarryData>,
   ): QuarryWrapper {
     return new QuarryWrapper(
       QuarrySDK.load({ provider }),
       Token.fromMint(
         quarry.account.tokenMintKey,
-        quarry.account.tokenMintDecimals
+        quarry.account.tokenMintDecimals,
       ),
       rewarder.account,
       quarry.account,
-      quarry.publicKey
+      quarry.publicKey,
     );
   }
 
@@ -95,7 +95,7 @@ export class QuarryWrapper {
     const program = sdk.programs.Mine;
     const quarryData = await program.account.quarry.fetch(key);
     const rewarderData = await program.account.rewarder.fetch(
-      quarryData.rewarder
+      quarryData.rewarder,
     );
     return new QuarryWrapper(sdk, token, rewarderData, quarryData, key);
   }
@@ -115,7 +115,7 @@ export class QuarryWrapper {
       return new u64(0);
     }
     const numerator = rewarder.annualRewardsRate.mul(
-      this.quarryData.rewardsShare
+      this.quarryData.rewardsShare,
     );
     return numerator.div(totalRewardsShares);
   }
@@ -129,7 +129,7 @@ export class QuarryWrapper {
     const [key] = await findMinerAddress(
       this.key,
       authority,
-      this.program.programId
+      this.program.programId,
     );
     return key;
   }
@@ -142,7 +142,7 @@ export class QuarryWrapper {
   async getMiner(authority: PublicKey): Promise<MinerData | null> {
     try {
       return await this.program.account.miner.fetch(
-        await this.getMinerAddress(authority)
+        await this.getMinerAddress(authority),
       );
     } catch (e) {
       return null;
@@ -155,7 +155,7 @@ export class QuarryWrapper {
    * @returns
    */
   async getMinerActions(
-    authority: PublicKey = this.provider.wallet.publicKey
+    authority: PublicKey = this.provider.wallet.publicKey,
   ): Promise<MinerWrapper> {
     const miner = await this.getMinerAddress(authority);
     const stakedTokenATA = await getATAAddress({
@@ -170,7 +170,7 @@ export class QuarryWrapper {
       authority,
       miner,
       tokenVaultKey,
-      stakedTokenATA
+      stakedTokenATA,
     );
   }
 
@@ -186,14 +186,14 @@ export class QuarryWrapper {
     authority: PublicKey,
     minerKey: PublicKey,
     tokenVaultKey: PublicKey,
-    stakedTokenATA: PublicKey
+    stakedTokenATA: PublicKey,
   ): MinerWrapper {
     return new MinerWrapper(
       this,
       authority,
       minerKey,
       tokenVaultKey,
-      stakedTokenATA
+      stakedTokenATA,
     );
   }
 
@@ -242,7 +242,7 @@ export class QuarryWrapper {
     const [miner] = await findMinerAddress(
       this.key,
       authority,
-      this.program.programId
+      this.program.programId,
     );
     const { address: minerVault, instruction: createATATX } =
       await getOrCreateATA({
@@ -258,7 +258,7 @@ export class QuarryWrapper {
       authority,
       miner,
       minerVault,
-      stakedTokenATA
+      stakedTokenATA,
     );
     const result = wrapper.initialize();
     if (createATATX) {
@@ -277,7 +277,7 @@ export class QuarryWrapper {
       data.lastUpdateTs,
       data.annualRewardsRate,
       data.rewardsPerTokenStored,
-      data.totalTokensDeposited
+      data.totalTokensDeposited,
     );
   }
 }

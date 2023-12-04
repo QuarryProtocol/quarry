@@ -100,7 +100,7 @@ export class MergeMine {
   }
 
   async fetchMergePoolData(
-    key: PublicKey
+    key: PublicKey,
   ): Promise<{ key: PublicKey; data: MergePoolData }> {
     return {
       key,
@@ -109,7 +109,7 @@ export class MergeMine {
   }
 
   async fetchMergeMinerData(
-    key: PublicKey
+    key: PublicKey,
   ): Promise<{ key: PublicKey; data: MergeMinerData }> {
     return {
       key,
@@ -203,7 +203,7 @@ export class MergeMine {
             payer,
             systemProgram: SystemProgram.programId,
           },
-        })
+        }),
       );
     }
 
@@ -244,9 +244,8 @@ export class MergeMine {
     const [minerKey] = await findMinerAddress(quarryKey, mm);
 
     const ixs: TransactionInstruction[] = [];
-    const minerAccountInfo = await this.sdk.provider.connection.getAccountInfo(
-      minerKey
-    );
+    const minerAccountInfo =
+      await this.sdk.provider.connection.getAccountInfo(minerKey);
     if (minerAccountInfo) {
       return { miner: minerKey, ixs };
     }
@@ -274,7 +273,7 @@ export class MergeMine {
           tokenMint: mint,
           minerVault: minerATA.address,
         },
-      })
+      }),
     );
 
     return {

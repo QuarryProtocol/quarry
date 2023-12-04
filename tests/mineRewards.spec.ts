@@ -83,7 +83,7 @@ describe("Mine Rewards", () => {
         decimals: DEFAULT_DECIMALS,
         mintAuthority: wrapperKey,
         freezeAuthority: wrapperKey,
-      })
+      }),
     ).to.be.fulfilled;
 
     mintWrapperKey = wrapperKey;
@@ -95,7 +95,7 @@ describe("Mine Rewards", () => {
     stakeTokenMint = await createMint(
       provider,
       stakedMintAuthority.publicKey,
-      DEFAULT_DECIMALS
+      DEFAULT_DECIMALS,
     );
     stakeToken = Token.fromMint(stakeTokenMint, DEFAULT_DECIMALS, {
       name: "stake token",
@@ -111,7 +111,7 @@ describe("Mine Rewards", () => {
 
     const setAnnualRewardsTX = await rewarderWrapper.setAndSyncAnnualRewards(
       annualRewardsRate,
-      []
+      [],
     );
     await expectTX(setAnnualRewardsTX).eventually.to.be.fulfilled;
 
@@ -122,15 +122,13 @@ describe("Mine Rewards", () => {
       .fulfilled;
     const quarryWrapper = await rewarderWrapper.getQuarry(stakeToken);
     await expectTX(
-      (
-        await quarryWrapper.createMiner()
-      ).tx,
-      "create miner for user"
+      (await quarryWrapper.createMiner()).tx,
+      "create miner for user",
     ).to.be.fulfilled;
 
     await expectTX(
       quarryWrapper.setRewardsShare(rewardsShare),
-      "set rewards share"
+      "set rewards share",
     ).to.be.fulfilled;
 
     // mint test tokens
@@ -139,7 +137,7 @@ describe("Mine Rewards", () => {
       await rewarderWrapper.getQuarry(stakeToken),
       stakeToken,
       stakedMintAuthority,
-      stakeAmount
+      stakeAmount,
     );
   });
 
@@ -147,7 +145,7 @@ describe("Mine Rewards", () => {
     let quarry = await rewarderWrapper.getQuarry(stakeToken);
     expect(quarry).to.exist;
     const minerActions = await quarry.getMinerActions(
-      provider.wallet.publicKey
+      provider.wallet.publicKey,
     );
     // stake into the quarry
     const tx = minerActions.stake(new TokenAmount(stakeToken, stakeAmount));
@@ -155,7 +153,7 @@ describe("Mine Rewards", () => {
 
     const parser = new anchor.EventParser(
       sdk.programs.Mine.programId,
-      sdk.programs.Mine.coder
+      sdk.programs.Mine.coder,
     );
     const theParser = (logs: string[]) => {
       const events: StakeEvent[] = [];
@@ -171,14 +169,14 @@ describe("Mine Rewards", () => {
     const payroll = quarry.payroll;
     assert.ok(event);
     const expectedRewardsPerTokenStored = payroll.calculateRewardPerToken(
-      event.data.timestamp
+      event.data.timestamp,
     );
     expect(quarry.quarryData.rewardsPerTokenStored.toString()).to.equal(
-      expectedRewardsPerTokenStored.toString()
+      expectedRewardsPerTokenStored.toString(),
     );
     const expectedRewardsRate = quarry.computeAnnualRewardsRate();
     expect(quarry.quarryData.annualRewardsRate.toString()).to.equal(
-      expectedRewardsRate.toString()
+      expectedRewardsRate.toString(),
     );
   });
 
@@ -189,11 +187,11 @@ describe("Mine Rewards", () => {
     invariant(miner, "miner does not exist");
 
     const minerActions = await quarry.getMinerActions(
-      provider.wallet.publicKey
+      provider.wallet.publicKey,
     );
 
     const stakeTx = minerActions.stake(
-      new TokenAmount(stakeToken, stakeAmount)
+      new TokenAmount(stakeToken, stakeAmount),
     );
     await expectTX(stakeTx, "Stake").to.be.fulfilled;
 
@@ -204,9 +202,9 @@ describe("Mine Rewards", () => {
       mintWrapper.newMinterWithAllowance(
         mintWrapperKey,
         rewarder,
-        new u64(100_000_000_000000)
+        new u64(100_000_000_000000),
       ),
-      "Minter add"
+      "Minter add",
     ).to.be.fulfilled;
 
     // wait some time so we can earn some tokens
@@ -219,7 +217,7 @@ describe("Mine Rewards", () => {
     receipt.printLogs();
 
     const claimEvent = QUARRY_CODERS.Mine.parseProgramLogEvents(
-      receipt.response.meta?.logMessages ?? []
+      receipt.response.meta?.logMessages ?? [],
     )[0];
     invariant(claimEvent?.name === "ClaimEvent", "claim event not found");
     assert.ok(claimEvent, "claim event not found");
@@ -234,7 +232,7 @@ describe("Mine Rewards", () => {
       claimEvent.data.timestamp,
       new BN(stakeAmount),
       wagesPerTokenPaid,
-      ZERO
+      ZERO,
     );
 
     const fees = expectedWagesEarned.mul(new BN(1)).div(new BN(10_000));
@@ -250,10 +248,10 @@ describe("Mine Rewards", () => {
     });
     const rewardsTokenAccountInfo = await getTokenAccount(
       provider,
-      rewardsTokenAccount
+      rewardsTokenAccount,
     );
     expect(rewardsTokenAccountInfo.amount.toString()).to.equal(
-      claimEvent.data.amount.toString()
+      claimEvent.data.amount.toString(),
     );
   });
 
@@ -264,11 +262,11 @@ describe("Mine Rewards", () => {
     invariant(miner, "miner does not exist");
 
     const minerActions = await quarry.getMinerActions(
-      provider.wallet.publicKey
+      provider.wallet.publicKey,
     );
 
     const stakeTx = minerActions.stake(
-      new TokenAmount(stakeToken, stakeAmount)
+      new TokenAmount(stakeToken, stakeAmount),
     );
     await expectTX(stakeTx, "Stake").to.be.fulfilled;
 
@@ -279,9 +277,9 @@ describe("Mine Rewards", () => {
       mintWrapper.newMinterWithAllowance(
         mintWrapperKey,
         rewarder,
-        new u64(100_000_000_000000)
+        new u64(100_000_000_000000),
       ),
-      "Minter add"
+      "Minter add",
     ).to.be.fulfilled;
 
     // wait some time so we can earn some tokens
@@ -289,9 +287,8 @@ describe("Mine Rewards", () => {
 
     const initRewardsPerTokenPaid = miner.rewardsPerTokenPaid;
 
-    const mintWrapperBefore = await mintWrapper.fetchMintWrapper(
-      mintWrapperKey
-    );
+    const mintWrapperBefore =
+      await mintWrapper.fetchMintWrapper(mintWrapperKey);
     invariant(mintWrapperBefore);
 
     const tx = await minerActions.claimV1();
@@ -310,17 +307,17 @@ describe("Mine Rewards", () => {
 
     // check that rewards have changed
     const rewardsPerTokenPaidDiff = nextRewardsPerTokenPaid.sub(
-      initRewardsPerTokenPaid
+      initRewardsPerTokenPaid,
     );
     expect(rewardsPerTokenPaidDiff).to.not.bignumber.zero;
 
     const numMinted = mintWrapperAfter.totalMinted.sub(
-      mintWrapperBefore.totalMinted
+      mintWrapperBefore.totalMinted,
     );
     expect(numMinted).to.not.bignumber.zero;
 
     const claimEvent = QUARRY_CODERS.Mine.parseProgramLogEvents(
-      receipt.response.meta?.logMessages ?? []
+      receipt.response.meta?.logMessages ?? [],
     )[0];
     invariant(claimEvent?.name === "ClaimEvent", "claim event not found");
     assert.ok(claimEvent, "claim event not found");
@@ -335,7 +332,7 @@ describe("Mine Rewards", () => {
       claimEvent.data.timestamp,
       new BN(stakeAmount),
       wagesPerTokenPaid,
-      ZERO
+      ZERO,
     );
 
     const fees = expectedWagesEarned.mul(new BN(1)).div(new BN(10_000));
@@ -353,10 +350,10 @@ describe("Mine Rewards", () => {
     });
     const rewardsTokenAccountInfo = await getTokenAccount(
       provider,
-      rewardsTokenAccount
+      rewardsTokenAccount,
     );
     expect(rewardsTokenAccountInfo.amount.toString()).to.equal(
-      claimEvent.data.amount.toString()
+      claimEvent.data.amount.toString(),
     );
   });
 
@@ -367,11 +364,11 @@ describe("Mine Rewards", () => {
     invariant(miner, "miner does not exist");
 
     const minerActions = await quarry.getMinerActions(
-      provider.wallet.publicKey
+      provider.wallet.publicKey,
     );
 
     const stakeTx = minerActions.stake(
-      new TokenAmount(stakeToken, stakeAmount)
+      new TokenAmount(stakeToken, stakeAmount),
     );
     await expectTX(stakeTx, "Stake").to.be.fulfilled;
 
@@ -380,9 +377,9 @@ describe("Mine Rewards", () => {
       mintWrapper.newMinterWithAllowance(
         mintWrapperKey,
         rewarder,
-        new u64(100_000_000_000000)
+        new u64(100_000_000_000000),
       ),
-      "Minter add"
+      "Minter add",
     ).to.be.fulfilled;
 
     const rewardsTokenAccount = await getATAAddress({
@@ -396,12 +393,12 @@ describe("Mine Rewards", () => {
 
     await expectTX(
       quarry.setRewardsShare(new BN(42)).combine(await minerActions.claim()),
-      "set rewards share and claim"
+      "set rewards share and claim",
     ).to.be.fulfilled;
 
     const rewardsTokenAccountInfo = await getTokenAccount(
       provider,
-      rewardsTokenAccount
+      rewardsTokenAccount,
     );
     expect(rewardsTokenAccountInfo.amount.isZero()).to.be.false;
   });

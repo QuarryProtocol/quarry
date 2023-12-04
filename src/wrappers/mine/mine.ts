@@ -47,18 +47,18 @@ export class MineWrapper {
   }> {
     const [rewarderKey, bump] = await findRewarderAddress(
       baseKP.publicKey,
-      this.program.programId
+      this.program.programId,
     );
 
     const mintWrapperDataRaw = await this.provider.getAccountInfo(mintWrapper);
     if (!mintWrapperDataRaw) {
       throw new Error(
-        `mint wrapper does not exist at ${mintWrapper.toString()}`
+        `mint wrapper does not exist at ${mintWrapper.toString()}`,
       );
     }
     const mintWrapperData =
       QUARRY_CODERS.MintWrapper.accounts.mintWrapper.parse(
-        mintWrapperDataRaw.accountInfo.data
+        mintWrapperDataRaw.accountInfo.data,
       );
 
     const { address: claimFeeTokenAccount, instruction: createATAInstruction } =
@@ -87,7 +87,7 @@ export class MineWrapper {
             },
           }),
         ],
-        [baseKP]
+        [baseKP],
       ),
     };
   }
@@ -111,19 +111,19 @@ export class MineWrapper {
   }> {
     const [rewarderKey] = await findRewarderAddress(
       baseKP.publicKey,
-      this.program.programId
+      this.program.programId,
     );
 
     const mintWrapperDataRaw = await this.provider.getAccountInfo(mintWrapper);
     if (!mintWrapperDataRaw) {
       throw new Error(
-        `mint wrapper does not exist at ${mintWrapper.toString()}`
+        `mint wrapper does not exist at ${mintWrapper.toString()}`,
       );
     }
 
     const mintWrapperData =
       QUARRY_CODERS.MintWrapper.accounts.mintWrapper.parse(
-        mintWrapperDataRaw.accountInfo.data
+        mintWrapperDataRaw.accountInfo.data,
       );
 
     const { address: claimFeeTokenAccount, instruction: createATAInstruction } =
@@ -151,7 +151,7 @@ export class MineWrapper {
             },
           }),
         ],
-        [baseKP]
+        [baseKP],
       ),
     };
   }
@@ -201,7 +201,7 @@ export class MineWrapper {
           destinationTokenAccount,
           tokenProgram: TOKEN_PROGRAM_ID,
         },
-      })
+      }),
     );
 
     return this.sdk.newTx(instructions);

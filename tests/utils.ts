@@ -19,10 +19,10 @@ export const newUserStakeTokenAccount = async (
   quarry: QuarryWrapper,
   stakeToken: Token,
   stakedMintAuthority: Signer,
-  amount: number
+  amount: number,
 ): Promise<PublicKey> => {
   const minerActions = await quarry.getMinerActions(
-    sdk.provider.wallet.publicKey
+    sdk.provider.wallet.publicKey,
   );
   const createATA = await minerActions.createATAIfNotExists();
   if (createATA) {
@@ -39,12 +39,12 @@ export const newUserStakeTokenAccount = async (
           userStakeTokenAccount,
           stakedMintAuthority.publicKey,
           [],
-          amount
+          amount,
         ),
       ],
-      [stakedMintAuthority]
+      [stakedMintAuthority],
     ),
-    "mint initial"
+    "mint initial",
   ).to.be.fulfilled;
 
   return userStakeTokenAccount;
@@ -53,13 +53,13 @@ export const newUserStakeTokenAccount = async (
 export const initATA = async (
   token: Token,
   owner: Signer,
-  mint?: { minter: Signer; mintAmount: number }
+  mint?: { minter: Signer; mintAmount: number },
 ): Promise<PublicKey> => {
   const account = await SPLToken.getAssociatedTokenAddress(
     ASSOCIATED_TOKEN_PROGRAM_ID,
     TOKEN_PROGRAM_ID,
     token.mintAccount,
-    owner.publicKey
+    owner.publicKey,
   );
 
   const tx = new Transaction().add(
@@ -69,8 +69,8 @@ export const initATA = async (
       token.mintAccount,
       account,
       owner.publicKey,
-      AnchorProvider.env().wallet.publicKey
-    )
+      AnchorProvider.env().wallet.publicKey,
+    ),
   );
 
   if (mint) {
@@ -81,8 +81,8 @@ export const initATA = async (
         account,
         mint.minter.publicKey,
         [],
-        mint.mintAmount
-      )
+        mint.mintAmount,
+      ),
     );
   }
   // mint tokens
@@ -91,7 +91,7 @@ export const initATA = async (
     mint ? [mint.minter] : undefined,
     {
       commitment: "confirmed",
-    }
+    },
   );
   return account;
 };

@@ -31,7 +31,7 @@ export class MergeMiner {
     readonly mm: {
       key: PublicKey;
       data: MergeMinerData;
-    }
+    },
   ) {}
 
   get provider(): Provider {
@@ -83,7 +83,7 @@ export class MergeMiner {
         mmPrimaryTokenAccount,
         owner,
         [],
-        amount.toU64()
+        amount.toU64(),
       ),
     ]).combine(await this.stakePrimaryMiner(rewarder));
   }
@@ -160,7 +160,7 @@ export class MergeMiner {
             systemProgram: SystemProgram.programId,
             tokenProgram: TOKEN_PROGRAM_ID,
           },
-        })
+        }),
       );
       if (minerReplicaMintTokenAccount.instruction) {
         txEnv.instructions.unshift(minerReplicaMintTokenAccount.instruction);
@@ -186,11 +186,11 @@ export class MergeMiner {
   }): Promise<TransactionEnvelope> {
     const withdrawPrimary = await this.unstakePrimaryMiner(rewarder, amount);
     const withdrawPrimaryFromMM = await this.withdrawTokens(
-      amount.token.mintAccount
+      amount.token.mintAccount,
     );
     return TransactionEnvelope.combineAll(
       withdrawPrimary,
-      withdrawPrimaryFromMM
+      withdrawPrimaryFromMM,
     );
   }
 
@@ -224,7 +224,7 @@ export class MergeMiner {
    */
   async unstakePrimaryMiner(
     rewarder: PublicKey,
-    amount: TokenAmount
+    amount: TokenAmount,
   ): Promise<TransactionEnvelope> {
     const stake = await this.getPrimaryStakeAccounts(rewarder);
     const mmPrimaryTokenAccount = await getATAAddress({
@@ -312,7 +312,7 @@ export class MergeMiner {
   async claimPrimaryRewards(rewarder: PublicKey): Promise<TransactionEnvelope> {
     return await this.claimRewardsCommon(
       this.primaryMint,
-      await this.getPrimaryStakeAccounts(rewarder)
+      await this.getPrimaryStakeAccounts(rewarder),
     );
   }
 
@@ -323,7 +323,7 @@ export class MergeMiner {
   async claimReplicaRewards(rewarder: PublicKey): Promise<TransactionEnvelope> {
     return await this.claimRewardsCommon(
       this.replicaMint,
-      await this.getReplicaStakeAccounts(rewarder)
+      await this.getReplicaStakeAccounts(rewarder),
     );
   }
 
@@ -335,17 +335,17 @@ export class MergeMiner {
   async claimRewardsCommon(
     quarryMint: PublicKey,
     stake: QuarryStakeAccounts,
-    mmOwner: PublicKey = this.provider.wallet.publicKey
+    mmOwner: PublicKey = this.provider.wallet.publicKey,
   ): Promise<TransactionEnvelope> {
     const rewarderKey = stake.rewarder;
     const rewarder =
       await this.mergeMine.sdk.programs.Mine.account.rewarder.fetch(
-        rewarderKey
+        rewarderKey,
       );
     const [minter] = await findMinterAddress(
       rewarder.mintWrapper,
       rewarderKey,
-      this.mergeMine.sdk.programs.MintWrapper.programId
+      this.mergeMine.sdk.programs.MintWrapper.programId,
     );
 
     const mm = this.mm.key;
@@ -392,7 +392,7 @@ export class MergeMiner {
   }
 
   async getReplicaStakeAccounts(
-    rewarder: PublicKey
+    rewarder: PublicKey,
   ): Promise<QuarryStakeAccounts> {
     const [quarry] = await findQuarryAddress(rewarder, this.replicaMint);
     const [miner] = await findMinerAddress(quarry, this.mm.key);
@@ -410,7 +410,7 @@ export class MergeMiner {
   }
 
   async getPrimaryStakeAccounts(
-    rewarder: PublicKey
+    rewarder: PublicKey,
   ): Promise<QuarryStakeAccounts> {
     const [quarry] = await findQuarryAddress(rewarder, this.primaryMint);
     const [miner] = await findMinerAddress(quarry, this.mm.key);

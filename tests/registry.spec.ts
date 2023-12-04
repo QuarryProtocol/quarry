@@ -65,7 +65,7 @@ describe("Registry", () => {
         decimals: DEFAULT_DECIMALS,
         mintAuthority: wrapperKey,
         freezeAuthority: wrapperKey,
-      })
+      }),
     ).to.be.fulfilled;
 
     mintWrapperKey = wrapperKey;
@@ -77,7 +77,7 @@ describe("Registry", () => {
     stakeTokenMint = await createMint(
       provider,
       stakedMintAuthority.publicKey,
-      DEFAULT_DECIMALS
+      DEFAULT_DECIMALS,
     );
     stakeToken = Token.fromMint(stakeTokenMint, DEFAULT_DECIMALS, {
       name: "stake token",
@@ -93,7 +93,7 @@ describe("Registry", () => {
 
     const setAnnualRewardsTX = await rewarderWrapper.setAndSyncAnnualRewards(
       annualRewardsRate,
-      []
+      [],
     );
     await expectTX(setAnnualRewardsTX).eventually.to.be.fulfilled;
 
@@ -120,8 +120,8 @@ describe("Registry", () => {
 
     console.log(
       (await sdk.registry.program.account.registry.fetch(registry)).tokens.map(
-        (tok) => tok.toString()
-      )
+        (tok) => tok.toString(),
+      ),
     );
   });
 });

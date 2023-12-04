@@ -67,7 +67,7 @@ describe("Operator", () => {
         decimals: DEFAULT_DECIMALS,
         mintAuthority: wrapperKey,
         freezeAuthority: wrapperKey,
-      })
+      }),
     ).to.be.fulfilled;
 
     mintWrapperKey = wrapperKey;
@@ -87,7 +87,7 @@ describe("Operator", () => {
     rewarder = await mine.loadRewarderWrapper(rewarderKey);
     await expectTX(
       await rewarder.setAndSyncAnnualRewards(ANNUAL_REWARDS_RATE, []),
-      "set annual rewards"
+      "set annual rewards",
     );
   });
 
@@ -188,8 +188,8 @@ describe("Operator", () => {
         sdk.provider.connection,
         await sdk.provider.connection.requestAirdrop(
           randomKP.publicKey,
-          LAMPORTS_PER_SOL
-        )
+          LAMPORTS_PER_SOL,
+        ),
       ).wait();
 
       const stakeMint = await createMint(sdk.provider);
@@ -197,7 +197,7 @@ describe("Operator", () => {
         tokenMint: stakeMint,
       });
       await expectTX(tx).to.be.rejected.and.to.match(
-        new RegExp(`0x${QuarryOperatorErrors.Unauthorized.code.toString(16)}`)
+        new RegExp(`0x${QuarryOperatorErrors.Unauthorized.code.toString(16)}`),
       ); // unauthorized
     });
 
@@ -215,8 +215,8 @@ describe("Operator", () => {
         sdk.provider.connection,
         await sdk.provider.connection.requestAirdrop(
           quarryCreatorKP.publicKey,
-          LAMPORTS_PER_SOL
-        )
+          LAMPORTS_PER_SOL,
+        ),
       ).wait();
 
       const stakeMint = await createMint(sdk.provider);
@@ -264,17 +264,17 @@ describe("Operator", () => {
         sdk.provider.connection,
         await sdk.provider.connection.requestAirdrop(
           randomKP.publicKey,
-          LAMPORTS_PER_SOL
-        )
+          LAMPORTS_PER_SOL,
+        ),
       ).wait();
 
       await expectTX(
         randomOperator.delegateSetRewardsShare({
           quarry: quarryKey,
           share: 1,
-        })
+        }),
       ).to.be.rejected.and.to.match(
-        new RegExp(`0x${QuarryOperatorErrors.Unauthorized.code.toString(16)}`)
+        new RegExp(`0x${QuarryOperatorErrors.Unauthorized.code.toString(16)}`),
       ); // unauthorized
     });
 
@@ -292,8 +292,8 @@ describe("Operator", () => {
         sdk.provider.connection,
         await sdk.provider.connection.requestAirdrop(
           shareAllocatorKP.publicKey,
-          LAMPORTS_PER_SOL
-        )
+          LAMPORTS_PER_SOL,
+        ),
       ).wait();
 
       const tx = shareAllocatorOperator.delegateSetRewardsShare({
@@ -317,13 +317,13 @@ describe("Operator", () => {
         sdk.provider.connection,
         await sdk.provider.connection.requestAirdrop(
           shareAllocatorKP.publicKey,
-          LAMPORTS_PER_SOL
-        )
+          LAMPORTS_PER_SOL,
+        ),
       ).wait();
 
       const tx = shareAllocatorOperator.delegateSetFamine(
         new u64("9000000000000000000"),
-        quarryKey
+        quarryKey,
       );
       await expectTX(tx).to.be.fulfilled;
     });
@@ -358,14 +358,14 @@ describe("Operator", () => {
         sdk.provider.connection,
         await sdk.provider.connection.requestAirdrop(
           randomKP.publicKey,
-          LAMPORTS_PER_SOL
-        )
+          LAMPORTS_PER_SOL,
+        ),
       ).wait();
 
       await expectTX(
-        randomOperator.delegateSetAnnualRewards(new u64(1_000000))
+        randomOperator.delegateSetAnnualRewards(new u64(1_000000)),
       ).to.be.rejected.and.to.match(
-        new RegExp(`0x${QuarryOperatorErrors.Unauthorized.code.toString(16)}`)
+        new RegExp(`0x${QuarryOperatorErrors.Unauthorized.code.toString(16)}`),
       );
     });
 
@@ -383,8 +383,8 @@ describe("Operator", () => {
         sdk.provider.connection,
         await sdk.provider.connection.requestAirdrop(
           rateSetterKP.publicKey,
-          LAMPORTS_PER_SOL
-        )
+          LAMPORTS_PER_SOL,
+        ),
       ).wait();
 
       const tx = rateSetterOperator.delegateSetAnnualRewards(new u64(1_000000));

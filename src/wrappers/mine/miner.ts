@@ -33,7 +33,7 @@ export class MinerWrapper {
     readonly authority: PublicKey,
     readonly minerKey: PublicKey,
     readonly tokenVaultKey: PublicKey,
-    readonly stakedTokenATA: PublicKey
+    readonly stakedTokenATA: PublicKey,
   ) {}
 
   /**
@@ -116,7 +116,7 @@ export class MinerWrapper {
 
   private _performStakeAction(
     amount: TokenAmount,
-    action: "stakeTokens" | "withdrawTokens"
+    action: "stakeTokens" | "withdrawTokens",
   ): TransactionEnvelope {
     const instruction = this.program.instruction[action](amount.toU64(), {
       accounts: this.userStakeAccounts,
@@ -189,7 +189,7 @@ export class MinerWrapper {
     const [minter] = await findMinterAddress(
       this.quarry.rewarderData.mintWrapper,
       this.quarry.quarryData.rewarder,
-      this.sdk.mintWrapper.program.programId
+      this.sdk.mintWrapper.program.programId,
     );
 
     const ix = this.quarry.program.instruction.claimRewards({
@@ -227,7 +227,7 @@ export class MinerWrapper {
     const [minter] = await findMinterAddress(
       this.quarry.rewarderData.mintWrapper,
       this.quarry.quarryData.rewarder,
-      this.sdk.mintWrapper.program.programId
+      this.sdk.mintWrapper.program.programId,
     );
 
     const ix = this.quarry.program.instruction.claimRewardsV2({

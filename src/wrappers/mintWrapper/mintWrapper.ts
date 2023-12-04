@@ -82,7 +82,7 @@ export class MintWrapper {
   }): Promise<PendingMintWrapper> {
     const [mintWrapper, bump] = await findMintWrapperAddress(
       baseKP.publicKey,
-      this.program.programId
+      this.program.programId,
     );
     return {
       mintWrapper,
@@ -100,7 +100,7 @@ export class MintWrapper {
             },
           }),
         ],
-        [baseKP]
+        [baseKP],
       ),
     };
   }
@@ -122,7 +122,7 @@ export class MintWrapper {
   }): Promise<PendingMintWrapper> {
     const [mintWrapper] = await findMintWrapperAddress(
       baseKP.publicKey,
-      this.program.programId
+      this.program.programId,
     );
     return {
       mintWrapper,
@@ -140,7 +140,7 @@ export class MintWrapper {
             },
           }),
         ],
-        [baseKP]
+        [baseKP],
       ),
     };
   }
@@ -190,7 +190,7 @@ export class MintWrapper {
     }
     return this.program.coder.accounts.decode<MintWrapperData>(
       "MintWrapper",
-      accountInfo.data
+      accountInfo.data,
     );
   }
 
@@ -201,33 +201,32 @@ export class MintWrapper {
    */
   async fetchMinter(
     wrapper: PublicKey,
-    authority: PublicKey
+    authority: PublicKey,
   ): Promise<MinterData | null> {
     const [minterAddress] = await findMinterAddress(
       wrapper,
       authority,
-      this.program.programId
+      this.program.programId,
     );
-    const accountInfo = await this.provider.connection.getAccountInfo(
-      minterAddress
-    );
+    const accountInfo =
+      await this.provider.connection.getAccountInfo(minterAddress);
     if (!accountInfo) {
       return null;
     }
     return this.program.coder.accounts.decode<MinterData>(
       "Minter",
-      accountInfo.data
+      accountInfo.data,
     );
   }
 
   async newMinterV1(
     wrapper: PublicKey,
-    authority: PublicKey
+    authority: PublicKey,
   ): Promise<TransactionEnvelope> {
     const [minter, bump] = await findMinterAddress(
       wrapper,
       authority,
-      this.program.programId
+      this.program.programId,
     );
     return this.provider.newTX([
       this.program.instruction.newMinter(bump, {
@@ -247,12 +246,12 @@ export class MintWrapper {
 
   async newMinter(
     wrapper: PublicKey,
-    authority: PublicKey
+    authority: PublicKey,
   ): Promise<TransactionEnvelope> {
     const [minter] = await findMinterAddress(
       wrapper,
       authority,
-      this.program.programId
+      this.program.programId,
     );
     return this.provider.newTX([
       this.program.instruction.newMinterV2({
@@ -279,12 +278,12 @@ export class MintWrapper {
   async minterUpdate(
     wrapper: PublicKey,
     authority: PublicKey,
-    allowance: u64
+    allowance: u64,
   ): Promise<TransactionEnvelope> {
     const [minter] = await findMinterAddress(
       wrapper,
       authority,
-      this.program.programId
+      this.program.programId,
     );
     return this.provider.newTX([
       this.program.instruction.minterUpdate(allowance, {
@@ -309,13 +308,13 @@ export class MintWrapper {
   async newMinterWithAllowance(
     wrapper: PublicKey,
     authority: PublicKey,
-    allowance: u64
+    allowance: u64,
   ): Promise<TransactionEnvelope> {
     const newMinter = await this.newMinter(wrapper, authority);
     const updateAllowance = await this.minterUpdate(
       wrapper,
       authority,
-      allowance
+      allowance,
     );
     return newMinter.combine(updateAllowance);
   }

@@ -56,7 +56,7 @@ describe("MintWrapper", () => {
         decimals: DEFAULT_DECIMALS,
         mintAuthority: wrapperKey,
         freezeAuthority: wrapperKey,
-      })
+      }),
     ).to.be.fulfilled;
 
     mintWrapperKey = wrapperKey;
@@ -99,7 +99,7 @@ describe("MintWrapper", () => {
         await mintWrapper.program.account.mintWrapper.fetch(mintWrapperKey);
       expect(mintWrapperState.admin).to.eqAddress(provider.wallet.publicKey);
       expect(mintWrapperState.pendingAdmin).to.eqAddress(
-        newAuthority.publicKey
+        newAuthority.publicKey,
       );
 
       const ix = mintWrapper.program.instruction.acceptAdmin({
@@ -110,12 +110,11 @@ describe("MintWrapper", () => {
       });
       let tx = sdk.newTx([ix], [newAuthority]);
       await expectTX(tx, "transfer authority").to.be.fulfilled;
-      mintWrapperState = await mintWrapper.program.account.mintWrapper.fetch(
-        mintWrapperKey
-      );
+      mintWrapperState =
+        await mintWrapper.program.account.mintWrapper.fetch(mintWrapperKey);
       expect(mintWrapperState.admin).to.eqAddress(newAuthority.publicKey);
       expect(mintWrapperState.pendingAdmin).to.eqAddress(
-        web3.PublicKey.default.toString()
+        web3.PublicKey.default.toString(),
       );
 
       // Transfer back
@@ -127,7 +126,7 @@ describe("MintWrapper", () => {
             admin: newAuthority.publicKey,
             nextAdmin: provider.wallet.publicKey,
           },
-        })
+        }),
       );
       instructions.push(
         mintWrapper.program.instruction.acceptAdmin({
@@ -135,19 +134,18 @@ describe("MintWrapper", () => {
             mintWrapper: mintWrapperKey,
             pendingAdmin: provider.wallet.publicKey,
           },
-        })
+        }),
       );
 
       tx = sdk.newTx(instructions, [newAuthority]);
       await expectTX(tx, "transfer authority back to original authority").to.be
         .fulfilled;
 
-      mintWrapperState = await mintWrapper.program.account.mintWrapper.fetch(
-        mintWrapperKey
-      );
+      mintWrapperState =
+        await mintWrapper.program.account.mintWrapper.fetch(mintWrapperKey);
       expect(mintWrapperState.admin).to.eqAddress(provider.wallet.publicKey);
       expect(mintWrapperState.pendingAdmin).to.eqAddress(
-        web3.PublicKey.default
+        web3.PublicKey.default,
       );
     });
 
@@ -155,7 +153,7 @@ describe("MintWrapper", () => {
       const id = Keypair.generate().publicKey;
       await expectTX(
         mintWrapper.newMinterV1(mintWrapperKey, id),
-        "new minter v1"
+        "new minter v1",
       ).to.be.fulfilled;
     });
 
@@ -164,21 +162,21 @@ describe("MintWrapper", () => {
       const id = Keypair.generate().publicKey;
       expect(
         (await mintWrapper.fetchMintWrapper(mintWrapperKey))?.numMinters,
-        "initial num minters"
+        "initial num minters",
       ).to.bignumber.eq(new BN(0));
 
       await expectTX(
         mintWrapper.newMinterWithAllowance(mintWrapperKey, id, allowance),
-        "add minter"
+        "add minter",
       ).to.be.fulfilled;
       expect(
         (await mintWrapper.fetchMinter(mintWrapperKey, id))?.allowance,
-        "allowance"
+        "allowance",
       ).to.bignumber.eq(allowance);
 
       expect(
         (await mintWrapper.fetchMintWrapper(mintWrapperKey))?.numMinters,
-        "final num minters"
+        "final num minters",
       ).to.bignumber.eq(new BN(1));
     });
 
@@ -187,21 +185,21 @@ describe("MintWrapper", () => {
       const id = Keypair.generate().publicKey;
       await expectTX(
         mintWrapper.newMinterWithAllowance(mintWrapperKey, id, allowance),
-        "add minter"
+        "add minter",
       ).to.be.fulfilled;
 
       expect(
         (await mintWrapper.fetchMinter(mintWrapperKey, id))?.allowance,
-        "allowance"
+        "allowance",
       ).to.bignumber.eq(allowance);
 
       await expectTX(
         mintWrapper.minterUpdate(mintWrapperKey, id, new u64(0)),
-        "remove minter"
+        "remove minter",
       ).to.be.fulfilled;
       expect(
         (await mintWrapper.fetchMinter(mintWrapperKey, id))?.allowance,
-        "no more allowance"
+        "no more allowance",
       ).to.bignumber.zero;
     });
 
@@ -215,20 +213,20 @@ describe("MintWrapper", () => {
           provider.connection,
           await provider.connection.requestAirdrop(
             kp.publicKey,
-            LAMPORTS_PER_SOL
-          )
-        )
+            LAMPORTS_PER_SOL,
+          ),
+        ),
       ).to.be.fulfilled;
 
       const id = kp.publicKey;
       await expectTX(
         mintWrapper.newMinterWithAllowance(mintWrapperKey, id, allowance),
-        "add minter"
+        "add minter",
       ).to.be.fulfilled;
 
       expect(
         (await mintWrapper.fetchMinter(mintWrapperKey, id))?.allowance,
-        "allowance"
+        "allowance",
       ).to.bignumber.eq(allowance);
 
       const amount = new TokenAmount(token, new u64(1_000));
@@ -236,7 +234,7 @@ describe("MintWrapper", () => {
       const [minterAddress] = await findMinterAddress(mintWrapperKey, id);
       const minterData =
         await minterSDK.programs.MintWrapper.account.minter.fetch(
-          minterAddress
+          minterAddress,
         );
       const minterRaw = await provider.connection.getAccountInfo(minterAddress);
       assert.ok(minterRaw);
@@ -252,24 +250,24 @@ describe("MintWrapper", () => {
             },
           },
         }),
-        "mint"
+        "mint",
       ).to.be.fulfilled;
 
       const minterData2 = await mintWrapper.fetchMinter(mintWrapperKey, id);
       const mwData2 = await mintWrapper.fetchMintWrapper(mintWrapperKey);
       assert.ok(minterData2 && mwData2);
       expect(minterData2.allowance, "allowance").to.bignumber.eq(
-        new BN(999_000)
+        new BN(999_000),
       );
       expect(minterData2.totalMinted, "minter total minted").to.bignumber.eq(
-        new BN(1_000)
+        new BN(1_000),
       );
 
       expect(mwData2.totalAllowance, "total allowance").to.bignumber.eq(
-        new BN(999_000)
+        new BN(999_000),
       );
       expect(mwData2.totalMinted, "total minted").to.bignumber.eq(
-        new BN(1_000)
+        new BN(1_000),
       );
 
       await expectTX(
@@ -283,7 +281,7 @@ describe("MintWrapper", () => {
             },
           },
         }),
-        "mint"
+        "mint",
       ).to.be.rejected;
     });
   });

@@ -5,18 +5,18 @@ import { QUARRY_ADDRESSES } from "../../constants";
 
 export const findRewarderAddress = async (
   base: PublicKey,
-  programID: PublicKey = QUARRY_ADDRESSES.Mine
+  programID: PublicKey = QUARRY_ADDRESSES.Mine,
 ): Promise<[PublicKey, number]> => {
   return await PublicKey.findProgramAddress(
     [Buffer.from(utils.bytes.utf8.encode("Rewarder")), base.toBytes()],
-    programID
+    programID,
   );
 };
 
 export const findQuarryAddress = async (
   rewarder: PublicKey,
   tokenMint: PublicKey,
-  programID: PublicKey = QUARRY_ADDRESSES.Mine
+  programID: PublicKey = QUARRY_ADDRESSES.Mine,
 ): Promise<[PublicKey, number]> => {
   return await PublicKey.findProgramAddress(
     [
@@ -24,14 +24,14 @@ export const findQuarryAddress = async (
       rewarder.toBytes(),
       tokenMint.toBytes(),
     ],
-    programID
+    programID,
   );
 };
 
 export const findMinerAddress = async (
   quarry: PublicKey,
   authority: PublicKey,
-  programID: PublicKey = QUARRY_ADDRESSES.Mine
+  programID: PublicKey = QUARRY_ADDRESSES.Mine,
 ): Promise<[PublicKey, number]> => {
   return await PublicKey.findProgramAddress(
     [
@@ -39,6 +39,6 @@ export const findMinerAddress = async (
       quarry.toBytes(),
       authority.toBytes(),
     ],
-    programID
+    programID,
   );
 };

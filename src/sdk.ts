@@ -31,7 +31,7 @@ import { RedeemerWrapper } from "./wrappers/redeemer";
 export class QuarrySDK {
   constructor(
     readonly provider: AugmentedProvider,
-    readonly programs: Programs
+    readonly programs: Programs,
   ) {}
 
   /**
@@ -71,7 +71,7 @@ export class QuarrySDK {
    */
   newTx(
     instructions: TransactionInstruction[],
-    signers?: Signer[]
+    signers?: Signer[],
   ): TransactionEnvelope {
     return this.provider.newTX(instructions, signers);
   }
@@ -93,7 +93,7 @@ export class QuarrySDK {
     const programs = newProgramMap<Programs>(
       provider,
       QUARRY_IDLS,
-      allAddresses
+      allAddresses,
     );
     return new QuarrySDK(new SolanaAugmentedProvider(provider), programs);
   }

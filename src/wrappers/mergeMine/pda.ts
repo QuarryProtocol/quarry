@@ -16,7 +16,7 @@ export const findPoolAddress = async ({
 }): Promise<[PublicKey, number]> => {
   return await PublicKey.findProgramAddress(
     [utils.bytes.utf8.encode("MergePool"), primaryMint.toBuffer()],
-    programId
+    programId,
   );
 };
 
@@ -34,7 +34,7 @@ export const findReplicaMintAddress = async ({
   const [pool] = await findPoolAddress({ programId, primaryMint });
   return await PublicKey.findProgramAddress(
     [utils.bytes.utf8.encode("ReplicaMint"), pool.toBuffer()],
-    programId
+    programId,
   );
 };
 
@@ -53,6 +53,6 @@ export const findMergeMinerAddress = async ({
 }): Promise<[PublicKey, number]> => {
   return await PublicKey.findProgramAddress(
     [utils.bytes.utf8.encode("MergeMiner"), pool.toBuffer(), owner.toBuffer()],
-    programId
+    programId,
   );
 };

@@ -14,7 +14,7 @@ export class Payroll {
     readonly lastCheckpointTs: BN,
     readonly annualRewardsRate: BN,
     readonly rewardsPerTokenStored: BN,
-    readonly totalTokensDeposited: BN
+    readonly totalTokensDeposited: BN,
   ) {}
 
   /**
@@ -30,7 +30,7 @@ export class Payroll {
     const lastTimeRewardsApplicable = BN.min(currentTs, this.famineTs);
     const timeWorked = BN.max(
       ZERO,
-      lastTimeRewardsApplicable.sub(this.lastCheckpointTs)
+      lastTimeRewardsApplicable.sub(this.lastCheckpointTs),
     );
     const reward = timeWorked
       .mul(MAX_U64_BN)
@@ -52,7 +52,7 @@ export class Payroll {
     currentTs: BN,
     tokensDeposited: BN,
     rewardsPerTokenPaid: BN,
-    rewardsEarned: BN
+    rewardsEarned: BN,
   ): BN {
     const netNewRewards =
       this.calculateRewardPerToken(currentTs).sub(rewardsPerTokenPaid);

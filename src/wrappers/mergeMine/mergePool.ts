@@ -25,7 +25,10 @@ import type { MergeMine } from "./quarryMergeMine";
 export class MergePool {
   private _data: MergePoolData | null = null;
 
-  constructor(readonly mergeMine: MergeMine, readonly key: PublicKey) {}
+  constructor(
+    readonly mergeMine: MergeMine,
+    readonly key: PublicKey,
+  ) {}
 
   async reloadData(): Promise<MergePoolData> {
     this._data = await this.mergeMine.program.account.mergePool.fetch(this.key);
@@ -95,7 +98,7 @@ export class MergePool {
             payer: this.provider.wallet.publicKey,
             systemProgram: SystemProgram.programId,
           },
-        })
+        }),
       );
       if (mmATAIx) {
         allInstructions.push(mmATAIx);
@@ -117,12 +120,12 @@ export class MergePool {
         mmPrimaryTokenAccount,
         mmOwner,
         [],
-        amount.toU64()
-      )
+        amount.toU64(),
+      ),
     );
 
     return new TransactionEnvelope(this.provider, allInstructions).combine(
-      await this.stakePrimaryMiner(rewarder, mmKey)
+      await this.stakePrimaryMiner(rewarder, mmKey),
     );
   }
 
@@ -133,7 +136,7 @@ export class MergePool {
    */
   async stakePrimaryMiner(
     rewarder: PublicKey,
-    mergeMiner: PublicKey
+    mergeMiner: PublicKey,
   ): Promise<TransactionEnvelope> {
     const { provider } = this.mergeMine;
     const data = await this.data();
@@ -160,7 +163,7 @@ export class MergePool {
    */
   async stakeReplicaMiner(
     rewarder: PublicKey,
-    mergeMiner: PublicKey
+    mergeMiner: PublicKey,
   ): Promise<TransactionEnvelope> {
     const poolData = await this.data();
 
@@ -209,7 +212,7 @@ export class MergePool {
             systemProgram: SystemProgram.programId,
             tokenProgram: TOKEN_PROGRAM_ID,
           },
-        })
+        }),
       );
       if (minerReplicaMintTokenAccount.instruction) {
         txEnv.instructions.unshift(minerReplicaMintTokenAccount.instruction);
@@ -238,15 +241,15 @@ export class MergePool {
     const withdrawPrimary = await this.unstakePrimaryMiner(
       rewarder,
       mergeMiner,
-      amount
+      amount,
     );
     const withdrawPrimaryFromMM = await this.withdrawTokens(
       amount.token.mintAccount,
-      mergeMiner
+      mergeMiner,
     );
     return TransactionEnvelope.combineAll(
       withdrawPrimary,
-      withdrawPrimaryFromMM
+      withdrawPrimaryFromMM,
     );
   }
 
@@ -257,7 +260,7 @@ export class MergePool {
    */
   async unstakeAllReplica(
     rewarder: PublicKey,
-    mergeMiner: PublicKey
+    mergeMiner: PublicKey,
   ): Promise<TransactionEnvelope> {
     const poolData = await this.data();
 
@@ -286,7 +289,7 @@ export class MergePool {
   async unstakePrimaryMiner(
     rewarder: PublicKey,
     mergeMiner: PublicKey,
-    amount: TokenAmount
+    amount: TokenAmount,
   ): Promise<TransactionEnvelope> {
     const poolData = await this.data();
 
@@ -313,7 +316,7 @@ export class MergePool {
    */
   async withdrawTokens(
     withdrawMint: PublicKey,
-    mergeMiner: PublicKey
+    mergeMiner: PublicKey,
   ): Promise<TransactionEnvelope> {
     const owner = this.provider.wallet.publicKey;
     const mmPrimaryAccount = await getATAAddress({
@@ -345,12 +348,12 @@ export class MergePool {
    */
   async claimPrimaryRewards(
     rewarder: PublicKey,
-    mergeMiner: PublicKey
+    mergeMiner: PublicKey,
   ): Promise<TransactionEnvelope> {
     const poolData = await this.data();
     return await this.claimRewardsCommon(
       poolData.primaryMint,
-      await this.getPrimaryStakeAccounts(rewarder, mergeMiner)
+      await this.getPrimaryStakeAccounts(rewarder, mergeMiner),
     );
   }
 
@@ -360,13 +363,13 @@ export class MergePool {
    */
   async claimReplicaRewards(
     rewarder: PublicKey,
-    mergeMiner: PublicKey
+    mergeMiner: PublicKey,
   ): Promise<TransactionEnvelope> {
     const poolData = await this.data();
 
     return await this.claimRewardsCommon(
       poolData.replicaMint,
-      await this.getReplicaStakeAccounts(rewarder, mergeMiner)
+      await this.getReplicaStakeAccounts(rewarder, mergeMiner),
     );
   }
 
@@ -378,16 +381,16 @@ export class MergePool {
   async claimRewardsCommon(
     quarryMint: PublicKey,
     stake: QuarryStakeAccounts,
-    mmOwner: PublicKey = this.provider.wallet.publicKey
+    mmOwner: PublicKey = this.provider.wallet.publicKey,
   ): Promise<TransactionEnvelope> {
     const rewarder =
       await this.mergeMine.sdk.programs.Mine.account.rewarder.fetch(
-        stake.rewarder
+        stake.rewarder,
       );
     const [minter] = await findMinterAddress(
       rewarder.mintWrapper,
       stake.rewarder,
-      this.mergeMine.sdk.programs.MintWrapper.programId
+      this.mergeMine.sdk.programs.MintWrapper.programId,
     );
 
     const withdrawMint = rewarder.rewardsTokenMint;
@@ -434,7 +437,7 @@ export class MergePool {
 
   async getReplicaStakeAccounts(
     rewarder: PublicKey,
-    mergeMiner: PublicKey
+    mergeMiner: PublicKey,
   ): Promise<QuarryStakeAccounts> {
     const poolData = await this.data();
 
@@ -456,7 +459,7 @@ export class MergePool {
 
   async getPrimaryStakeAccounts(
     rewarder: PublicKey,
-    mergeMiner: PublicKey
+    mergeMiner: PublicKey,
   ): Promise<QuarryStakeAccounts> {
     const poolData = await this.data();
 
