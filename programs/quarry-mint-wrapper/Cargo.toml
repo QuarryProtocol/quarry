@@ -20,7 +20,7 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = ">=0.22, <=0.25"
-anchor-spl = ">=0.22, <=0.25"
+anchor-lang = "0.29.0"
+anchor-spl = "0.29.0"
 solana-security-txt = "1.0.1"
-vipers = "^2.0"
+vipers = { git = "https://github.com/kAsky53/vipers", branch = "anchor-v0.29.0" }

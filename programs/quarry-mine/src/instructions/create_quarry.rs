@@ -7,7 +7,7 @@ pub fn handler(ctx: Context<CreateQuarry>) -> Result<()> {
     rewarder.num_quarries = unwrap_int!(rewarder.num_quarries.checked_add(1));
 
     let quarry = &mut ctx.accounts.quarry;
-    quarry.bump = unwrap_bump!(ctx, "quarry");
+    quarry.bump = ctx.bumps.quarry;
 
     // Set quarry params
     quarry.index = index;

@@ -3,7 +3,7 @@ use crate::*;
 pub fn handler(ctx: Context<CreateOperator>) -> Result<()> {
     let operator = &mut ctx.accounts.operator;
     operator.base = ctx.accounts.base.key();
-    operator.bump = unwrap_bump!(ctx, "operator");
+    operator.bump = ctx.bumps.operator;
 
     operator.rewarder = ctx.accounts.rewarder.key();
     operator.admin = ctx.accounts.admin.key();

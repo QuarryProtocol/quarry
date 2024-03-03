@@ -10,7 +10,7 @@ pub fn handler(ctx: Context<CreateMiner>) -> Result<()> {
 
     let miner = &mut ctx.accounts.miner;
     miner.authority = ctx.accounts.authority.key();
-    miner.bump = unwrap_bump!(ctx, "miner");
+    miner.bump = ctx.bumps.miner;
     miner.quarry = ctx.accounts.quarry.key();
     miner.token_vault_key = ctx.accounts.miner_vault.key();
     miner.rewards_earned = 0;

@@ -65,7 +65,7 @@ mod tests {
             ..Default::default()
         };
 
-        let invalid: Result<u64> = err!(InvalidRewardsShare);
+        let invalid: Result<u64> = err!(crate::ErrorCode::InvalidRewardsShare);
 
         // invalid because there are no shares
         assert_eq!(

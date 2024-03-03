@@ -5,7 +5,7 @@ pub fn handler(ctx: Context<NewMinter>) -> Result<()> {
 
     minter.mint_wrapper = ctx.accounts.auth.mint_wrapper.key();
     minter.minter_authority = ctx.accounts.new_minter_authority.key();
-    minter.bump = unwrap_bump!(ctx, "minter");
+    minter.bump = ctx.bumps.minter;
 
     let index = ctx.accounts.auth.mint_wrapper.num_minters;
     minter.index = index;
