@@ -2769,8 +2769,8 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
 name = "vipers"
-version = "2.1.0"
-source = "git+https://github.com/kAsky53/vipers?branch=anchor-v0.29.0#d76df255dbc4ef5aeae48c0a918b8ecee92fa53a"
+version = "2.0.6"
+source = "git+https://github.com/kAsky53/vipers?branch=anchor-v0.29.0#a1f91c576a608e80fa9f79cdf6855e9bd2d3600c"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
