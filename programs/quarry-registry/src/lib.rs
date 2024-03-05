@@ -36,7 +36,7 @@ pub mod quarry_registry {
     pub fn new_registry(ctx: Context<NewRegistry>, max_quarries: u16, _bump: u8) -> Result<()> {
         ctx.accounts.validate()?;
         let registry = &mut ctx.accounts.registry;
-        registry.bump = unwrap_bump!(ctx, "registry");
+        registry.bump = ctx.bumps.registry;
         registry.rewarder = ctx.accounts.rewarder.key();
         registry
             .tokens

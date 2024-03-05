@@ -1,5 +1,5 @@
-anchor_version = "0.24.2"
-solana_version = "1.10.39"
+anchor_version = "0.29.0"
+solana_version = "1.17.10"
 
 [features]
 seeds = true

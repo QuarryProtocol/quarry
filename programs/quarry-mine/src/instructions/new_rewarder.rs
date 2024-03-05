@@ -4,7 +4,7 @@ pub fn handler(ctx: Context<NewRewarder>) -> Result<()> {
     let rewarder = &mut ctx.accounts.rewarder;
 
     rewarder.base = ctx.accounts.base.key();
-    rewarder.bump = unwrap_bump!(ctx, "rewarder");
+    rewarder.bump = ctx.bumps.rewarder;
 
     rewarder.authority = ctx.accounts.initial_authority.key();
     rewarder.pending_authority = Pubkey::default();

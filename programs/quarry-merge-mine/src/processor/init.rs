@@ -9,7 +9,7 @@ use vipers::prelude::*;
 pub fn new_pool(ctx: Context<NewPool>) -> Result<()> {
     let pool = &mut ctx.accounts.pool;
     pool.primary_mint = ctx.accounts.primary_mint.key();
-    pool.bump = unwrap_bump!(ctx, "pool");
+    pool.bump = ctx.bumps.pool;
 
     pool.replica_mint = ctx.accounts.replica_mint.key();
 
@@ -33,7 +33,7 @@ pub fn init_merge_miner(ctx: Context<InitMergeMiner>) -> Result<()> {
 
     mm.pool = ctx.accounts.pool.key();
     mm.owner = ctx.accounts.owner.key();
-    mm.bump = unwrap_bump!(ctx, "mm");
+    mm.bump = ctx.bumps.mm;
 
     // Track total number of pools.
     let pool = &mut ctx.accounts.pool;

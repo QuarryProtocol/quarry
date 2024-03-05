@@ -3,7 +3,7 @@ use crate::*;
 pub fn handler(ctx: Context<NewWrapper>, hard_cap: u64) -> Result<()> {
     let mint_wrapper = &mut ctx.accounts.mint_wrapper;
     mint_wrapper.base = ctx.accounts.base.key();
-    mint_wrapper.bump = unwrap_bump!(ctx, "mint_wrapper");
+    mint_wrapper.bump = ctx.bumps.mint_wrapper;
     mint_wrapper.hard_cap = hard_cap;
     mint_wrapper.admin = ctx.accounts.admin.key();
     mint_wrapper.pending_admin = Pubkey::default();
